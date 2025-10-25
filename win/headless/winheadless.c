@@ -582,13 +582,34 @@ headless_can_suspend_yes(void)
     return TRUE;
 }
 
+/* Stub functions (to be implemented in later milestones) */
+void
+headless_nhbell(void)
+{
+    emit_event("BELL", NULL);
+}
+
+int
+headless_doprev_message(void)
+{
+    /* M5: previous message navigation */
+    return 0;
+}
+
+void
+headless_number_pad(int state)
+{
+    /* M2: numpad configuration */
+    (void)state;
+}
+
 /* ========================================================================
  * WINDOW PORT STRUCTURE
  * ======================================================================== */
 
 struct window_procs headless_procs = {
     "headless",                     /* name */
-    WC_COLOR | WC_HILITE_PET        /* wincap1 */
+    WC_COLOR | WC_HILITE_PET        /* wincap */
         | WC_ALIGN_MESSAGE | WC_ALIGN_STATUS
         | WC_INVERSE | WC_SCROLL_AMOUNT
         | WC_SCROLL_MARGIN | WC_MAP_MODE
@@ -601,8 +622,13 @@ struct window_procs headless_procs = {
     WC2_FULLSCREEN | WC2_SOFTKEYBOARD  /* wincap2 */
         | WC2_WRAPTEXT | WC2_HILITE_STATUS
         | WC2_FLUSH_STATUS | WC2_RESET_STATUS
-        | WC2_HITPOINTBAR | WC2_FLUSH_STATUS
+        | WC2_HITPOINTBAR
         | WC2_URGENT_MESG | WC2_SUPPRESS_HIST,
+#ifdef TEXTCOLOR
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},   /* has_color */
+#else
+    {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+#endif
     headless_init_nhwindows,
     headless_player_selection,
     headless_askname,
@@ -616,6 +642,7 @@ struct window_procs headless_procs = {
     headless_destroy_nhwindow,
     headless_curs,
     headless_putstr,
+    genl_putmixed,                  /* Use generic */
     headless_display_file,
     headless_start_menu,
     headless_add_menu,
@@ -636,15 +663,21 @@ struct window_procs headless_procs = {
     headless_raw_print_bold,
     headless_nhgetch,
     headless_nh_poskey,
-    headless_nhbell,                /* TODO: emit BELL event */
-    headless_doprev_message,        /* TODO: M5 */
+    headless_nhbell,
+    headless_doprev_message,
     headless_yn_function,
     headless_getlin,
     headless_get_ext_cmd,
-    headless_number_pad,            /* TODO */
+    headless_number_pad,
     headless_delay_output,
+#ifdef CHANGE_COLOR
     headless_change_color,
+#ifdef MAC
+    0,                              /* change_background (not implemented) */
+    0,                              /* set_font_name (not implemented) */
+#endif
     headless_get_color_string,
+#endif
     headless_start_screen,
     headless_end_screen,
     headless_outrip,
@@ -655,31 +688,9 @@ struct window_procs headless_procs = {
     headless_status_finish,
     headless_status_enablefield,
     headless_status_update,
-    headless_status_threshold,
     headless_can_suspend_yes,
 };
 
-/* ========================================================================
- * STUBS FOR MISSING FUNCTIONS
- * ======================================================================== */
-
-void
-headless_nhbell(void)
-{
-    emit_event("BELL", NULL);
-}
-
-void
-headless_doprev_message(void)
-{
-    /* M5: previous message */
-}
-
-void
-headless_number_pad(int state)
-{
-    /* M2: numpad configuration */
-}
-
 #endif /* HEADLESS */
 /*winheadless.c*/
+

@@ -31,7 +31,7 @@ if errorlevel 1 (
 )
 
 echo Building headless web stub (Web M0)...
-nmake -f ..\sys\winnt\Makefile.msc WIN64=Y headlessweb
+nmake -f ..\sys\winnt\Makefile.msc WIN64=Y HEADLESS_BUILD=Y headlessweb
 set BUILDERR=%ERRORLEVEL%
 
 popd

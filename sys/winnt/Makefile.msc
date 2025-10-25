@@ -278,6 +278,9 @@ COMCTRL = comctl32.lib
 # Unity port scaffolding objects
 UNITYOBJ = $(O)adapter.o $(O)winunity.o
 
+# Headless port objects (Web UI)
+HEADLESSOBJ = $(O)winheadless.o
+
 TILEUTIL16  = $(UTIL)\tile2bmp.exe
 TILEBMP16   = $(SRC)\tiles.bmp
 
@@ -892,21 +895,59 @@ $(GAMEDIR)\nethack_unity.dll : $(O)gamedir.tag $(ALLOBJ) $(UNITYOBJ) $(O)tile.o 
 <<
 
 # ------------------------------------------------------------
-# Headless Web stub (Web M0): minimal stdio NDJSON handshake
-# Build with:  cd src && nmake -f ..\sys\winnt\Makefile.msc headlessweb
+# Headless Web port (M1+): Full NetHack with headless window port
+# Build with:  cd src && nmake -f ..\sys\winnt\Makefile.msc WIN64=Y HEADLESS_BUILD=Y headlessweb
 # Produces:    ..\binary\nethack_headless.exe
+# 
+# This builds NetHack with the headless window port (JSON protocol over stdio)
+# Use HEADLESS_BUILD=Y on command line to enable HEADLESS define
+
+!IFDEF HEADLESS_BUILD
+HEADLESS_FLAG=-DHEADLESS
+WINPFLAG_OVERRIDE=-DTILES -DWIN32CON -DHEADLESS
+!ELSE
+HEADLESS_FLAG=
+WINPFLAG_OVERRIDE=$(WINPFLAG)
+!ENDIF
 
 headlessweb: $(GAMEDIR)\nethack_headless.exe
 
-$(GAMEDIR)\nethack_headless.exe : $(O)gamedir.tag $(O)nh_headless_stub.o
+# Rebuild key object files with HEADLESS define
+!IFDEF HEADLESS_BUILD
+$(O)windows.o: ..\src\windows.c $(HACK_H)
+	@$(CC) $(cflags) $(INCLDIR) $(WINPFLAG_OVERRIDE) $(DLBFLG) -DSAFEPROCS -Fo$@ ..\src\windows.c
+!ENDIF
+
+$(GAMEDIR)\nethack_headless.exe : $(O)gamedir.tag $(O)tile.o $(O)ttystub.o $(O)guistub.o \
+			$(ALLOBJ) $(HEADLESSOBJ) $(O)headless.res $(KEYDLLS)
 	@if not exist $(GAMEDIR)\*.* mkdir $(GAMEDIR)
 	@echo   Linking $(@:\=/)
-	$(link) $(lflagsBuild) $(conlflags) /PDB:$(GAMEDIR)\$(@B).PDB /MAP:$(O)$(@B).MAP -out:$@ $(O)nh_headless_stub.o
+	$(link) $(lflagsBuild) $(conlflags) /STACK:2048 /PDB:$(GAMEDIR)\$(@B).PDB /MAP:$(O)$(@B).MAP \
+		$(LIBS) $(PDCLIB) $(conlibs) $(BCRYPT) -out:$@ @<<$(@B).lnk
+		$(GAMEOBJ)
+		$(HEADLESSOBJ)
+		$(O)ttystub.o
+		$(O)guistub.o
+		$(O)tile.o
+		$(O)headless.res
+<<
+	@if exist $(O)install.tag del $(O)install.tag
 
-$(O)nh_headless_stub.o: ..\win\headless\nh_headless_stub.c
-	@if not exist $(OBJ)\*.* echo creating directory $(OBJ:\=/)
-	@if not exist $(OBJ)\*.* mkdir $(OBJ)
-	@$(cc) $(cflagsBuild) -Fo$@ ..\win\headless\nh_headless_stub.c
+# Compilation rule for headless window port
+$(O)winheadless.o: ..\win\headless\winheadless.c $(HACK_H) $(INCL)\dlb.h
+	@$(CC) $(cflags) $(INCLDIR) $(WINPFLAG_OVERRIDE) $(DLBFLG) -DSAFEPROCS -Fo$@ ..\win\headless\winheadless.c
+
+# TTY stubs for headless (provides stub tty_procs, win_tty_init, etc)
+$(O)ttystub.o: $(HACK_H) $(MSWSYS)\stubs.c
+	@$(CC) $(cflagsBuild) -DTTYSTUB -Fo$@ $(MSWSYS)\stubs.c
+
+# GUI stubs for headless (provides stub mswin functions)
+$(O)guistub.o: $(HACK_H) $(MSWSYS)\stubs.c
+	@$(CC) $(cflagsBuild) -DGUISTUB -Fo$@ $(MSWSYS)\stubs.c
+
+# Resource file for headless (minimal - just version info)
+$(O)headless.res: ..\sys\winnt\console.rc $(HACK_H)
+	@$(rc) $(rcvars) -r -fo$@ ..\sys\winnt\console.rc
 
 $(O)gamedir.tag:
 	@if not exist $(GAMEDIR)\*.* echo creating directory $(GAMEDIR:\=/)
