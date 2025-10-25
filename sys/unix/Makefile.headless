@@ -1,0 +1,28 @@
+# Minimal Unix Makefile for the headless web stub (Web M0)
+# Usage:
+#   cd src && make -f ../sys/unix/Makefile.headless headlessweb
+
+ROOT := ..
+CC   ?= cc
+CFLAGS ?= -O2 -Wall -Wextra
+LDFLAGS ?=
+
+OUT := $(ROOT)/binary/nethack_headless
+SRC := $(ROOT)/win/headless/nh_headless_stub.c
+OBJ := nh_headless_stub.o
+
+all: headlessweb
+
+headlessweb: $(OUT)
+
+$(OUT): $(OBJ)
+	@mkdir -p $(ROOT)/binary
+	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDFLAGS)
+
+$(OBJ): $(SRC)
+	$(CC) $(CFLAGS) -c -o $@ $(SRC)
+
+clean:
+	rm -f $(OBJ) $(OUT)
+
+.PHONY: all headlessweb clean

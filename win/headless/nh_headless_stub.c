@@ -76,8 +76,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    // Optional greeting event on startup
-    send_event(stdout, "STATUS", "engine:headless_stub started");
+    // No unsolicited output on startup to keep smoke tests simple
 
     char buf[16384];
     while (fgets(buf, sizeof(buf), stdin)) {
