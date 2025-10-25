@@ -891,6 +891,23 @@ $(GAMEDIR)\nethack_unity.dll : $(O)gamedir.tag $(ALLOBJ) $(UNITYOBJ) $(O)tile.o 
 		$(UNITYOBJ)
 <<
 
+# ------------------------------------------------------------
+# Headless Web stub (Web M0): minimal stdio NDJSON handshake
+# Build with:  cd src && nmake -f ..\sys\winnt\Makefile.msc headlessweb
+# Produces:    ..\binary\nethack_headless.exe
+
+headlessweb: $(GAMEDIR)\nethack_headless.exe
+
+$(GAMEDIR)\nethack_headless.exe : $(O)gamedir.tag $(O)nh_headless_stub.o
+	@if not exist $(GAMEDIR)\*.* mkdir $(GAMEDIR)
+	@echo   Linking $(@:\=/)
+	$(link) $(lflagsBuild) $(conlflags) /PDB:$(GAMEDIR)\$(@B).PDB /MAP:$(O)$(@B).MAP -out:$@ $(O)nh_headless_stub.o
+
+$(O)nh_headless_stub.o: ..\win\headless\nh_headless_stub.c
+	@if not exist $(OBJ)\*.* echo creating directory $(OBJ:\=/)
+	@if not exist $(OBJ)\*.* mkdir $(OBJ)
+	@$(cc) $(cflagsBuild) -Fo$@ ..\win\headless\nh_headless_stub.c
+
 $(O)gamedir.tag:
 	@if not exist $(GAMEDIR)\*.* echo creating directory $(GAMEDIR:\=/)
 	@if not exist $(GAMEDIR)\*.* mkdir $(GAMEDIR)
