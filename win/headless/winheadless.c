@@ -274,15 +274,27 @@ send_request(const char *kind, int req_id, const char *json_data, char *response
     
     /* Block waiting for RESP with matching corr */
     response_buf[0] = '\0';
+    fprintf(stderr, "[HEADLESS] Waiting for response with corr=%d\n", req_id);
+    fflush(stderr);
     while (fgets(response_buf, bufsz, stdin)) {
+        fprintf(stderr, "[HEADLESS] Read from stdin: %s", response_buf);
+        fflush(stderr);
         int corr = parse_json_field_int(response_buf, "corr");
+        fprintf(stderr, "[HEADLESS] Parsed corr=%d (expecting %d)\n", corr, req_id);
+        fflush(stderr);
         if (corr == req_id) {
             /* Got our response */
+            fprintf(stderr, "[HEADLESS] Match! Returning response\n");
+            fflush(stderr);
             return;
         }
         /* Else: wrong correlation ID or event; discard and continue */
+        fprintf(stderr, "[HEADLESS] No match, discarding and waiting for next line\n");
+        fflush(stderr);
         /* TODO M2+: Queue events for later processing */
     }
+    fprintf(stderr, "[HEADLESS] EOF on stdin, exiting wait loop\n");
+    fflush(stderr);
 }
 
 /* ========================================================================
@@ -296,6 +308,9 @@ headless_init_nhwindows(int *argcp, char **argv)
     
     g_out = stdout;
     g_initialized = 1;
+    
+    /* Mark window system as initialized so yn() prompts work */
+    iflags.window_inited = 1;
     
     /* M2: Initialize map buffer */
     for (y = 0; y < MAP_ROWS; y++) {
