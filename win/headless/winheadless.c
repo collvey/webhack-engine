@@ -20,8 +20,20 @@ static FILE *g_out = NULL;
 static int g_next_req_id = 1;
 static int g_initialized = 0;
 
-/* Event queue (simplified for M1 - just immediate flush) */
-/* TODO M2+: Add batching for map frames */
+/* M2: Map frame buffering */
+#define MAP_ROWS 21
+#define MAP_COLS 80
+
+typedef struct {
+    int glyph;      /* glyph at this position */
+    int bkglyph;    /* background glyph */
+    unsigned char dirty;  /* 1 if updated this frame */
+} MapCell;
+
+static MapCell g_map[MAP_ROWS][MAP_COLS];
+static int g_cursor_x = 0;
+static int g_cursor_y = 0;
+static int g_map_dirty = 0;  /* 1 if map needs redraw */
 
 /* ========================================================================
  * UTILITIES
@@ -96,6 +108,47 @@ emit_message(const char *text, const char *style)
     char buf[16384];
     snprintf(buf, sizeof(buf), "{\"text\":\"%s\",\"style\":\"%s\"}", escaped, style);
     emit_event("MESSAGE", buf);
+}
+
+/* M2: Emit map frame with all glyphs */
+static void
+emit_map_frame(void)
+{
+    if (!g_map_dirty) return;
+    
+    /* Build JSON for map frame */
+    /* Format: {"width":80,"height":21,"cursor":{"x":X,"y":Y},"glyphs":[...]} */
+    char buf[65536];  /* Large buffer for full map */
+    int pos = 0;
+    
+    pos += snprintf(buf + pos, sizeof(buf) - pos,
+                    "{\"width\":%d,\"height\":%d,\"cursor\":{\"x\":%d,\"y\":%d},\"glyphs\":[",
+                    MAP_COLS, MAP_ROWS, g_cursor_x, g_cursor_y);
+    
+    /* Emit glyphs in row-major order */
+    int first = 1;
+    int y, x;
+    for (y = 0; y < MAP_ROWS; y++) {
+        for (x = 0; x < MAP_COLS; x++) {
+            if (!first) {
+                pos += snprintf(buf + pos, sizeof(buf) - pos, ",");
+            }
+            first = 0;
+            pos += snprintf(buf + pos, sizeof(buf) - pos, "%d", g_map[y][x].glyph);
+        }
+    }
+    
+    pos += snprintf(buf + pos, sizeof(buf) - pos, "]}");
+    
+    emit_event("MAP_FRAME", buf);
+    g_map_dirty = 0;
+    
+    /* Clear dirty flags */
+    for (y = 0; y < MAP_ROWS; y++) {
+        for (x = 0; x < MAP_COLS; x++) {
+            g_map[y][x].dirty = 0;
+        }
+    }
 }
 
 /* ========================================================================
@@ -194,8 +247,22 @@ send_request(const char *kind, int req_id, const char *json_data, char *response
 static void
 headless_init_nhwindows(int *argcp, char **argv)
 {
+    int x, y;
+    
     g_out = stdout;
     g_initialized = 1;
+    
+    /* M2: Initialize map buffer */
+    for (y = 0; y < MAP_ROWS; y++) {
+        for (x = 0; x < MAP_COLS; x++) {
+            g_map[y][x].glyph = 0;
+            g_map[y][x].bkglyph = 0;
+            g_map[y][x].dirty = 0;
+        }
+    }
+    g_cursor_x = 0;
+    g_cursor_y = 0;
+    g_map_dirty = 0;
     
     /* Emit startup event */
     emit_event("INIT", "{\"engine\":\"EasyNetHack\",\"version\":\"3.6.7-headless\"}");
@@ -280,7 +347,14 @@ headless_destroy_nhwindow(winid window)
 static void
 headless_curs(winid window, int x, int y)
 {
-    /* M2: emit CURSOR event */
+    /* M2: Update cursor position and trigger map flush if needed */
+    g_cursor_x = x;
+    g_cursor_y = y;
+    
+    /* Emit map frame when cursor moves (indicates end of drawing cycle) */
+    if (g_map_dirty) {
+        emit_map_frame();
+    }
 }
 
 static void
@@ -309,13 +383,25 @@ headless_display_file(const char *filename, BOOLEAN_P must_exist)
 }
 
 /* ========================================================================
- * WINDOW PORT API: MAP (stubs for M1, implemented in M2)
+ * WINDOW PORT API: MAP (M2 implementation)
  * ======================================================================== */
 
 static void
 headless_print_glyph(winid window, XCHAR_P x, XCHAR_P y, int glyph, int bkglyph)
 {
-    /* M2: batch into MAP_FRAME */
+    /* M2: Batch glyph updates into map buffer */
+    /* Bounds check */
+    if (x < 0 || x >= MAP_COLS || y < 0 || y >= MAP_ROWS) {
+        return;
+    }
+    
+    /* Update map buffer */
+    g_map[y][x].glyph = glyph;
+    g_map[y][x].bkglyph = bkglyph;
+    g_map[y][x].dirty = 1;
+    g_map_dirty = 1;
+    
+    /* Don't emit immediately - wait for curs() or mark_synch() */
 }
 
 static void
@@ -339,15 +425,38 @@ headless_raw_print_bold(const char *str)
 static int
 headless_nhgetch(void)
 {
-    /* M2: handle key input */
-    return '\033'; /* ESC for now */
+    /* M2: Handle key input from stdin */
+    char response[16384];
+    
+    /* Wait for INPUT event */
+    while (fgets(response, sizeof(response), stdin)) {
+        char kind[64];
+        if (parse_json_field_str(response, "kind", kind, sizeof(kind))) {
+            if (strcmp(kind, "INPUT") == 0) {
+                char key_str[16];
+                if (parse_json_field_str(response, "key", key_str, sizeof(key_str))) {
+                    if (key_str[0]) return (int)key_str[0];
+                }
+            }
+        }
+        /* Ignore other events */
+    }
+    
+    return '\033'; /* ESC on EOF */
 }
 
 static int
 headless_nh_poskey(int *x, int *y, int *mod)
 {
-    /* M2: handle positional input */
-    return '\033';
+    /* M2: Handle positional input (similar to nhgetch for now) */
+    /* For M2, we don't handle mouse clicks, just keyboard */
+    int ch = headless_nhgetch();
+    
+    if (x) *x = -1;
+    if (y) *y = -1;
+    if (mod) *mod = 0;
+    
+    return ch;
 }
 
 /* ========================================================================
@@ -482,21 +591,32 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent)
 static void
 headless_mark_synch(void)
 {
-    /* Flush any batched output */
+    /* Flush any batched map output */
+    if (g_map_dirty) {
+        emit_map_frame();
+    }
     if (g_out) fflush(g_out);
 }
 
 static void
 headless_wait_synch(void)
 {
-    /* Block until client acknowledges - for M1, just flush */
+    /* Block until client acknowledges - for M2, flush and mark_synch */
     headless_mark_synch();
 }
 
 static void
 headless_cliparound(int x, int y)
 {
-    /* M2: handle map viewport */
+    /* M2: Handle map viewport centering */
+    /* For now, just update cursor - full viewport logic in later optimization */
+    g_cursor_x = x;
+    g_cursor_y = y;
+    
+    /* Emit map frame if dirty */
+    if (g_map_dirty) {
+        emit_map_frame();
+    }
 }
 
 static void
