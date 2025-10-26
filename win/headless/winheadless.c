@@ -63,6 +63,23 @@ typedef struct {
 static MenuState g_menu = {0};
 static int g_next_menu_id = 1;
 
+/* M4: Status field cache */
+typedef struct {
+    int hp;
+    int hpmax;
+    int pw;
+    int pwmax;
+    int ac;
+    int xlvl;
+    int dlvl;
+    long exp;
+    int enc;
+    unsigned long cond;
+    long turn;
+} StatusCache;
+
+static StatusCache g_status = {0};
+
 /* ========================================================================
  * UTILITIES
  * ======================================================================== */
@@ -744,25 +761,130 @@ headless_select_menu(winid window, int how, MENU_ITEM_P **selected)
 static void
 headless_status_init(void)
 {
-    /* M4: status initialization */
+    /* M4: Initialize status cache */
+    memset(&g_status, 0, sizeof(g_status));
+    
+    /* Call generic status initialization to set up status_vals arrays */
+    genl_status_init();
 }
 
 static void
 headless_status_finish(void)
 {
-    /* M4: status cleanup */
+    /* M4: status cleanup - call generic cleanup */
+    genl_status_finish();
 }
 
 static void
 headless_status_enablefield(int fieldidx, const char *nm, const char *fmt, BOOLEAN_P enable)
 {
-    /* M4: configure status fields */
+    /* M4: configure status fields - delegate to generic handler */
+    genl_status_enablefield(fieldidx, nm, fmt, enable);
 }
 
 static void
-headless_status_update(int idx, genericptr_t ptr, int chg, int percent)
+headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int color, unsigned long *colormasks)
 {
-    /* M4: emit STATUS event */
+    /* M4: Update status fields and emit STATUS event on BL_FLUSH/BL_RESET */
+    (void)chg;
+    (void)percent;
+    (void)color;
+    (void)colormasks;
+    
+    char *text = (char *)ptr;
+    long *condptr = (long *)ptr;
+    
+    /* Handle special indices */
+    if (idx == BL_FLUSH || idx == BL_RESET) {
+        /* Emit STATUS event with all cached values */
+        char buf[512];
+        snprintf(buf, sizeof(buf),
+                 "{\"hp\":%d,\"hpmax\":%d,\"pw\":%d,\"pwmax\":%d,"
+                 "\"ac\":%d,\"xlvl\":%d,\"dlvl\":%d,\"exp\":%ld,"
+                 "\"enc\":%d,\"cond\":%lu,\"turn\":%ld}",
+                 g_status.hp, g_status.hpmax,
+                 g_status.pw, g_status.pwmax,
+                 g_status.ac, g_status.xlvl, g_status.dlvl,
+                 g_status.exp, g_status.enc, g_status.cond,
+                 g_status.turn);
+        emit_event("STATUS", buf);
+        
+        if (idx == BL_RESET) {
+            /* Reset also clears the cache */
+            memset(&g_status, 0, sizeof(g_status));
+        }
+        return;
+    }
+    
+    if (idx < 0 || idx >= MAXBLSTATS) {
+        return;  /* Invalid index */
+    }
+    
+    /* Update cached fields based on index */
+    switch (idx) {
+    case BL_HP:
+        if (text) g_status.hp = atoi(text);
+        break;
+    case BL_HPMAX:
+        if (text) g_status.hpmax = atoi(text);
+        break;
+    case BL_ENE:  /* Energy/Power/Mana */
+        if (text) g_status.pw = atoi(text);
+        break;
+    case BL_ENEMAX:
+        if (text) g_status.pwmax = atoi(text);
+        break;
+    case BL_AC:
+        if (text) g_status.ac = atoi(text);
+        break;
+    case BL_XP:  /* Experience level */
+        if (text) g_status.xlvl = atoi(text);
+        break;
+    case BL_EXP:  /* Experience points */
+        if (text) g_status.exp = atol(text);
+        break;
+    case BL_LEVELDESC:
+        /* Parse "Dlvl:5" or "Home 1" format */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            if (colon) {
+                g_status.dlvl = atoi(colon + 1);
+            } else {
+                /* Try to find a number at end */
+                const char *p = text + strlen(text) - 1;
+                while (p > text && isdigit((unsigned char)*p)) p--;
+                if (p < text + strlen(text) - 1) {
+                    g_status.dlvl = atoi(p + 1);
+                } else {
+                    g_status.dlvl = 1;  /* Default */
+                }
+            }
+        }
+        break;
+    case BL_CAP:  /* Encumbrance */
+        /* Text is like "Burdened", "Stressed", etc. */
+        if (text) {
+            if (strstr(text, "Overloaded")) g_status.enc = 5;
+            else if (strstr(text, "Overtaxed")) g_status.enc = 4;
+            else if (strstr(text, "Strained")) g_status.enc = 3;
+            else if (strstr(text, "Stressed")) g_status.enc = 2;
+            else if (strstr(text, "Burdened")) g_status.enc = 1;
+            else g_status.enc = 0;
+        }
+        break;
+    case BL_CONDITION:
+        /* Condition is a bitmask passed as long* */
+        if (condptr) {
+            g_status.cond = (unsigned long)*condptr;
+        }
+        break;
+    case BL_TIME:
+        if (text) g_status.turn = atol(text);
+        break;
+    default:
+        /* Ignore other fields (STR, DX, CO, etc.) for now */
+        break;
+    }
 }
 
 /* ========================================================================
