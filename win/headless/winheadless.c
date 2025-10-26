@@ -35,6 +35,34 @@ static int g_cursor_x = 0;
 static int g_cursor_y = 0;
 static int g_map_dirty = 0;  /* 1 if map needs redraw */
 
+/* M3: Menu state */
+#define MAX_MENU_ITEMS 512
+
+typedef struct {
+    anything identifier;   /* item identifier (from game) */
+    char text[512];        /* display text */
+    char accel;            /* accelerator key ('a', 'b', etc.) */
+    char group_accel;      /* group selector */
+    int glyph;             /* glyph for rendering */
+    int attr;              /* text attributes */
+    boolean selectable;    /* can be selected? */
+    boolean selected;      /* is selected? */
+    long count;            /* count (for selection) */
+} MenuItem;
+
+typedef struct {
+    int menu_id;
+    winid window;
+    MenuItem items[MAX_MENU_ITEMS];
+    int item_count;
+    char prompt[512];
+    int how;               /* PICK_NONE, PICK_ONE, PICK_ANY */
+    boolean active;
+} MenuState;
+
+static MenuState g_menu = {0};
+static int g_next_menu_id = 1;
+
 /* ========================================================================
  * UTILITIES
  * ======================================================================== */
@@ -430,9 +458,9 @@ headless_nhgetch(void)
     
     /* Wait for INPUT event */
     while (fgets(response, sizeof(response), stdin)) {
-        char kind[64];
-        if (parse_json_field_str(response, "kind", kind, sizeof(kind))) {
-            if (strcmp(kind, "INPUT") == 0) {
+        char type_str[64];
+        if (parse_json_field_str(response, "type", type_str, sizeof(type_str))) {
+            if (strcmp(type_str, "INPUT") == 0) {
                 char key_str[16];
                 if (parse_json_field_str(response, "key", key_str, sizeof(key_str))) {
                     if (key_str[0]) return (int)key_str[0];
@@ -526,13 +554,25 @@ headless_get_ext_cmd(void)
 }
 
 /* ========================================================================
- * WINDOW PORT API: MENUS (stubs for M1, implemented in M3)
+ * WINDOW PORT API: MENUS (M3 implementation)
  * ======================================================================== */
 
 static void
 headless_start_menu(winid window)
 {
-    /* M3: menu implementation */
+    /* Initialize menu state */
+    g_menu.menu_id = g_next_menu_id++;
+    g_menu.window = window;
+    g_menu.item_count = 0;
+    g_menu.prompt[0] = '\0';
+    g_menu.how = PICK_ANY;
+    g_menu.active = TRUE;
+    
+    /* Emit MENU_BEGIN event */
+    char buf[256];
+    snprintf(buf, sizeof(buf), "{\"id\":%d,\"window\":%d}", 
+             g_menu.menu_id, window);
+    emit_event("MENU_BEGIN", buf);
 }
 
 static void
@@ -540,20 +580,161 @@ headless_add_menu(winid window, int glyph, const ANY_P *identifier,
                   CHAR_P accelerator, CHAR_P group_accel, int attr,
                   const char *str, BOOLEAN_P presel)
 {
-    /* M3: menu items */
+    if (!g_menu.active || g_menu.item_count >= MAX_MENU_ITEMS) {
+        return;
+    }
+    
+    if (!str) str = "";
+    
+    MenuItem *item = &g_menu.items[g_menu.item_count++];
+    
+    /* Store item data */
+    item->identifier = identifier ? *identifier : zeroany;
+    strncpy(item->text, str, sizeof(item->text) - 1);
+    item->text[sizeof(item->text) - 1] = '\0';
+    item->accel = accelerator;
+    item->group_accel = group_accel;
+    item->glyph = glyph;
+    item->attr = attr;
+    item->selectable = (identifier && identifier->a_void != 0);
+    item->selected = presel;
+    item->count = 0;
+    
+    /* Emit MENU_ITEM event */
+    char escaped[1024];
+    json_escape(item->text, escaped, sizeof(escaped));
+    
+    char buf[2048];
+    snprintf(buf, sizeof(buf),
+             "{\"id\":%d,\"item_id\":%d,\"text\":\"%s\",\"accel\":\"%c\","
+             "\"group_accel\":\"%c\",\"glyph\":%d,\"attr\":%d,"
+             "\"selectable\":%s,\"selected\":%s}",
+             g_menu.menu_id,
+             (int)(item - g_menu.items),  /* Use array index as item_id */
+             escaped,
+             accelerator ? accelerator : ' ',
+             group_accel ? group_accel : ' ',
+             glyph,
+             attr,
+             item->selectable ? "true" : "false",
+             item->selected ? "true" : "false");
+    emit_event("MENU_ITEM", buf);
 }
 
 static void
 headless_end_menu(winid window, const char *prompt)
 {
-    /* M3: finalize menu */
+    if (!g_menu.active) return;
+    
+    /* Store prompt */
+    if (prompt) {
+        strncpy(g_menu.prompt, prompt, sizeof(g_menu.prompt) - 1);
+        g_menu.prompt[sizeof(g_menu.prompt) - 1] = '\0';
+    } else {
+        g_menu.prompt[0] = '\0';
+    }
+    
+    /* Emit MENU_END event */
+    char escaped[1024];
+    json_escape(g_menu.prompt, escaped, sizeof(escaped));
+    
+    char buf[2048];
+    snprintf(buf, sizeof(buf),
+             "{\"id\":%d,\"prompt\":\"%s\",\"count\":%d}",
+             g_menu.menu_id, escaped, g_menu.item_count);
+    emit_event("MENU_END", buf);
 }
 
 static int
 headless_select_menu(winid window, int how, MENU_ITEM_P **selected)
 {
-    /* M3: menu selection */
-    return 0;
+    if (!g_menu.active) {
+        *selected = NULL;
+        return 0;
+    }
+    
+    g_menu.how = how;
+    
+    /* Send REQ:MENU_SELECT and block for response */
+    char req_buf[512];
+    snprintf(req_buf, sizeof(req_buf), "{\"id\":%d,\"how\":%d}", 
+             g_menu.menu_id, how);
+    
+    char response[16384];
+    int req_id = g_next_req_id++;
+    send_request("MENU_SELECT", req_id, req_buf, response, sizeof(response));
+    
+    /* Parse response to extract selected items */
+    /* Response format: {"items":[{"item_id":N,"count":C},...]} */
+    
+    int selected_count = 0;
+    MENU_ITEM_P *items = NULL;
+    
+    /* Simple parser: count items array entries */
+    const char *p = strstr(response, "\"items\"");
+    if (p) {
+        p = strchr(p, '[');
+        if (p) {
+            p++;
+            /* Count comma-separated objects */
+            int depth = 0;
+            const char *scan = p;
+            while (*scan && *scan != ']') {
+                if (*scan == '{') {
+                    if (depth == 0) selected_count++;
+                    depth++;
+                } else if (*scan == '}') {
+                    depth--;
+                }
+                scan++;
+            }
+        }
+    }
+    
+    if (selected_count > 0) {
+        items = (MENU_ITEM_P *) alloc(selected_count * sizeof(menu_item));
+        
+        /* Parse each selected item */
+        p = strstr(response, "\"items\"");
+        if (p) {
+            p = strchr(p, '[');
+            if (p) {
+                p++;
+                int idx = 0;
+                while (*p && *p != ']' && idx < selected_count) {
+                    /* Find item_id */
+                    const char *id_pos = strstr(p, "\"item_id\"");
+                    if (!id_pos || id_pos > strchr(p, ']')) break;
+                    
+                    int item_id = parse_json_field_int(id_pos, "item_id");
+                    int count = 1;
+                    
+                    /* Find count if present */
+                    const char *count_pos = strstr(id_pos, "\"count\"");
+                    if (count_pos && count_pos < strchr(id_pos, '}')) {
+                        count = parse_json_field_int(count_pos, "count");
+                        if (count < 0) count = 1;
+                    }
+                    
+                    /* Store in result */
+                    if (item_id >= 0 && item_id < g_menu.item_count) {
+                        items[idx].item = g_menu.items[item_id].identifier;
+                        items[idx].count = count;
+                        idx++;
+                    }
+                    
+                    /* Move to next item */
+                    p = strchr(id_pos, '}');
+                    if (p) p++;
+                }
+                selected_count = idx;  /* Actual count of parsed items */
+            }
+        }
+    }
+    
+    *selected = items;
+    g_menu.active = FALSE;
+    return selected_count;
 }
 
 /* ========================================================================
