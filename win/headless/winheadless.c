@@ -11,6 +11,7 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+#include <errno.h>
 
 /* ========================================================================
  * GLOBALS & STATE
@@ -507,19 +508,52 @@ headless_nhgetch(void)
     char response[16384];
     
     /* Wait for INPUT event */
-    while (fgets(response, sizeof(response), stdin)) {
+    while (1) {
+        fprintf(stderr, "[headless_nhgetch] Waiting for fgets...\n");
+        fflush(stderr);
+        
+        char *result = fgets(response, sizeof(response), stdin);
+        
+        if (!result) {
+            fprintf(stderr, "[headless_nhgetch] fgets returned NULL (EOF or error), errno=%d\n", errno);
+            fflush(stderr);
+            break;
+        }
+        
+        fprintf(stderr, "[headless_nhgetch] Received: %s", response);
+        fflush(stderr);
+        
         char type_str[64];
         if (parse_json_field_str(response, "type", type_str, sizeof(type_str))) {
+            fprintf(stderr, "[headless_nhgetch] Parsed type: %s\n", type_str);
+            fflush(stderr);
             if (strcmp(type_str, "INPUT") == 0) {
                 char key_str[16];
                 if (parse_json_field_str(response, "key", key_str, sizeof(key_str))) {
-                    if (key_str[0]) return (int)key_str[0];
+                    if (key_str[0]) {
+                        fprintf(stderr, "[headless_nhgetch] Returning key: 0x%02x (%c)\n", 
+                                (unsigned char)key_str[0], 
+                                isprint((unsigned char)key_str[0]) ? key_str[0] : '?');
+                        fflush(stderr);
+                        return (int)key_str[0];
+                    } else {
+                        fprintf(stderr, "[headless_nhgetch] ERROR: Empty key_str after parsing\n");
+                        fflush(stderr);
+                    }
+                } else {
+                    fprintf(stderr, "[headless_nhgetch] ERROR: Failed to parse 'key' field\n");
+                    fflush(stderr);
                 }
             }
+        } else {
+            fprintf(stderr, "[headless_nhgetch] ERROR: Failed to parse 'type' field\n");
+            fflush(stderr);
         }
-        /* Ignore other events */
+        /* Ignore other events and continue loop */
     }
     
+    fprintf(stderr, "[headless_nhgetch] EOF reached, returning ESC\n");
+    fflush(stderr);
     return '\033'; /* ESC on EOF */
 }
 
@@ -541,18 +575,28 @@ headless_nh_poskey(int *x, int *y, int *mod)
  * WINDOW PORT API: PROMPTS (M1 implementation)
  * ======================================================================== */
 
-static char
+char
 headless_yn_function(const char *question, const char *choices, CHAR_P def)
 {
     /* Generate PROMPT_YN request */
     int req_id = g_next_req_id++;
+    
+    fprintf(stderr, "[headless_yn_function] Question: %s, choices: %s, def: %c\n", 
+            question, choices ? choices : "(null)", def);
+    fflush(stderr);
     
     char escaped_q[4096];
     char escaped_choices[128];
     char escaped_def[16];
     
     json_escape(question, escaped_q, sizeof(escaped_q));
-    json_escape(choices, escaped_choices, sizeof(escaped_choices));
+    
+    /* Handle NULL choices (e.g., directional prompts) */
+    if (choices) {
+        json_escape(choices, escaped_choices, sizeof(escaped_choices));
+    } else {
+        escaped_choices[0] = '\0';
+    }
     
     char def_str[2] = {def, '\0'};
     json_escape(def_str, escaped_def, sizeof(escaped_def));
