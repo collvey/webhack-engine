@@ -224,6 +224,24 @@ parse_json_field_str(const char *json, const char *field, char *out, size_t outs
             if (*p == 'n') out[i++] = '\n';
             else if (*p == 'r') out[i++] = '\r';
             else if (*p == 't') out[i++] = '\t';
+            else if (*p == 'u' && isxdigit((unsigned char)*(p+1)) && 
+                     isxdigit((unsigned char)*(p+2)) && 
+                     isxdigit((unsigned char)*(p+3)) && 
+                     isxdigit((unsigned char)*(p+4))) {
+                /* Handle \uXXXX Unicode escape (for control chars like ESC) */
+                char hex[5];
+                hex[0] = *(++p);
+                hex[1] = *(++p);
+                hex[2] = *(++p);
+                hex[3] = *(++p);
+                hex[4] = '\0';
+                unsigned int codepoint = (unsigned int)strtol(hex, NULL, 16);
+                /* For simplicity, only handle ASCII range (0-127) */
+                if (codepoint < 128) {
+                    out[i++] = (char)codepoint;
+                }
+                p++;
+            }
             else out[i++] = *p;
             p++;
         } else {
