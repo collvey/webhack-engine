@@ -324,6 +324,7 @@ static void
 headless_init_nhwindows(int *argcp, char **argv)
 {
     int x, y;
+    char debug_buf[512];
     
     g_out = stdout;
     g_initialized = 1;
@@ -343,8 +344,12 @@ headless_init_nhwindows(int *argcp, char **argv)
     g_cursor_y = 0;
     g_map_dirty = 0;
     
-    /* Emit startup event */
-    emit_event("INIT", "{\"engine\":\"EasyNetHack\",\"version\":\"3.6.7-headless\"}");
+    /* Emit startup event with debug info */
+    snprintf(debug_buf, sizeof(debug_buf), 
+             "{\"engine\":\"EasyNetHack\",\"version\":\"3.6.7-headless\","
+             "\"debug\":{\"num_pad\":%d,\"cmd_num_pad\":%d,\"dirchars\":\"%s\"}}",
+             iflags.num_pad, Cmd.num_pad, Cmd.dirchars ? Cmd.dirchars : "null");
+    emit_event("INIT", debug_buf);
 }
 
 static void
