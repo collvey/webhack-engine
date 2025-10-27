@@ -613,11 +613,19 @@ headless_yn_function(const char *question, const char *choices, CHAR_P def)
     char ch_str[16];
     if (parse_json_field_str(response, "ch", ch_str, sizeof(ch_str))) {
         if (ch_str[0]) {
+            fprintf(stderr, "[headless_yn_function] Returning character: 0x%02x (%c)\n",
+                    (unsigned char)ch_str[0],
+                    isprint((unsigned char)ch_str[0]) ? ch_str[0] : '?');
+            fflush(stderr);
             return ch_str[0];
         }
     }
     
     /* Default on parse failure */
+    fprintf(stderr, "[headless_yn_function] Parse failed, returning default: 0x%02x (%c)\n",
+            (unsigned char)def,
+            isprint((unsigned char)def) ? def : '?');
+    fflush(stderr);
     return def;
 }
 
