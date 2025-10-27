@@ -550,7 +550,9 @@ headless_yn_function(const char *question, const char *choices, CHAR_P def)
     /* Parse response for "ch" field */
     char ch_str[16];
     if (parse_json_field_str(response, "ch", ch_str, sizeof(ch_str))) {
-        if (ch_str[0]) return ch_str[0];
+        if (ch_str[0]) {
+            return ch_str[0];
+        }
     }
     
     /* Default on parse failure */

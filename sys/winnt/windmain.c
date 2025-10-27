@@ -1387,7 +1387,8 @@ other_self_recover_prompt()
         c = yn("Are you sure you wish to destroy the old game, rather than try to "
                   "recover it? [yn] ");
         pl = 2;
-        if (!ismswin && !iscurses) {
+        /* Skip the re-prompt logic for window ports that use yn() directly (like headless) */
+        if (!ismswin && !iscurses && !iflags.window_inited) {
             c = 'n';
             ct = 0;
             goto other_ask_again;
@@ -1398,10 +1399,11 @@ other_self_recover_prompt()
         retval = 0;
     } else {
         /* only yes answers get here */
-        if (pl == 2)
+        if (pl == 2) {
             retval = -1;  /* yes, do destroy the old game anyway */
-        else
+        } else {
             retval = 1;   /* yes, do recover the old game */
+        }
     }
     return retval;
 }
