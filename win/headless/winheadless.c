@@ -533,6 +533,17 @@ headless_nhgetch(void)
             fprintf(stderr, "[headless_nhgetch] Parsed type: %s\n", type_str);
             fflush(stderr);
             if (strcmp(type_str, "INPUT") == 0) {
+                /* Try keycode field first (for high-bit characters from JS/JSON) */
+                int keycode = parse_json_field_int(response, "keycode");
+                if (keycode >= 0 && keycode <= 255) {
+                    fprintf(stderr, "[headless_nhgetch] Returning keycode: 0x%02x (%c)\n", 
+                            (unsigned char)keycode, 
+                            isprint((unsigned char)keycode) ? (char)keycode : '?');
+                    fflush(stderr);
+                    return keycode;
+                }
+                
+                /* Fallback to key string field (for Python tests and ASCII keys) */
                 char key_str[16];
                 if (parse_json_field_str(response, "key", key_str, sizeof(key_str))) {
                     if (key_str[0]) {
