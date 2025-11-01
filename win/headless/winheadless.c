@@ -229,7 +229,7 @@ parse_json_field_str(const char *json, const char *field, char *out, size_t outs
                      isxdigit((unsigned char)*(p+2)) && 
                      isxdigit((unsigned char)*(p+3)) && 
                      isxdigit((unsigned char)*(p+4))) {
-                /* Handle \uXXXX Unicode escape (for control chars like ESC) */
+                /* Handle \uXXXX Unicode escape */
                 char hex[5];
                 hex[0] = *(++p);
                 hex[1] = *(++p);
@@ -237,8 +237,8 @@ parse_json_field_str(const char *json, const char *field, char *out, size_t outs
                 hex[3] = *(++p);
                 hex[4] = '\0';
                 unsigned int codepoint = (unsigned int)strtol(hex, NULL, 16);
-                /* For simplicity, only handle ASCII range (0-127) */
-                if (codepoint < 128) {
+                /* Handle extended ASCII range (0-255) for meta keys */
+                if (codepoint < 256) {
                     out[i++] = (char)codepoint;
                 }
                 p++;
