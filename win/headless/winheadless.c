@@ -658,8 +658,12 @@ headless_getlin(const char *prompt, char *buf)
 static int
 headless_get_ext_cmd(void)
 {
-    /* M3: extended command menu */
-    return -1;
+    /* M3: Use the standard menu-based extended command interface.
+     * This calls extcmd_via_menu() from cmd.c which uses our menu system
+     * (start_menu, add_menu, end_menu, select_menu) to display the list
+     * of extended commands and get the user's selection.
+     */
+    return extcmd_via_menu();
 }
 
 /* ========================================================================
