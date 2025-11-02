@@ -907,7 +907,10 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
     
     /* Handle special indices */
     if (idx == BL_FLUSH || idx == BL_RESET) {
-        /* Emit STATUS event with all cached values */
+        /* Emit STATUS event with all cached values 
+         * BL_RESET means "force redisplay" not "clear cache"
+         * Both BL_FLUSH and BL_RESET should emit current status without clearing
+         */
         char buf[512];
         snprintf(buf, sizeof(buf),
                  "{\"hp\":%d,\"hpmax\":%d,\"pw\":%d,\"pwmax\":%d,"
@@ -919,11 +922,6 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
                  g_status.exp, g_status.enc, g_status.cond,
                  g_status.turn);
         emit_event("STATUS", buf);
-        
-        if (idx == BL_RESET) {
-            /* Reset also clears the cache */
-            memset(&g_status, 0, sizeof(g_status));
-        }
         return;
     }
     
