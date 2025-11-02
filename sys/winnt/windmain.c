@@ -1368,7 +1368,7 @@ other_self_recover_prompt()
 
  other_ask_again:
 
-    if (!ismswin && !iscurses) {
+    if (!ismswin && !iscurses && !iflags.window_inited) {
         while ((ci = nhgetch()) && !(ci == '\n' || ci == 13)) {
             if (ct > 0) {
                 /* invalid answer */
