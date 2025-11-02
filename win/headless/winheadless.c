@@ -160,27 +160,63 @@ emit_message(const char *text, const char *style)
 static void
 emit_map_frame(void)
 {
+    int y, x;
+    
     if (!g_map_dirty) return;
     
-    /* Build JSON for map frame */
-    /* Format: {"width":80,"height":21,"cursor":{"x":X,"y":Y},"glyphs":[...]} */
-    char buf[65536];  /* Large buffer for full map */
+    /* Build JSON for map frame with full cell data (char, color, special) */
+    /* Format: {"width":80,"height":21,"cursor":{"x":X,"y":Y},"cells":[{"x":X,"y":Y,"glyph":N,"ch":"C","color":N,"special":N},...]} */
+    char buf[131072];  /* Larger buffer for full cell data */
     int pos = 0;
     
     pos += snprintf(buf + pos, sizeof(buf) - pos,
-                    "{\"width\":%d,\"height\":%d,\"cursor\":{\"x\":%d,\"y\":%d},\"glyphs\":[",
+                    "{\"width\":%d,\"height\":%d,\"cursor\":{\"x\":%d,\"y\":%d},\"cells\":[",
                     MAP_COLS, MAP_ROWS, g_cursor_x, g_cursor_y);
     
-    /* Emit glyphs in row-major order */
+    /* Emit cells with mapglyph conversion */
     int first = 1;
-    int y, x;
     for (y = 0; y < MAP_ROWS; y++) {
         for (x = 0; x < MAP_COLS; x++) {
+            int glyph = g_map[y][x].glyph;
+            
+            /* Skip uninitialized cells (like Win32 does) */
+            if (glyph == NO_GLYPH) {
+                continue;
+            }
+            
+            int ochar = ' ';
+            int ocolor = 7;  /* Default to gray */
+            unsigned ospecial = 0;
+            
+            /* Use mapglyph() to convert glyph to character/color/special */
+            /* This is the same function TTY port uses for display */
+            /* TTY always calls mapglyph - we should too */
+            mapglyph(glyph, &ochar, &ocolor, &ospecial, x, y, 0);
+            
             if (!first) {
                 pos += snprintf(buf + pos, sizeof(buf) - pos, ",");
             }
             first = 0;
-            pos += snprintf(buf + pos, sizeof(buf) - pos, "%d", g_map[y][x].glyph);
+            
+            /* Emit cell with char, color, special flags */
+            /* Escape special characters in JSON */
+            char ch_escaped[8];
+            if (ochar == '"') {
+                strcpy(ch_escaped, "\\\"");
+            } else if (ochar == '\\') {
+                strcpy(ch_escaped, "\\\\");
+            } else if (ochar < 32 || ochar > 126) {
+                /* Non-printable - use space */
+                ch_escaped[0] = ' ';
+                ch_escaped[1] = '\0';
+            } else {
+                ch_escaped[0] = (char)ochar;
+                ch_escaped[1] = '\0';
+            }
+            
+            pos += snprintf(buf + pos, sizeof(buf) - pos,
+                            "{\"x\":%d,\"y\":%d,\"glyph\":%d,\"ch\":\"%s\",\"color\":%d,\"special\":%u}",
+                            x, y, glyph, ch_escaped, ocolor, ospecial);
         }
     }
     
@@ -293,27 +329,15 @@ send_request(const char *kind, int req_id, const char *json_data, char *response
     
     /* Block waiting for RESP with matching corr */
     response_buf[0] = '\0';
-    fprintf(stderr, "[HEADLESS] Waiting for response with corr=%d\n", req_id);
-    fflush(stderr);
     while (fgets(response_buf, bufsz, stdin)) {
-        fprintf(stderr, "[HEADLESS] Read from stdin: %s", response_buf);
-        fflush(stderr);
         int corr = parse_json_field_int(response_buf, "corr");
-        fprintf(stderr, "[HEADLESS] Parsed corr=%d (expecting %d)\n", corr, req_id);
-        fflush(stderr);
         if (corr == req_id) {
             /* Got our response */
-            fprintf(stderr, "[HEADLESS] Match! Returning response\n");
-            fflush(stderr);
             return;
         }
         /* Else: wrong correlation ID or event; discard and continue */
-        fprintf(stderr, "[HEADLESS] No match, discarding and waiting for next line\n");
-        fflush(stderr);
         /* TODO M2+: Queue events for later processing */
     }
-    fprintf(stderr, "[HEADLESS] EOF on stdin, exiting wait loop\n");
-    fflush(stderr);
 }
 
 /* ========================================================================
@@ -332,11 +356,18 @@ headless_init_nhwindows(int *argcp, char **argv)
     /* Mark window system as initialized so yn() prompts work */
     iflags.window_inited = 1;
     
-    /* M2: Initialize map buffer */
+    /* Initialize display symbols early (before initoptions is called)
+     * This ensures mapglyph() works correctly when first map is drawn.
+     * Normally init_symbols() is called later in initoptions(), but
+     * we need it ready for early map rendering.
+     */
+    init_symbols();
+    
+    /* M2: Initialize map buffer - use NO_GLYPH like Win32 does */
     for (y = 0; y < MAP_ROWS; y++) {
         for (x = 0; x < MAP_COLS; x++) {
-            g_map[y][x].glyph = 0;
-            g_map[y][x].bkglyph = 0;
+            g_map[y][x].glyph = NO_GLYPH;
+            g_map[y][x].bkglyph = NO_GLYPH;
             g_map[y][x].dirty = 0;
         }
     }
@@ -413,7 +444,22 @@ headless_create_nhwindow(int type)
 static void
 headless_clear_nhwindow(winid window)
 {
-    /* no-op for M1 */
+    /* Win32 pattern: Clear map buffer when clearing WIN_MAP */
+    /* This ensures old floor data is cleared when entering new levels */
+    if (window == WIN_MAP) {
+        int x, y;
+        for (y = 0; y < MAP_ROWS; y++) {
+            for (x = 0; x < MAP_COLS; x++) {
+                g_map[y][x].glyph = NO_GLYPH;
+                g_map[y][x].bkglyph = NO_GLYPH;
+                g_map[y][x].dirty = 1;  /* Mark as dirty to emit in next frame */
+            }
+        }
+        g_map_dirty = 1;
+        /* Note: Don't emit immediately - wait for curs() or mark_synch() */
+        /* NetHack will redraw the new level after clearing */
+    }
+    /* Other window types: no-op for now */
 }
 
 static void
@@ -514,32 +560,19 @@ headless_nhgetch(void)
     
     /* Wait for INPUT event */
     while (1) {
-        fprintf(stderr, "[headless_nhgetch] Waiting for fgets...\n");
-        fflush(stderr);
-        
         char *result = fgets(response, sizeof(response), stdin);
         
         if (!result) {
-            fprintf(stderr, "[headless_nhgetch] fgets returned NULL (EOF or error), errno=%d\n", errno);
-            fflush(stderr);
-            break;
+            /* EOF on stdin */
+            return '\033'; /* ESC */
         }
-        
-        fprintf(stderr, "[headless_nhgetch] Received: %s", response);
-        fflush(stderr);
         
         char type_str[64];
         if (parse_json_field_str(response, "type", type_str, sizeof(type_str))) {
-            fprintf(stderr, "[headless_nhgetch] Parsed type: %s\n", type_str);
-            fflush(stderr);
             if (strcmp(type_str, "INPUT") == 0) {
                 /* Try keycode field first (for high-bit characters from JS/JSON) */
                 int keycode = parse_json_field_int(response, "keycode");
                 if (keycode >= 0 && keycode <= 255) {
-                    fprintf(stderr, "[headless_nhgetch] Returning keycode: 0x%02x (%c)\n", 
-                            (unsigned char)keycode, 
-                            isprint((unsigned char)keycode) ? (char)keycode : '?');
-                    fflush(stderr);
                     return keycode;
                 }
                 
@@ -547,30 +580,13 @@ headless_nhgetch(void)
                 char key_str[16];
                 if (parse_json_field_str(response, "key", key_str, sizeof(key_str))) {
                     if (key_str[0]) {
-                        fprintf(stderr, "[headless_nhgetch] Returning key: 0x%02x (%c)\n", 
-                                (unsigned char)key_str[0], 
-                                isprint((unsigned char)key_str[0]) ? key_str[0] : '?');
-                        fflush(stderr);
                         return (int)key_str[0];
-                    } else {
-                        fprintf(stderr, "[headless_nhgetch] ERROR: Empty key_str after parsing\n");
-                        fflush(stderr);
                     }
-                } else {
-                    fprintf(stderr, "[headless_nhgetch] ERROR: Failed to parse 'key' field\n");
-                    fflush(stderr);
                 }
             }
-        } else {
-            fprintf(stderr, "[headless_nhgetch] ERROR: Failed to parse 'type' field\n");
-            fflush(stderr);
         }
         /* Ignore other events and continue loop */
     }
-    
-    fprintf(stderr, "[headless_nhgetch] EOF reached, returning ESC\n");
-    fflush(stderr);
-    return '\033'; /* ESC on EOF */
 }
 
 static int
@@ -596,10 +612,6 @@ headless_yn_function(const char *question, const char *choices, CHAR_P def)
 {
     /* Generate PROMPT_YN request */
     int req_id = g_next_req_id++;
-    
-    fprintf(stderr, "[headless_yn_function] Question: %s, choices: %s, def: %c\n", 
-            question, choices ? choices : "(null)", def);
-    fflush(stderr);
     
     char escaped_q[4096];
     char escaped_choices[128];
@@ -629,19 +641,11 @@ headless_yn_function(const char *question, const char *choices, CHAR_P def)
     char ch_str[16];
     if (parse_json_field_str(response, "ch", ch_str, sizeof(ch_str))) {
         if (ch_str[0]) {
-            fprintf(stderr, "[headless_yn_function] Returning character: 0x%02x (%c)\n",
-                    (unsigned char)ch_str[0],
-                    isprint((unsigned char)ch_str[0]) ? ch_str[0] : '?');
-            fflush(stderr);
             return ch_str[0];
         }
     }
     
     /* Default on parse failure */
-    fprintf(stderr, "[headless_yn_function] Parse failed, returning default: 0x%02x (%c)\n",
-            (unsigned char)def,
-            isprint((unsigned char)def) ? def : '?');
-    fflush(stderr);
     return def;
 }
 
