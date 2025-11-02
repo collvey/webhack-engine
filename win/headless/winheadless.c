@@ -3,6 +3,7 @@
 
 #include "hack.h"
 #include "dlb.h"
+#include "func_tab.h"  /* For extcmdlist[] */
 
 #ifdef HEADLESS
 
@@ -347,8 +348,10 @@ send_request(const char *kind, int req_id, const char *json_data, char *response
 static void
 headless_init_nhwindows(int *argcp, char **argv)
 {
-    int x, y;
+    int x, y, i;
     char debug_buf[512];
+    char extcmd_buf[32768];  /* Buffer for extended command list */
+    int pos;
     
     g_out = stdout;
     g_initialized = 1;
@@ -381,6 +384,26 @@ headless_init_nhwindows(int *argcp, char **argv)
              "\"debug\":{\"num_pad\":%d,\"cmd_num_pad\":%d,\"dirchars\":\"%s\"}}",
              iflags.num_pad, Cmd.num_pad, Cmd.dirchars ? Cmd.dirchars : "null");
     emit_event("INIT", debug_buf);
+    
+    /* Build and emit extended command list for autocomplete as separate event */
+    pos = 0;
+    pos += snprintf(extcmd_buf + pos, sizeof(extcmd_buf) - pos, "{\"commands\":[");
+    for (i = 0; extcmdlist[i].ef_txt != (char *)0; i++) {
+        char escaped_txt[256], escaped_desc[512];
+        
+        if (i > 0) {
+            pos += snprintf(extcmd_buf + pos, sizeof(extcmd_buf) - pos, ",");
+        }
+        
+        json_escape(extcmdlist[i].ef_txt, escaped_txt, sizeof(escaped_txt));
+        json_escape(extcmdlist[i].ef_desc, escaped_desc, sizeof(escaped_desc));
+        
+        pos += snprintf(extcmd_buf + pos, sizeof(extcmd_buf) - pos,
+                        "{\"name\":\"%s\",\"desc\":\"%s\",\"flags\":%d}",
+                        escaped_txt, escaped_desc, extcmdlist[i].flags);
+    }
+    pos += snprintf(extcmd_buf + pos, sizeof(extcmd_buf) - pos, "]}");
+    emit_event("EXTCMD_LIST", extcmd_buf);
 }
 
 static void
@@ -673,12 +696,31 @@ headless_getlin(const char *prompt, char *buf)
 static int
 headless_get_ext_cmd(void)
 {
-    /* M3: Use the standard menu-based extended command interface.
-     * This calls extcmd_via_menu() from cmd.c which uses our menu system
-     * (start_menu, add_menu, end_menu, select_menu) to display the list
-     * of extended commands and get the user's selection.
+    /* M5: Win32-style extended command interface.
+     * Directly enter text input mode with autocomplete support.
+     * This allows accessing all commands including those without
+     * keyboard accelerators (like #exploremode).
      */
-    return extcmd_via_menu();
+    char buf[BUFSZ];
+    int ret;
+    
+    /* Directly prompt for command name (like Win32) */
+    headless_getlin("Extended command: ", buf);
+    
+    if (buf[0] == '\033' || buf[0] == '\0') {
+        return -1;  /* Cancelled or empty */
+    }
+    
+    /* Search for matching command (case-insensitive) */
+    for (ret = 0; extcmdlist[ret].ef_txt != (char *)0; ret++) {
+        if (!strcmpi(buf, extcmdlist[ret].ef_txt)) {
+            return ret;  /* Found it! */
+        }
+    }
+    
+    /* No match found */
+    pline("Unknown extended command '%s'.", buf);
+    return -1;
 }
 
 /* ========================================================================
