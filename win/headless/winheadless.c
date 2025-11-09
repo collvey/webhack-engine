@@ -180,7 +180,6 @@ emit_map_frame(void)
     
     /* Emit cells with mapglyph conversion */
     int first = 1;
-    int cell_count = 0;
     for (y = 0; y < MAP_ROWS; y++) {
         for (x = 0; x < MAP_COLS; x++) {
             int glyph = g_map[y][x].glyph;
@@ -198,7 +197,6 @@ emit_map_frame(void)
             /* This is the same function TTY port uses for display */
             /* TTY always calls mapglyph - we should too */
             mapglyph(glyph, &ochar, &ocolor, &ospecial, x, y, 0);
-            cell_count++;
             
             if (!first) {
                 pos += snprintf(buf + pos, sizeof(buf) - pos, ",");
