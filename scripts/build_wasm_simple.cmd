@@ -51,6 +51,11 @@ emcc -O2 ^
      -lidbfs.js ^
      --js-library win/headless/headless_lib.js ^
      --preload-file binary@/ ^
+     --exclude-file *.exe ^
+     --exclude-file *.dll ^
+     --exclude-file *.PDB ^
+     --exclude-file *.exp ^
+     --exclude-file *.lib ^
      -o webhack-client/public/nethack.js ^
      win/headless/main_wasm.c ^
      win/headless/winheadless.c ^
