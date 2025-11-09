@@ -14,6 +14,10 @@
 #include <ctype.h>
 #include <errno.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 /* ========================================================================
  * GLOBALS & STATE
  * ======================================================================== */
@@ -176,6 +180,7 @@ emit_map_frame(void)
     
     /* Emit cells with mapglyph conversion */
     int first = 1;
+    int cell_count = 0;
     for (y = 0; y < MAP_ROWS; y++) {
         for (x = 0; x < MAP_COLS; x++) {
             int glyph = g_map[y][x].glyph;
@@ -193,6 +198,7 @@ emit_map_frame(void)
             /* This is the same function TTY port uses for display */
             /* TTY always calls mapglyph - we should too */
             mapglyph(glyph, &ochar, &ocolor, &ospecial, x, y, 0);
+            cell_count++;
             
             if (!first) {
                 pos += snprintf(buf + pos, sizeof(buf) - pos, ",");
@@ -409,7 +415,27 @@ headless_init_nhwindows(int *argcp, char **argv)
 static void
 headless_player_selection(void)
 {
-    /* Handled via prompts in M1; for now just use defaults */
+    /* Set up default character if not already specified
+     * This is needed for headless/WASM builds where interactive
+     * character selection is not available */
+    
+    /* Use ROLE_RANDOM to trigger automatic selection */
+    if (flags.initrole == ROLE_NONE) {
+        flags.initrole = ROLE_RANDOM;
+    }
+    if (flags.initrace == ROLE_NONE) {
+        flags.initrace = ROLE_RANDOM;
+    }
+    if (flags.initgend == ROLE_NONE) {
+        flags.initgend = ROLE_RANDOM;
+    }
+    if (flags.initalign == ROLE_NONE) {
+        flags.initalign = ROLE_RANDOM;
+    }
+    
+    /* Call rigid_role_checks() to finalize character selection
+     * This picks random values for any ROLE_RANDOM settings */
+    rigid_role_checks();
 }
 
 static void
@@ -468,8 +494,10 @@ static void
 headless_clear_nhwindow(winid window)
 {
     /* Win32 pattern: Clear map buffer when clearing WIN_MAP */
+    fprintf(stderr, "[headless] clear_nhwindow: window=%d\n", (int)window);
     /* This ensures old floor data is cleared when entering new levels */
     if (window == WIN_MAP) {
+        fprintf(stderr, "[headless] clear_nhwindow: Clearing WIN_MAP, setting g_map_dirty=1\n");
         int x, y;
         for (y = 0; y < MAP_ROWS; y++) {
             for (x = 0; x < MAP_COLS; x++) {
@@ -501,11 +529,13 @@ static void
 headless_curs(winid window, int x, int y)
 {
     /* M2: Update cursor position and trigger map flush if needed */
+    fprintf(stderr, "[headless] curs called: window=%d x=%d y=%d g_map_dirty=%d\n", (int)window, (int)x, (int)y, g_map_dirty);
     g_cursor_x = x;
     g_cursor_y = y;
     
     /* Emit map frame when cursor moves (indicates end of drawing cycle) */
     if (g_map_dirty) {
+        fprintf(stderr, "[headless] curs: emitting MAP_FRAME\n");
         emit_map_frame();
     }
 }
@@ -543,8 +573,10 @@ static void
 headless_print_glyph(winid window, XCHAR_P x, XCHAR_P y, int glyph, int bkglyph)
 {
     /* M2: Batch glyph updates into map buffer */
+    fprintf(stderr, "[headless] print_glyph: window=%d x=%d y=%d glyph=%d bkglyph=%d\n", (int)window, (int)x, (int)y, glyph, bkglyph);
     /* Bounds check */
     if (x < 0 || x >= MAP_COLS || y < 0 || y >= MAP_ROWS) {
+        fprintf(stderr, "[headless] print_glyph: OUT OF BOUNDS x=%d y=%d\n", (int)x, (int)y);
         return;
     }
     
@@ -575,20 +607,53 @@ headless_raw_print_bold(const char *str)
     }
 }
 
+#ifdef __EMSCRIPTEN__
+/* Declare extern functions from headless_lib.js */
+extern void headless_start_input_wait(void);
+extern int headless_check_input_ready(void);
+extern int headless_get_input_keycode(void);
+extern void emscripten_sleep(unsigned int ms);
+
+/* WASM version: Poll for input with emscripten_sleep() to yield control */
+static int
+headless_nhgetch(void)
+{
+    fprintf(stderr, "[headless] nhgetch: waiting for INPUT (WASM/Asyncify polling)...\n");
+    
+    /* Start waiting for input (kicks off Promise in JS) */
+    headless_start_input_wait();
+    
+    /* Poll until input is ready, yielding with emscripten_sleep() */
+    while (!headless_check_input_ready()) {
+        emscripten_sleep(10);  /* Sleep 10ms - ASYNCIFY unwinds stack here */
+    }
+    
+    /* Get the keycode */
+    int keycode = headless_get_input_keycode();
+    
+    fprintf(stderr, "[headless] nhgetch: received keycode %d from JS\n", keycode);
+    return keycode;
+}
+#else
+/* Native version: Use fgets() which blocks normally on OS pipe */
 static int
 headless_nhgetch(void)
 {
     /* M2: Handle key input from stdin */
     char response[16384];
     
+    fprintf(stderr, "[headless] nhgetch: waiting for INPUT...\n");
+    
     /* Wait for INPUT event */
     while (1) {
         char *result = fgets(response, sizeof(response), stdin);
         
         if (!result) {
-            /* EOF on stdin */
-            return '\033'; /* ESC */
+            fprintf(stderr, "[headless] nhgetch: EOF on stdin\n");
+            return '\033'; /* ESC on EOF */
         }
+        
+        fprintf(stderr, "[headless] nhgetch: received line: %.100s\n", response);
         
         char type_str[64];
         if (parse_json_field_str(response, "type", type_str, sizeof(type_str))) {
@@ -596,6 +661,7 @@ headless_nhgetch(void)
                 /* Try keycode field first (for high-bit characters from JS/JSON) */
                 int keycode = parse_json_field_int(response, "keycode");
                 if (keycode >= 0 && keycode <= 255) {
+                    fprintf(stderr, "[headless] nhgetch: returning keycode %d\n", keycode);
                     return keycode;
                 }
                 
@@ -603,14 +669,18 @@ headless_nhgetch(void)
                 char key_str[16];
                 if (parse_json_field_str(response, "key", key_str, sizeof(key_str))) {
                     if (key_str[0]) {
+                        fprintf(stderr, "[headless] nhgetch: returning key '%c' (0x%02x)\n", 
+                                key_str[0], (unsigned char)key_str[0]);
                         return (int)key_str[0];
                     }
                 }
             }
         }
         /* Ignore other events and continue loop */
+        fprintf(stderr, "[headless] nhgetch: ignoring non-INPUT event, continuing...\n");
     }
 }
+#endif
 
 static int
 headless_nh_poskey(int *x, int *y, int *mod)
