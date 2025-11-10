@@ -491,11 +491,8 @@ headless_create_nhwindow(int type)
 static void
 headless_clear_nhwindow(winid window)
 {
-    /* Win32 pattern: Clear map buffer when clearing WIN_MAP */
-    fprintf(stderr, "[headless] clear_nhwindow: window=%d\n", (int)window);
     /* This ensures old floor data is cleared when entering new levels */
     if (window == WIN_MAP) {
-        fprintf(stderr, "[headless] clear_nhwindow: Clearing WIN_MAP, setting g_map_dirty=1\n");
         int x, y;
         for (y = 0; y < MAP_ROWS; y++) {
             for (x = 0; x < MAP_COLS; x++) {
@@ -527,13 +524,11 @@ static void
 headless_curs(winid window, int x, int y)
 {
     /* M2: Update cursor position and trigger map flush if needed */
-    fprintf(stderr, "[headless] curs called: window=%d x=%d y=%d g_map_dirty=%d\n", (int)window, (int)x, (int)y, g_map_dirty);
     g_cursor_x = x;
     g_cursor_y = y;
     
     /* Emit map frame when cursor moves (indicates end of drawing cycle) */
     if (g_map_dirty) {
-        fprintf(stderr, "[headless] curs: emitting MAP_FRAME\n");
         emit_map_frame();
     }
 }
@@ -570,8 +565,6 @@ headless_display_file(const char *filename, BOOLEAN_P must_exist)
 static void
 headless_print_glyph(winid window, XCHAR_P x, XCHAR_P y, int glyph, int bkglyph)
 {
-    /* M2: Batch glyph updates into map buffer */
-    fprintf(stderr, "[headless] print_glyph: window=%d x=%d y=%d glyph=%d bkglyph=%d\n", (int)window, (int)x, (int)y, glyph, bkglyph);
     /* Bounds check */
     if (x < 0 || x >= MAP_COLS || y < 0 || y >= MAP_ROWS) {
         fprintf(stderr, "[headless] print_glyph: OUT OF BOUNDS x=%d y=%d\n", (int)x, (int)y);
