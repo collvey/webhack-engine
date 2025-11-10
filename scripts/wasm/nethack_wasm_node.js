@@ -1,7 +1,16 @@
 /**
- * Node.js runner for NetHack WASM
- * This runs the WASM module in Node.js with stdin/stdout,
- * exactly like the native nethack_headless.exe
+ * NetHack WASM Node.js Adapter
+ * 
+ * Runs the NetHack WASM module in Node.js with stdin/stdout interface,
+ * exactly like the native nethack_headless.exe binary.
+ * 
+ * This allows the same WASM build used in the browser to be used for:
+ * - Automated testing (Python subprocess communication)
+ * - Command-line gameplay
+ * - CI/CD integration
+ * 
+ * Architecture: stdin/stdout (JSON) <-> WASM module
+ * (Mirrors: nethack.worker.js for browser, bridge.js for native binary)
  */
 
 import { fileURLToPath } from 'url';
