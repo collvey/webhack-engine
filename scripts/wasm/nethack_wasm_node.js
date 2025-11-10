@@ -10,7 +10,7 @@
  * - CI/CD integration
  * 
  * Architecture: stdin/stdout (JSON) <-> WASM module
- * (Mirrors: nethack.worker.js for browser, bridge.js for native binary)
+ * (Companion to: nethack.worker.js for browser Web Worker)
  */
 
 import { fileURLToPath } from 'url';
