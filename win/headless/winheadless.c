@@ -352,10 +352,8 @@ send_request(const char *kind, int req_id, const char *json_data, char *response
 static void
 headless_init_nhwindows(int *argcp, char **argv)
 {
-    int x, y, i;
+    int x, y;
     char debug_buf[512];
-    char extcmd_buf[32768];  /* Buffer for extended command list */
-    int pos;
     
     g_out = stdout;
     g_initialized = 1;
@@ -388,26 +386,6 @@ headless_init_nhwindows(int *argcp, char **argv)
              "\"debug\":{\"num_pad\":%d,\"cmd_num_pad\":%d,\"dirchars\":\"%s\"}}",
              iflags.num_pad, Cmd.num_pad, Cmd.dirchars ? Cmd.dirchars : "null");
     emit_event("INIT", debug_buf);
-    
-    /* Build and emit extended command list for autocomplete as separate event */
-    pos = 0;
-    pos += snprintf(extcmd_buf + pos, sizeof(extcmd_buf) - pos, "{\"commands\":[");
-    for (i = 0; extcmdlist[i].ef_txt != (char *)0; i++) {
-        char escaped_txt[256], escaped_desc[512];
-        
-        if (i > 0) {
-            pos += snprintf(extcmd_buf + pos, sizeof(extcmd_buf) - pos, ",");
-        }
-        
-        json_escape(extcmdlist[i].ef_txt, escaped_txt, sizeof(escaped_txt));
-        json_escape(extcmdlist[i].ef_desc, escaped_desc, sizeof(escaped_desc));
-        
-        pos += snprintf(extcmd_buf + pos, sizeof(extcmd_buf) - pos,
-                        "{\"name\":\"%s\",\"desc\":\"%s\",\"flags\":%d}",
-                        escaped_txt, escaped_desc, extcmdlist[i].flags);
-    }
-    pos += snprintf(extcmd_buf + pos, sizeof(extcmd_buf) - pos, "]}");
-    emit_event("EXTCMD_LIST", extcmd_buf);
 }
 
 static void
