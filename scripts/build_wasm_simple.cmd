@@ -21,17 +21,22 @@ copy /Y binary\sysconf.wasm binary\sysconf >nul
 echo.
 
 rem Build with ALL necessary source files
-rem Match native headless build flags: -DTILES -DWIN32CON -DHEADLESS -DDLB -DSAFEPROCS
+rem IMPORTANT: Do NOT define -DWIN32CON or -DMICRO - these enable Windows file locking!
+rem WASM should behave like UNIX, not Windows
 rem Add -DNOMAIL to match onames.h state (SCR_MAIL not generated)
 rem CRITICAL: -s ASYNCIFY=1 enables blocking I/O (fgets) to work in WASM
+rem Force-undefine WIN32 macros that emcc auto-defines when building on Windows
 emcc -O2 ^
+     -UWIN32 ^
+     -U_WIN32 ^
+     -U__WIN32__ ^
      -DTILES ^
-     -DWIN32CON ^
      -DHEADLESS ^
      -DDLB ^
      -DSAFEPROCS ^
      -DNOTPARMDECL ^
      -DNOMAIL ^
+     -DUNIX ^
      -D__EMSCRIPTEN__ ^
      -I include ^
      -I win/headless ^
@@ -46,7 +51,7 @@ emcc -O2 ^
      -s ASYNCIFY=1 ^
      -s ASYNCIFY_STACK_SIZE=262144 ^
      -s ALLOW_MEMORY_GROWTH=1 ^
-     -s ASYNCIFY_IGNORE_INDIRECT=1 ^
+     -s ASYNCIFY_IMPORTS=[headless_wait_for_input_blocking] ^
      -s STACK_SIZE=5MB ^
      -lidbfs.js ^
      --js-library win/headless/headless_lib.js ^

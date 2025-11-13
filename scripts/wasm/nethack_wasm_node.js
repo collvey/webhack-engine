@@ -54,6 +54,7 @@ console.error('[WASM Runner] Working directory:', process.cwd());
 // Set up JSON input protocol with Promise-based async handling
 let stdinBuffer = '';
 let pendingInputResolvers = [];
+let bufferedKeycodes = [];  // Buffer for input that arrives before resolvers are ready
 
 // Process stdin data and parse JSON INPUT commands
 function processStdinData(data) {
@@ -82,10 +83,15 @@ function processStdinData(data) {
         if (keycode >= 0) {
           console.error('[WASM Runner] Got keycode:', keycode);
           
-          // Resolve any pending input requests
+          // If there's a resolver waiting, resolve it immediately
           if (pendingInputResolvers.length > 0) {
             const resolve = pendingInputResolvers.shift();
+            console.error('[WASM Runner] Resolving pending request with keycode:', keycode);
             resolve(keycode);
+          } else {
+            // Buffer the keycode for later - resolver will consume it when ready
+            console.error('[WASM Runner] No resolver ready, buffering keycode:', keycode);
+            bufferedKeycodes.push(keycode);
           }
         }
       }
@@ -97,6 +103,10 @@ function processStdinData(data) {
 
 // Listen to stdin for JSON input
 process.stdin.setEncoding('utf8');
+
+// Resume stdin to enable reading (required for Node.js)
+process.stdin.resume();
+
 process.stdin.on('data', (data) => {
   console.error('[WASM Runner] stdin data received:', data.length, 'bytes');
   processStdinData(data);
@@ -111,10 +121,18 @@ process.stdin.on('end', () => {
   }
 });
 
+process.stdin.on('error', (err) => {
+  console.error('[WASM Runner] stdin error:', err.message);
+});
+
 console.error('[WASM Runner] stdin listener registered and ready');
 
 // Call the factory function to create the module instance
 NetHackModule({
+  // Don't define stdin at all - let Emscripten use its default
+  // which won't try to read from process.stdin
+  // (We use wasmGetNextInputKey Promise API instead)
+  
   // Provide a preRun hook to override FS.syncfs before it's called
   preRun: [
     (Module) => {
@@ -130,15 +148,87 @@ NetHackModule({
           }
         };
       }
+      
+      // Initialize filesystem for NetHack (BrowserHack-style)
+      console.error('[WASM Runner] preRun: Initializing filesystem for save files');
+      
+      // Set up environment
+      if (typeof Module.ENV !== 'undefined') {
+        Module.ENV['USER'] = Module.ENV['USER'] || 'player';
+        Module.ENV['HOME'] = '/home/nethack_player';
+      }
+      
+      // Create necessary directories
+      try {
+        Module.FS.mkdir('/home');
+      } catch(e) {
+        console.error('[WASM Runner] /home already exists');
+      }
+      
+      try {
+        Module.FS.mkdir('/home/nethack_player');
+      } catch(e) {
+        console.error('[WASM Runner] /home/nethack_player already exists');
+      }
+      
+      // Create /save directory for level files
+      try {
+        Module.FS.mkdir('/save');
+        console.error('[WASM Runner] Created /save directory for level files');
+      } catch(e) {
+        console.error('[WASM Runner] /save already exists or cannot be created:', e.message);
+      }
+      
+      console.error('[WASM Runner] Filesystem initialized successfully');
     },
     () => {
       // Make getNextInputKey globally accessible for library functions
       console.error('[WASM Runner] preRun: Setting up global.wasmGetNextInputKey');
       global.wasmGetNextInputKey = () => {
-        console.error('[WASM Runner] wasmGetNextInputKey() - Waiting for INPUT...');
+        console.error('[WASM Runner] wasmGetNextInputKey() called, buffered:', bufferedKeycodes.length);
+        
+        // Check buffered input first
+        // CRITICAL: Return the keycode DIRECTLY, not wrapped in a Promise!
+        // Asyncify.handleAsync expects the async function to await a pending Promise,
+        // but if the value is already available, we should return it synchronously.
+        if (bufferedKeycodes.length > 0) {
+          const keycode = bufferedKeycodes.shift();
+          console.error('[WASM Runner] Returning buffered keycode directly:', keycode);
+          return keycode; // Return directly, not Promise.resolve(keycode)
+        }
+        
+        // Check if there's already a pending resolver (shouldn't happen!)
+        if (pendingInputResolvers.length > 0) {
+          console.error('[WASM Runner] WARNING: Already have', pendingInputResolvers.length, 'pending resolvers!');
+          console.error('[WASM Runner] This might indicate recursive/nested Asyncify calls!');
+        }
+        
+        // Wait for new input with timeout fallback
+        console.error('[WASM Runner] No buffered input, creating Promise for new INPUT (with timeout)...');
         return new Promise((resolve) => {
           pendingInputResolvers.push(resolve);
           console.error('[WASM Runner] Added resolver to queue, total pending:', pendingInputResolvers.length);
+          
+          // Set a timeout to prevent infinite hanging
+          // After 5 seconds, resolve with '.' (wait command) to keep game alive
+          const timeoutId = setTimeout(() => {
+            // Check if this resolver is still pending
+            const stillPending = pendingInputResolvers.includes(resolve);
+            if (stillPending) {
+              console.error('[WASM Runner] INPUT TIMEOUT after 5s - sending "." (wait) to keep game alive');
+              // Remove this resolver from pending list
+              const idx = pendingInputResolvers.indexOf(resolve);
+              if (idx >= 0) {
+                pendingInputResolvers.splice(idx, 1);
+              }
+              // Resolve with '.' (period = wait one turn)
+              resolve('.'.charCodeAt(0));
+            } else {
+              console.error('[WASM Runner] Timeout fired but resolver already consumed');
+            }
+          }, 5000);
+          
+          console.error('[WASM Runner] Timeout scheduled for 5000ms');
         });
       };
     }
@@ -189,8 +279,17 @@ NetHackModule({
   // Async input function called from WASM via Asyncify.handleAsync()
   // This returns a Promise that resolves when an INPUT JSON arrives
   getNextInputKey: async () => {
-    console.error('[WASM Runner] getNextInputKey() - Waiting for INPUT...');
+    console.error('[WASM Runner] getNextInputKey() - Checking for INPUT...');
     
+    // Check if we have buffered input first
+    if (bufferedKeycodes.length > 0) {
+      const keycode = bufferedKeycodes.shift();
+      console.error('[WASM Runner] Returning buffered keycode:', keycode);
+      return keycode;
+    }
+    
+    // No buffered input, wait for new input via Promise
+    console.error('[WASM Runner] No buffered input, waiting for new INPUT...');
     return new Promise((resolve) => {
       // Add to pending resolvers queue
       pendingInputResolvers.push(resolve);
