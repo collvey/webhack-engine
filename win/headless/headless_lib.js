@@ -205,5 +205,52 @@ mergeInto(LibraryManager.library, {
     }
     
     throw new Error('[headless_lib.js] FATAL: wasmGetNextInputKey returned invalid type: ' + typeof result);
+  },
+  
+  // Called from C when reading JSON lines from stdin (for RESP messages)
+  // Uses Asyncify to block until stdin has a complete line available
+  // Returns pointer to line in WASM memory (caller must free), or 0 on EOF
+  headless_read_line_blocking__deps: ['$Asyncify', '$stringToNewUTF8'],
+  headless_read_line_blocking: function() {
+    console.error('[headless_lib.js] C code requesting line from stdin (for RESP)');
+    
+    var globalObj = (typeof self !== 'undefined') ? self 
+                  : (typeof global !== 'undefined') ? global
+                  : (typeof window !== 'undefined') ? window
+                  : this;
+    
+    // Check if wasmWaitForStdinLine exists (provided by worker)
+    if (typeof globalObj.wasmWaitForStdinLine !== 'function') {
+      console.error('[headless_lib.js] wasmWaitForStdinLine not defined - using fallback fgets');
+      return 0; // Return NULL pointer, C will use regular fgets
+    }
+    
+    var result = globalObj.wasmWaitForStdinLine();
+    
+    // wasmWaitForStdinLine returns Promise that resolves with a line string
+    if (result && typeof result.then === 'function') {
+      console.error('[headless_lib.js] Waiting for stdin line Promise...');
+      
+      var asyncifyResult = Asyncify.handleSleep(function(wakeUp) {
+        result.then(function(lineStr) {
+          console.error('[headless_lib.js] Got stdin line, length:', lineStr.length);
+          console.error('[headless_lib.js]   Line preview:', lineStr.substring(0, 80));
+          
+          // Convert JS string to C string in WASM memory
+          var strPtr = stringToNewUTF8(lineStr);
+          console.error('[headless_lib.js] Allocated C string at ptr:', strPtr);
+          wakeUp(strPtr);
+        }).catch(function(err) {
+          console.error('[headless_lib.js] stdin line Promise rejected:', err);
+          wakeUp(0); // Return NULL on error
+        });
+      });
+      
+      console.error('[headless_lib.js] C code resumed with string ptr:', asyncifyResult);
+      return asyncifyResult;
+    }
+    
+    console.error('[headless_lib.js] wasmWaitForStdinLine returned invalid type:', typeof result);
+    return 0; // NULL
   }
 });

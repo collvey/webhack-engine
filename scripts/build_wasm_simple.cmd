@@ -51,7 +51,7 @@ emcc -O2 ^
      -s ASYNCIFY=1 ^
      -s ASYNCIFY_STACK_SIZE=262144 ^
      -s ALLOW_MEMORY_GROWTH=1 ^
-     -s ASYNCIFY_IMPORTS=[headless_wait_for_input_blocking] ^
+     -s ASYNCIFY_IMPORTS=[headless_wait_for_input_blocking,headless_read_line_blocking] ^
      -s STACK_SIZE=5MB ^
      -lidbfs.js ^
      --js-library win/headless/headless_lib.js ^

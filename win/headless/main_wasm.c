@@ -66,6 +66,25 @@ int main(int argc, char* argv[]) {
     /* Set up options */
     initoptions();
     
+    /* Set up file prefixes for save/level files (from unixmain.c) */
+#ifdef VAR_PLAYGROUND
+    {
+        int len = strlen(VAR_PLAYGROUND);
+        fqn_prefix[SCOREPREFIX] = (char *) alloc(len + 2);
+        Strcpy(fqn_prefix[SCOREPREFIX], VAR_PLAYGROUND);
+        if (fqn_prefix[SCOREPREFIX][len - 1] != '/') {
+            fqn_prefix[SCOREPREFIX][len] = '/';
+            fqn_prefix[SCOREPREFIX][len + 1] = '\0';
+        }
+        /* Point all file prefixes to VAR_PLAYGROUND */
+        fqn_prefix[LEVELPREFIX] = fqn_prefix[SCOREPREFIX];
+        fqn_prefix[SAVEPREFIX] = fqn_prefix[SCOREPREFIX];
+        fqn_prefix[BONESPREFIX] = fqn_prefix[SCOREPREFIX];
+        fqn_prefix[LOCKPREFIX] = fqn_prefix[SCOREPREFIX];
+        fqn_prefix[TROUBLEPREFIX] = fqn_prefix[SCOREPREFIX];
+    }
+#endif
+    
     /* Initialize game data files (MUST be before vision_init) */
     dlb_init();
     

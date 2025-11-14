@@ -316,11 +316,16 @@ parse_json_field_int(const char *json, const char *field)
     return neg ? -val : val;
 }
 
+/* External function from headless_lib.js - uses Asyncify to wait for stdin line */
+extern char *headless_read_line_blocking(void);
+
 static void
 send_request(const char *kind, int req_id, const char *json_data, char *response_buf, size_t bufsz)
 {
     long ts = now_ms();
     if (!g_out) g_out = stdout;
+    
+    fprintf(stderr, "[headless] send_request: EMITTING REQ kind=%s id=%d\n", kind, req_id);
     
     /* Emit REQ */
     if (json_data && *json_data) {
@@ -332,17 +337,53 @@ send_request(const char *kind, int req_id, const char *json_data, char *response
     }
     fflush(g_out);
     
+    fprintf(stderr, "[headless] send_request: WAITING for RESP with corr=%d\n", req_id);
+    
     /* Block waiting for RESP with matching corr */
     response_buf[0] = '\0';
-    while (fgets(response_buf, bufsz, stdin)) {
+    
+    /* In WASM environment, use Asyncify-aware line reading */
+    /* This blocks C execution until JavaScript provides the RESP line */
+#ifdef __EMSCRIPTEN__
+    while (1) {
+        char *line = headless_read_line_blocking();
+        if (!line) {
+            fprintf(stderr, "[headless] send_request: headless_read_line_blocking returned NULL\n");
+            /* Fall back to regular fgets for compatibility */
+            if (!fgets(response_buf, bufsz, stdin)) {
+                fprintf(stderr, "[headless] send_request: EOF reached while waiting for corr=%d!\n", req_id);
+                return;
+            }
+        } else {
+            /* Copy line to response buffer */
+            strncpy(response_buf, line, bufsz - 1);
+            response_buf[bufsz - 1] = '\0';
+            free(line);  /* headless_read_line_blocking allocates with malloc */
+        }
+        
         int corr = parse_json_field_int(response_buf, "corr");
+        fprintf(stderr, "[headless] send_request: GOT message corr=%d (want %d) msg='%.80s'\n",
+                corr, req_id, response_buf);
         if (corr == req_id) {
-            /* Got our response */
+            fprintf(stderr, "[headless] send_request: MATCHED! Returning for req_id=%d\n", req_id);
             return;
         }
-        /* Else: wrong correlation ID or event; discard and continue */
-        /* TODO M2+: Queue events for later processing */
+        fprintf(stderr, "[headless] send_request: MISMATCH, continuing to wait for corr=%d\n", req_id);
     }
+#else
+    /* Non-WASM: use regular blocking fgets */
+    while (fgets(response_buf, bufsz, stdin)) {
+        int corr = parse_json_field_int(response_buf, "corr");
+        fprintf(stderr, "[headless] send_request: GOT message corr=%d (want %d) msg='%.80s'\n",
+                corr, req_id, response_buf);
+        if (corr == req_id) {
+            fprintf(stderr, "[headless] send_request: MATCHED! Returning for req_id=%d\n", req_id);
+            return;
+        }
+        fprintf(stderr, "[headless] send_request: MISMATCH, continuing to wait for corr=%d\n", req_id);
+    }
+    fprintf(stderr, "[headless] send_request: EOF reached while waiting for corr=%d!\n", req_id);
+#endif
 }
 
 /* ========================================================================
@@ -665,6 +706,9 @@ headless_yn_function(const char *question, const char *choices, CHAR_P def)
     /* Generate PROMPT_YN request */
     int req_id = g_next_req_id++;
     
+    fprintf(stderr, "[headless] yn_function: ENTER req_id=%d question='%.50s' choices='%s' def='%c'\n",
+            req_id, question, choices ? choices : "NULL", def);
+    
     char escaped_q[4096];
     char escaped_choices[128];
     char escaped_def[16];
@@ -686,18 +730,25 @@ headless_yn_function(const char *question, const char *choices, CHAR_P def)
              "{\"q\":\"%s\",\"choices\":\"%s\",\"def\":\"%s\"}",
              escaped_q, escaped_choices, escaped_def);
     
+    fprintf(stderr, "[headless] yn_function: SENDING REQ req_id=%d\n", req_id);
     char response[16384];
     send_request("PROMPT_YN", req_id, req_data, response, sizeof(response));
+    
+    fprintf(stderr, "[headless] yn_function: RECEIVED RESP req_id=%d response='%.100s'\n", 
+            req_id, response);
     
     /* Parse response for "ch" field */
     char ch_str[16];
     if (parse_json_field_str(response, "ch", ch_str, sizeof(ch_str))) {
         if (ch_str[0]) {
+            fprintf(stderr, "[headless] yn_function: RETURNING ch='%c' (code=%d) req_id=%d\n",
+                    ch_str[0], (int)ch_str[0], req_id);
             return ch_str[0];
         }
     }
     
     /* Default on parse failure */
+    fprintf(stderr, "[headless] yn_function: RETURNING DEFAULT '%c' req_id=%d\n", def, req_id);
     return def;
 }
 
