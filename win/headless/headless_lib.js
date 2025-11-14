@@ -105,28 +105,23 @@ mergeInto(LibraryManager.library, {
     
     var result = globalObj.wasmGetNextInputKey();
     
-    // If it's a number (buffered input), use it immediately
     if (typeof result === 'number') {
       console.error('[headless_lib.js] Got buffered keycode immediately: ' + result);
       globalObj.headlessInputState.pendingKeycode = result;
       globalObj.headlessInputState.waitingForInput = false;
     } 
-    // If it's a Promise, wait for it
     else if (result && typeof result.then === 'function') {
       result.then(function(keycode) {
         console.error('[headless_lib.js] Got keycode from Promise: ' + keycode);
         globalObj.headlessInputState.pendingKeycode = keycode;
         globalObj.headlessInputState.waitingForInput = false;
       }).catch(function(err) {
-        console.error('[headless_lib.js] Promise error: ' + err);
-        globalObj.headlessInputState.pendingKeycode = 27;  // ESC on error
-        globalObj.headlessInputState.waitingForInput = false;
+        console.error('[headless_lib.js] FATAL: Input promise failed:', err);
+        throw new Error('[headless_lib.js] Input system error: ' + err);
       });
     }
     else {
-      console.error('[headless_lib.js] ERROR: wasmGetNextInputKey returned unexpected type: ' + typeof result);
-      globalObj.headlessInputState.pendingKeycode = 27;  // ESC on error
-      globalObj.headlessInputState.waitingForInput = false;
+      throw new Error('[headless_lib.js] FATAL: wasmGetNextInputKey returned invalid type: ' + typeof result);
     }
   },
   
@@ -163,56 +158,52 @@ mergeInto(LibraryManager.library, {
     return -1;
   },
   
-  // Blocking input function using Asyncify - BrowserHack pattern
-  // This is called from C and blocks until input is available
+  // Called from C when NetHack needs keyboard input (nhgetch)
+  // Uses Asyncify to block C execution until JavaScript Promise resolves with keycode
   headless_wait_for_input_blocking__deps: ['$Asyncify'],
   headless_wait_for_input_blocking: function() {
-    console.error('[headless_lib.js] wait_for_input_blocking: Starting...');
-    console.error('[headless_lib.js] Asyncify available?', typeof Asyncify !== 'undefined');
-    console.error('[headless_lib.js] Asyncify.State:', typeof Asyncify !== 'undefined' ? Asyncify.State : 'N/A');
+    console.error('[headless_lib.js] C code requesting input');
     
     var globalObj = (typeof self !== 'undefined') ? self 
                   : (typeof global !== 'undefined') ? global
                   : (typeof window !== 'undefined') ? window
                   : null;
     
-    if (!globalObj || typeof globalObj.wasmGetNextInputKey !== 'function') {
-      console.error('[headless_lib.js] ERROR: wasmGetNextInputKey not found!');
-      return 27; // ESC
+    if (!globalObj) {
+      throw new Error('[headless_lib.js] FATAL: Cannot find global object');
     }
     
-    // Call wasmGetNextInputKey - returns number or Promise
+    if (typeof globalObj.wasmGetNextInputKey !== 'function') {
+      throw new Error('[headless_lib.js] FATAL: wasmGetNextInputKey not defined - input system not initialized');
+    }
+    
     var result = globalObj.wasmGetNextInputKey();
     
-    // If buffered (number), return immediately
+    // wasmGetNextInputKey returns either:
+    // - number: Pre-buffered keycode (rare, for testing environments)
+    // - Promise: Will resolve when user presses key
     if (typeof result === 'number') {
-      console.error('[headless_lib.js] Got buffered keycode:', result);
+      console.error('[headless_lib.js] Pre-buffered keycode available:', result);
       return result;
     }
     
-    // If Promise, use Asyncify.handleSleep to block (BrowserHack pattern)
     if (result && typeof result.then === 'function') {
-      console.error('[headless_lib.js] Got Promise, using Asyncify.handleSleep...');
-      if (typeof Asyncify === 'undefined' || typeof Asyncify.handleSleep !== 'function') {
-        console.error('[headless_lib.js] ERROR: Asyncify.handleSleep not available!');
-        return 27; // ESC
-      }
+      console.error('[headless_lib.js] Waiting for Promise to resolve...');
       
+      // Asyncify.handleSleep blocks C execution and resumes when wakeUp() is called
       var asyncifyResult = Asyncify.handleSleep(function(wakeUp) {
-        console.error('[headless_lib.js] Asyncify: Setting up wakeUp callback...');
         result.then(function(keycode) {
-          console.error('[headless_lib.js] Asyncify: Promise resolved! Waking with keycode:', keycode);
+          console.error('[headless_lib.js] Promise resolved, waking C code with keycode:', keycode);
           wakeUp(keycode);
         }).catch(function(err) {
-          console.error('[headless_lib.js] Asyncify: Promise error:', err);
-          wakeUp(27); // ESC on error
+          console.error('[headless_lib.js] FATAL: Promise rejected:', err);
+          throw new Error('[headless_lib.js] Input promise failed: ' + err);
         });
       });
-      console.error('[headless_lib.js] Asyncify.handleSleep returned:', asyncifyResult);
+      console.error('[headless_lib.js] C code resumed with keycode:', asyncifyResult);
       return asyncifyResult;
     }
     
-    console.error('[headless_lib.js] ERROR: Unexpected result type');
-    return 27; // ESC
+    throw new Error('[headless_lib.js] FATAL: wasmGetNextInputKey returned invalid type: ' + typeof result);
   }
 });
