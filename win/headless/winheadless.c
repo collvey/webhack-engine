@@ -577,30 +577,20 @@ headless_raw_print_bold(const char *str)
 }
 
 #ifdef __EMSCRIPTEN__
-/* Declare extern functions from headless_lib.js */
-extern void headless_start_input_wait(void);
-extern int headless_check_input_ready(void);
-extern int headless_get_input_keycode(void);
-extern void emscripten_sleep(unsigned int ms);
+/* Declare the JS library function (BrowserHack pattern) */
+extern int headless_wait_for_input_blocking(void);
 
-/* WASM version: Poll for input with emscripten_sleep() to yield control */
+/* WASM version: Call library function that uses Asyncify.handleSleep */
 static int
 headless_nhgetch(void)
 {
-    fprintf(stderr, "[headless] nhgetch: waiting for INPUT (WASM/Asyncify polling)...\n");
+    fprintf(stderr, "[headless] nhgetch: calling library function...\n");
     
-    /* Start waiting for input (kicks off Promise in JS) */
-    headless_start_input_wait();
+    /* Call the library function - it handles Asyncify internally */
+    /* This follows the BrowserHack pattern: library function uses Asyncify.handleSleep */
+    int keycode = headless_wait_for_input_blocking();
     
-    /* Poll until input is ready, yielding with emscripten_sleep() */
-    while (!headless_check_input_ready()) {
-        emscripten_sleep(10);  /* Sleep 10ms - ASYNCIFY unwinds stack here */
-    }
-    
-    /* Get the keycode */
-    int keycode = headless_get_input_keycode();
-    
-    fprintf(stderr, "[headless] nhgetch: received keycode %d from JS\n", keycode);
+    fprintf(stderr, "[headless] nhgetch: received keycode %d\n", keycode);
     return keycode;
 }
 #else
