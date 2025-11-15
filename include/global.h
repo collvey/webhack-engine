@@ -128,11 +128,16 @@ typedef uchar nhsym;
  * Please don't change the order.  It does matter.
  */
 
+/* Emscripten/WASM must be checked FIRST before platform-specific includes */
+#ifdef __EMSCRIPTEN__
+#include "unixconf.h"
+#endif
+
 #ifdef VMS
 #include "vmsconf.h"
 #endif
 
-#ifdef UNIX
+#if defined(UNIX) && !defined(__EMSCRIPTEN__)
 #include "unixconf.h"
 #endif
 
@@ -160,7 +165,7 @@ typedef uchar nhsym;
 #include "beconf.h"
 #endif
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(__EMSCRIPTEN__)
 #ifdef WIN_CE
 #include "wceconf.h"
 #else

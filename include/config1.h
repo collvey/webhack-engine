@@ -215,4 +215,31 @@
  */
 #endif
 
+/*
+ * Emscripten/WASM detection and configuration
+ * This MUST come after all other platform detection (especially WIN32)
+ * because Emscripten may define _WIN32 when cross-compiling from Windows.
+ */
+#ifdef __EMSCRIPTEN__
+/* Emscripten may define _WIN32 when cross-compiling from Windows - undefine it */
+#ifdef WIN32
+#undef WIN32
+#endif
+#ifdef _WIN32
+#undef _WIN32
+#endif
+/* MICRO might be defined by pcconf.h - undefine it for WASM */
+#ifdef MICRO
+#undef MICRO
+#endif
+#ifndef UNIX
+#define UNIX
+#endif
+/* WASM doesn't support file locking via sopen/SH_DENYRW */
+#define NO_FILE_LOCKING
+#define NHSTDC
+#define USE_STDARG
+#define NEED_VARARGS
+#endif
+
 #endif /* CONFIG1_H */

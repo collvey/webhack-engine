@@ -399,6 +399,8 @@ savestateinlock()
             return;
 
         (void) read(fd, (genericptr_t) &hpid, sizeof hpid);
+#ifndef __EMSCRIPTEN__
+        /* Skip PID validation for WASM - single player, no multi-user concerns */
         if (hackpid != hpid) {
             Sprintf(whynot, "Level #0 pid (%d) doesn't match ours (%d)!",
                     hpid, hackpid);
@@ -406,6 +408,7 @@ savestateinlock()
             Strcpy(killer.name, whynot);
             done(TRICKED);
         }
+#endif
         (void) nhclose(fd);
 
         fd = create_levelfile(0, whynot);

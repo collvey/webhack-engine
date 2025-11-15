@@ -106,7 +106,13 @@
  * If you want the static parts of your playground on a read-only file
  * system, define VAR_PLAYGROUND to be where the variable parts are kept.
  */
+#ifdef __EMSCRIPTEN__
+/* For WASM, use /nethack_data for variable files (level files, saves, bones, etc.)
+ * This MUST match the IDBFS mount point in main_wasm.c for persistence! */
+#define VAR_PLAYGROUND "/nethack_data"
+#else
 /* #define VAR_PLAYGROUND "/var/lib/games/nethack" */
+#endif
 
 /*
  * Define DEF_PAGER as your default pager, e.g. "/bin/cat" or "/usr/ucb/more"

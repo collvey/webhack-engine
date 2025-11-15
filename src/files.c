@@ -8,6 +8,18 @@
 #include "hack.h"
 #include "dlb.h"
 
+/* WASM/Emscripten doesn't support sopen() with SH_DENYRW file locking */
+#ifdef __EMSCRIPTEN__
+#ifdef HOLD_LOCKFILE_OPEN
+#undef HOLD_LOCKFILE_OPEN
+#endif
+#endif
+#ifdef NO_FILE_LOCKING
+#ifdef HOLD_LOCKFILE_OPEN
+#undef HOLD_LOCKFILE_OPEN
+#endif
+#endif
+
 #ifdef TTY_GRAPHICS
 #include "wintty.h" /* more() */
 #endif
@@ -57,6 +69,11 @@ const
 #else
 #include <sys/stat.h>
 #endif
+#endif
+#ifdef __EMSCRIPTEN__
+/* Need sys/stat.h for mkdir() and access() */
+#include <sys/stat.h>
+#include <unistd.h>
 #endif
 #ifndef O_BINARY /* used for micros, no-op for others */
 #define O_BINARY 0
@@ -512,7 +529,33 @@ char errbuf[];
     set_levelfile_name(lock, lev);
     fq_lock = fqname(lock, LEVELPREFIX, 0);
 
-#if defined(MICRO) || defined(WIN32)
+#ifdef __EMSCRIPTEN__
+/* WASM: Use simple creat() - no file locking support */
+    /* Ensure parent directory exists before creating file */
+    {
+        char dirpath[BUFSZ];
+        const char *lastslash = strrchr(fq_lock, '/');
+        if (lastslash && lastslash != fq_lock) {
+            int dirlen = lastslash - fq_lock;
+            if (dirlen > 0 && dirlen < BUFSZ - 1) {
+                strncpy(dirpath, fq_lock, dirlen);
+                dirpath[dirlen] = '\0';
+                
+                /* Create directory if it doesn't exist */
+                if (access(dirpath, F_OK) != 0) {
+                    (void) mkdir(dirpath, 0755);
+                }
+            }
+        }
+    }
+    
+    fd = creat(fq_lock, FCMASK);
+    
+    /* Emscripten sometimes returns ENOLCK (44) instead of proper errno */
+    if (fd < 0 && errno == 44) {
+        errno = 2; /* ENOENT - directory doesn't exist or permission denied */
+    }
+#elif defined(MICRO) || defined(WIN32)
 /* Use O_TRUNC to force the file to be shortened if it already
  * exists and is currently longer.
  */
@@ -529,7 +572,7 @@ char errbuf[];
 #else
     fd = creat(fq_lock, FCMASK);
 #endif
-#endif /* MICRO || WIN32 */
+#endif /* __EMSCRIPTEN__ || MICRO || WIN32 */
 
     if (fd >= 0)
         level_info[lev].flags |= LFILE_EXISTS;
@@ -557,7 +600,26 @@ char errbuf[];
     if (level_info[lev].where != ACTIVE)
         swapin_file(lev);
 #endif
-#ifdef MAC
+#ifdef __EMSCRIPTEN__
+/* WASM: Use simple open() - no file locking support */
+/* For WASM, lock files are not used for actual locking (single-player).
+ * If lock file doesn't exist, create an empty one so level access works. */
+    fd = open(fq_lock, O_RDONLY | O_BINARY, 0);
+    if (fd < 0 && (errno == 2 || errno == 44)) {
+        /* File doesn't exist - create empty lock file */
+        int create_fd = creat(fq_lock, FCMASK);
+        if (create_fd >= 0) {
+            close(create_fd);
+            /* Now try opening again */
+            fd = open(fq_lock, O_RDONLY | O_BINARY, 0);
+        }
+    }
+    /* Emscripten sometimes returns ENOLCK (44) instead of ENOENT (2) for missing files.
+     * Convert it so NetHack can handle the missing file properly. */
+    if (fd < 0 && errno == 44) {
+        errno = 2; /* ENOENT */
+    }
+#elif defined(MAC)
     fd = macopen(fq_lock, O_RDONLY | O_BINARY, LEVL_TYPE);
 #else
 #ifdef HOLD_LOCKFILE_OPEN
@@ -1828,7 +1890,7 @@ int retryct;
 #endif /* UNIX || VMS */
 
 #if (defined(AMIGA) || defined(WIN32) || defined(MSDOS)) \
-    && !defined(USE_FCNTL)
+    && !defined(USE_FCNTL) && !defined(__EMSCRIPTEN__)
 #ifdef AMIGA
 #define OPENFAILURE(fd) (!fd)
     lockptr = 0;
@@ -1837,7 +1899,7 @@ int retryct;
     lockptr = -1;
 #endif
     while (--retryct && OPENFAILURE(lockptr)) {
-#if defined(WIN32) && !defined(WIN_CE)
+#if defined(WIN32) && !defined(WIN_CE) && !defined(__EMSCRIPTEN__)
         lockptr = sopen(lockname, O_RDWR | O_CREAT, SH_DENYRW, S_IWRITE);
 #else
         (void) DeleteFile(lockname); /* in case dead process was here first */
