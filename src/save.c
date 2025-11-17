@@ -29,7 +29,8 @@ STATIC_DCL void FDECL(saveobjchn, (int, struct obj *, int));
 STATIC_DCL void FDECL(savemon, (int, struct monst *));
 STATIC_DCL void FDECL(savemonchn, (int, struct monst *, int));
 STATIC_DCL void FDECL(savetrapchn, (int, struct trap *, int));
-STATIC_DCL void FDECL(savegamestate, (int, int));
+/* Make savegamestate non-static so save_slots.c can call it for non-destructive saves */
+void FDECL(savegamestate, (int, int));
 STATIC_OVL void FDECL(save_msghistory, (int, int));
 #ifdef MFLOPPY
 STATIC_DCL void FDECL(savelev0, (int, XCHAR_P, int));
@@ -275,7 +276,8 @@ dosave0()
     return 1;
 }
 
-STATIC_OVL void
+/* Made non-static for save_slots.c to call for non-destructive saves */
+void
 savegamestate(fd, mode)
 register int fd, mode;
 {

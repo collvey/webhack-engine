@@ -476,6 +476,17 @@ headless_exit_nhwindows(const char *str)
     if (str) {
         emit_message(str, "normal");
     }
+    
+#ifdef __EMSCRIPTEN__
+    /* CRITICAL FIX: Sync filesystem to IndexedDB after save completes
+     * This ensures saves persist across page reloads.
+     * The game has already written save files to /nethack_data/
+     * Now we sync that directory to browser's IndexedDB storage.
+     */
+    extern void wasm_sync_saves(void);  /* Defined in main_wasm.c */
+    wasm_sync_saves();
+#endif
+    
     emit_event("EXIT", NULL);
     g_initialized = 0;
 }

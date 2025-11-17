@@ -46,12 +46,13 @@ emcc -O2 ^
      -s MODULARIZE=1 ^
      -s EXPORT_NAME=NetHackModule ^
      -s ENVIRONMENT=web ^
-     -s EXPORTED_RUNTIME_METHODS=FS,ccall,cwrap ^
+     -s EXPORTED_RUNTIME_METHODS=FS,ccall,cwrap,UTF8ToString ^
+     -s EXPORTED_FUNCTIONS=_main,_save_to_slot,_load_from_slot,_list_save_slots,_delete_save_slot,_init_save_slots ^
      -s INITIAL_MEMORY=67108864 ^
      -s ASYNCIFY=1 ^
      -s ASYNCIFY_STACK_SIZE=262144 ^
+     -s ASYNCIFY_IMPORTS=[headless_wait_for_input_blocking,headless_read_line_blocking,save_to_slot] ^
      -s ALLOW_MEMORY_GROWTH=1 ^
-     -s ASYNCIFY_IMPORTS=[headless_wait_for_input_blocking,headless_read_line_blocking] ^
      -s STACK_SIZE=5MB ^
      -lidbfs.js ^
      --js-library win/headless/headless_lib.js ^
@@ -177,7 +178,8 @@ emcc -O2 ^
      sys/share/unixtty.c ^
      sys/unix/unixunix.c ^
      sys/wasm/wasm_stubs.c ^
-     sys/wasm/wasm_tty_stubs.c
+     sys/wasm/wasm_tty_stubs.c ^
+     win/headless/save_slots.c
 
 if %ERRORLEVEL% neq 0 (
     echo.

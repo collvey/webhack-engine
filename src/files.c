@@ -988,6 +988,12 @@ void
 set_savefile_name(regularize_it)
 boolean regularize_it;
 {
+#ifdef __EMSCRIPTEN__
+    /* WASM: Use simple fixed filename for single-player browser game
+     * The prefix system will add /nethack_data/ to create /nethack_data/save */
+    (void) regularize_it; /* unused */
+    Strcpy(SAVEF, "save");
+#else
 #ifdef VMS
     Sprintf(SAVEF, "[.save]%d%s", getuid(), plname);
     if (regularize_it)
@@ -1034,6 +1040,7 @@ boolean regularize_it;
 #endif /* WIN32 */
 #endif /* MICRO */
 #endif /* VMS   */
+#endif /* __EMSCRIPTEN__ */
 }
 
 #ifdef INSURANCE
@@ -1467,9 +1474,17 @@ boolean uncomp;
                        uncomp ? "un" : "", filename);
         nh_terminate(EXIT_FAILURE);
     } else if (f == -1) {
+#ifdef __EMSCRIPTEN__
+        /* WASM doesn't support fork() - this is expected and harmless.
+         * The save file is already written successfully; it just won't be compressed.
+         * This saves ~20KB but doesn't affect functionality. */
+        /* Silently skip compression in WASM - no error message needed */
+        return;
+#else
         perror((char *) 0);
         pline("Fork to %scompress %s failed.", uncomp ? "un" : "", filename);
         return;
+#endif
     }
 #ifndef NO_SIGNAL
     (void) signal(SIGINT, SIG_IGN);

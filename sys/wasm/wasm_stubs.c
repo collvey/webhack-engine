@@ -11,6 +11,15 @@ check_user_string(char *optstr)
     return FALSE;
 }
 
+/* From unixmain.c - validate wizard mode access */
+boolean
+authorize_wizard_mode(void)
+{
+    /* In WASM single-player browser game, always allow wizard mode
+     * There's no multi-user system to protect against */
+    return TRUE;
+}
+
 /* From unixmain.c - set hangup handler */
 void
 sethanguphandler(void (*handler)(int))
