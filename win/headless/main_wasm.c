@@ -1,5 +1,4 @@
-/* Main entry point for NetHack Headless Window Port
- * Supports both native (stdio) and WASM (Emscripten) builds
+/* Main entry point for NetHack Headless Window Port (WASM/Emscripten build)
  * Based on unixmain.c with minimal changes for headless/WASM
  */
 
@@ -10,58 +9,87 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <string.h>
-
-#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 
-/* Check if filesystem has been initialized
- * NOTE: The filesystem is now initialized by the JavaScript worker
- * BEFORE main() is called, so this just verifies it's ready
- */
+/* Verify filesystem is ready (initialized by worker.js before main()) */
 void wasm_init_filesystem(void) {
-    fprintf(stderr, "[wasm_init_filesystem] Verifying filesystem is ready...\n");
-    
-    /* Check if /nethack_data mount exists */
     int mount_exists = EM_ASM_INT({
         try {
-            var stat = FS.stat('/nethack_data');
-            console.log('[C→JS] /nethack_data exists, ready to use');
+            FS.stat('/nethack_data');
             return 1;
         } catch(e) {
-            console.error('[C→JS] /nethack_data does NOT exist!', e);
+            console.error('[wasm_init_filesystem] /nethack_data not mounted!', e);
             return 0;
         }
     });
     
-    if (mount_exists) {
-        fprintf(stderr, "[wasm_init_filesystem] ✓ Filesystem is ready\n");
-        
-        /* Debug: List files in /nethack_data */
-        fprintf(stderr, "[wasm_init_filesystem] Listing files in /nethack_data...\n");
-        EM_ASM({
-            try {
-                var files = FS.readdir('/nethack_data');
-                console.log('[C→JS] Files in /nethack_data:', files);
-                files.forEach(function(f) {
-                    if (f !== '.' && f !== '..') {
-                        try {
-                            var stat = FS.stat('/nethack_data/' + f);
-                            console.log('[C→JS]   -', f, 'size:', stat.size, 'bytes');
-                        } catch(e) {
-                            console.log('[C→JS]   -', f, '(directory)');
-                        }
-                    }
-                });
-            } catch(e) {
-                console.error('[C→JS] Error listing /nethack_data:', e);
-            }
-        });
-    } else {
-        fprintf(stderr, "[wasm_init_filesystem] ✗ WARNING: Filesystem not initialized!\n");
-        fprintf(stderr, "[wasm_init_filesystem] This should not happen - check worker.js\n");
+    if (!mount_exists) {
+        fprintf(stderr, "[wasm_init_filesystem] ERROR: Filesystem not initialized!\n");
     }
+}
+
+/* Clean up stale lock files from previous session
+ * Lock files (1lock.0, 1lock.1, etc.) are temporary level storage during gameplay.
+ * If the browser was closed without proper game exit, these files persist in IndexedDB.
+ * When restoring from a save file, dorecover() will extract fresh lock files from
+ * the .sav, so any pre-existing lock files are stale and should be deleted.
+ */
+void wasm_cleanup_stale_lockfiles(void) {
+    int files_deleted = EM_ASM_INT({
+        var count = 0;
+        try {
+            var files = FS.readdir('/nethack_data');
+            
+            for (var i = 0; i < files.length; i++) {
+                var filename = files[i];
+                
+                if (filename === '.' || filename === '..') {
+                    continue;
+                }
+                
+                // Match lock files: "lock", "1lock", "lock.N", "1lock.N"
+                var isLockFile = false;
+                if (filename === 'lock' || filename === '1lock') {
+                    isLockFile = true;
+                } else if (filename.indexOf('lock.') === 0 || filename.indexOf('1lock.') === 0) {
+                    isLockFile = true;
+                }
+                
+                if (isLockFile) {
+                    try {
+                        var path = '/nethack_data/' + filename;
+                        var stat = FS.stat(path);
+                        if (FS.isFile(stat.mode)) {
+                            FS.unlink(path);
+                            count++;
+                        }
+                    } catch(e) {
+                        console.error('[wasm_cleanup] Failed to delete', filename + ':', e);
+                    }
+                }
+            }
+            
+            if (count > 0) {
+                console.log('[wasm_cleanup] Deleted', count, 'stale lock file(s)');
+            }
+            
+        } catch(e) {
+            console.error('[wasm_cleanup] Error:', e);
+        }
+        
+        return count;
+    });
     
-    fprintf(stderr, "[wasm_init_filesystem] Verification complete\n\n");
+    if (files_deleted > 0) {
+        /* Sync deletion to IndexedDB */
+        EM_ASM({
+            FS.syncfs(false, function(err) {
+                if (err) {
+                    console.error('[wasm_cleanup] Sync failed:', err);
+                }
+            });
+        });
+    }
 }
 
 /* Sync saves to IndexedDB (call after NetHack saves) */
@@ -69,23 +97,18 @@ void wasm_sync_saves(void) {
     EM_ASM(
         FS.syncfs(false, function(err) {
             if (err) {
-                console.error('Failed to sync saves to IndexedDB:', err);
-            } else {
-                console.log('Saves synced to IndexedDB');
+                console.error('Failed to sync saves:', err);
             }
         });
     );
 }
-#endif /* __EMSCRIPTEN__ */
 
 int main(int argc, char* argv[]) {
     int fd;
     boolean resuming = FALSE;
     
-#ifdef __EMSCRIPTEN__
-    /* WASM build: Initialize IndexedDB filesystem first */
+    /* Verify IndexedDB filesystem is ready */
     wasm_init_filesystem();
-#endif
 
     /* Set program name and PID (from unixmain.c) */
     hname = argv[0];
@@ -129,131 +152,50 @@ int main(int argc, char* argv[]) {
     /* Create game windows (WIN_MAP, WIN_MESSAGE, etc.) */
     display_gamewindows();
     
-    /* ========================================================================
-     * SAVE FILE DETECTION AT STARTUP (modeled after unixmain.c)
-     * ======================================================================== */
+    /* Clean up stale lock files before checking for save file
+     * Lock files are temporary level storage created during gameplay.
+     * If the browser was closed mid-game, lock files persist in IndexedDB.
+     * When we restore from a .sav file, dorecover() will extract fresh
+     * lock files from the save, so pre-existing ones are stale and must be deleted.
+     */
+    wasm_cleanup_stale_lockfiles();
     
-    fprintf(stderr, "\n[main_wasm] ========== SAVE FILE DETECTION ==========\n");
-    
-    /* Set default player name so we have a save filename to check
-     * This will be overridden later if we start a new game */
+    /* Set default player name so we have a save filename to check */
     strcpy(plname, "player");
-    fprintf(stderr, "[main_wasm] Default plname set to: '%s'\n", plname);
     
-    /* Generate save file name (e.g., "save" or based on plname)
-     * This populates the global SAVEF variable */
+    /* Generate save file name and check if it exists */
     set_savefile_name(TRUE);
-    fprintf(stderr, "[main_wasm] SAVEF set to: '%s'\n", SAVEF);
     
-    /* Get the full path with prefix (/nethack_data/...) */
     {
         const char *fq_save = fqname(SAVEF, SAVEPREFIX, 0);
-        fprintf(stderr, "[main_wasm] Full save path (with prefix): '%s'\n", fq_save);
-        
-        /* Debug: List what files are actually in the directory */
-        fprintf(stderr, "[main_wasm] Listing files in /nethack_data to verify filesystem state...\n");
-        EM_ASM({
-            try {
-                var files = FS.readdir('/nethack_data');
-                console.log('[JS] Files in /nethack_data:', files);
-                for (var i = 0; i < files.length; i++) {
-                    if (files[i] !== '.' && files[i] !== '..') {
-                        try {
-                            var path = '/nethack_data/' + files[i];
-                            var stat = FS.stat(path);
-                            console.log('[JS]   -', files[i], '(size:', stat.size, 'bytes)');
-                        } catch(e) {
-                            console.log('[JS]   -', files[i], '(directory or inaccessible)');
-                        }
-                    }
-                }
-            } catch(e) {
-                console.error('[JS] Failed to list /nethack_data:', e);
-            }
-        });
-        
-        fprintf(stderr, "[main_wasm] Now checking if file exists with stat(): '%s'\n", fq_save);
-        
-        /* Check if save file exists using stat() */
         struct stat st;
+        
         if (stat(fq_save, &st) == 0) {
-            fprintf(stderr, "[main_wasm] ✓ SUCCESS: Save file EXISTS at '%s'\n", fq_save);
-            fprintf(stderr, "[main_wasm]   File size: %ld bytes\n", (long)st.st_size);
-            fprintf(stderr, "[main_wasm]   Attempting to restore saved game...\n");
-            
             /* Try to restore the saved game */
             fd = restore_saved_game();
             
-            if (fd >= 0) {
-                fprintf(stderr, "[main_wasm] ✓ SUCCESS: Save file opened (fd=%d)\n", fd);
-                fprintf(stderr, "[main_wasm]   Calling dorecover() to restore game state...\n");
-                
-                /* Restore the game state from the save file */
-                if (dorecover(fd)) {
-                    fprintf(stderr, "[main_wasm] ✓ SUCCESS: Game restored from save file!\n");
-                    fprintf(stderr, "[main_wasm]   Character name: %s\n", plname);
-                    fprintf(stderr, "[main_wasm]   Resuming saved game...\n");
-                    
-                    /* CRITICAL: Sync extracted lock files to IndexedDB
-                     * dorecover() extracted levels from .sav and created lock.N files
-                     * These files are in RAM right now and need to be persisted
-                     * to IndexedDB so they survive browser refresh
-                     */
-                    fprintf(stderr, "[main_wasm] Syncing extracted lock files to IndexedDB...\n");
-                    EM_ASM({
-                        console.log('[main_wasm] [JS] Syncing lock files (RAM → IndexedDB)...');
-                        FS.syncfs(false, function(err) {
-                            if (err) {
-                                console.error('[main_wasm] [JS] ✗ Lock file sync FAILED:', err);
-                            } else {
-                                console.log('[main_wasm] [JS] ✓ Lock files synced to IndexedDB');
-                            }
-                        });
+            if (fd >= 0 && dorecover(fd)) {
+                /* Sync extracted lock files to IndexedDB */
+                EM_ASM({
+                    FS.syncfs(false, function(err) {
+                        if (err) {
+                            console.error('[main] Lock file sync failed:', err);
+                        }
                     });
-                    fprintf(stderr, "[main_wasm] ✓ Lock file sync initiated\n");
-                    
-                    resuming = TRUE;
-                } else {
-                    fprintf(stderr, "[main_wasm] ✗ FAILED: dorecover() returned false\n");
-                    fprintf(stderr, "[main_wasm]   Save file may be corrupt or incompatible\n");
-                    fprintf(stderr, "[main_wasm]   Starting new game instead\n");
-                }
-            } else {
-                fprintf(stderr, "[main_wasm] ✗ FAILED: restore_saved_game() couldn't open file\n");
-                fprintf(stderr, "[main_wasm]   Return value: %d\n", fd);
-                fprintf(stderr, "[main_wasm]   Error code: %d (%s)\n", errno, strerror(errno));
-                fprintf(stderr, "[main_wasm]   Starting new game instead\n");
+                });
+                
+                resuming = TRUE;
             }
-        } else {
-            fprintf(stderr, "[main_wasm] ✗ NOTICE: Save file NOT FOUND at '%s'\n", fq_save);
-            fprintf(stderr, "[main_wasm]   stat() error: %d (%s)\n", errno, strerror(errno));
-            fprintf(stderr, "[main_wasm]   This is normal for first-time play\n");
-            fprintf(stderr, "[main_wasm]   Starting new game...\n");
         }
     }
     
-    fprintf(stderr, "[main_wasm] ==================================================\n\n");
-    
-    /* ========================================================================
-     * START NEW GAME OR RESUME
-     * ======================================================================== */
-    
     if (!resuming) {
-        fprintf(stderr, "[main_wasm] Starting NEW game...\n");
-        
-        /* Set up character (player chooses role, race, etc.) */
+        /* Set up character and start new game */
         player_selection();
-        fprintf(stderr, "[main_wasm] Character created: %s\n", plname);
-        
-        /* Start new game */
-        fprintf(stderr, "[main_wasm] Calling newgame()...\n");
         newgame();
-    } else {
-        fprintf(stderr, "[main_wasm] Resuming SAVED game...\n");
     }
     
     /* Start the game loop */
-    fprintf(stderr, "[main_wasm] Entering moveloop(resuming=%d)...\n", resuming);
     moveloop(resuming);
     
     /* Clean exit */
