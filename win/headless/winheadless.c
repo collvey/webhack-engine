@@ -979,13 +979,13 @@ headless_select_menu(winid window, int how, MENU_ITEM_P **selected)
                     if (!id_pos || id_pos > strchr(p, ']')) break;
                     
                     int item_id = parse_json_field_int(id_pos, "item_id");
-                    int count = 1;
+                    long count = -1;  /* Default to -1 (all) like NetHack expects */
                     
                     /* Find count if present */
                     const char *count_pos = strstr(id_pos, "\"count\"");
                     if (count_pos && count_pos < strchr(id_pos, '}')) {
                         count = parse_json_field_int(count_pos, "count");
-                        if (count < 0) count = 1;
+                        /* NetHack uses -1 to mean "all", so preserve it */
                     }
                     
                     /* Store in result */
