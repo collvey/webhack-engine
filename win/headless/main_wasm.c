@@ -193,6 +193,25 @@ int main(int argc, char* argv[]) {
                     fprintf(stderr, "[main_wasm] ✓ SUCCESS: Game restored from save file!\n");
                     fprintf(stderr, "[main_wasm]   Character name: %s\n", plname);
                     fprintf(stderr, "[main_wasm]   Resuming saved game...\n");
+                    
+                    /* CRITICAL: Sync extracted lock files to IndexedDB
+                     * dorecover() extracted levels from .sav and created lock.N files
+                     * These files are in RAM right now and need to be persisted
+                     * to IndexedDB so they survive browser refresh
+                     */
+                    fprintf(stderr, "[main_wasm] Syncing extracted lock files to IndexedDB...\n");
+                    EM_ASM({
+                        console.log('[main_wasm] [JS] Syncing lock files (RAM → IndexedDB)...');
+                        FS.syncfs(false, function(err) {
+                            if (err) {
+                                console.error('[main_wasm] [JS] ✗ Lock file sync FAILED:', err);
+                            } else {
+                                console.log('[main_wasm] [JS] ✓ Lock files synced to IndexedDB');
+                            }
+                        });
+                    });
+                    fprintf(stderr, "[main_wasm] ✓ Lock file sync initiated\n");
+                    
                     resuming = TRUE;
                 } else {
                     fprintf(stderr, "[main_wasm] ✗ FAILED: dorecover() returned false\n");

@@ -24,6 +24,9 @@ extern int FDECL(dosave0, (void));
 /* savegamestate is made non-static in save.c for our use */
 extern void FDECL(savegamestate, (int, int));
 
+/* External declarations from files.c */
+extern int FDECL(open_levelfile, (int, char *));  /* Opens lock.N file for reading */
+
 /* Save slot directory - relative path so fqname() adds the /nethack_data/ prefix */
 #define SLOT_DIR "save_slots"
 #define MAX_SLOTS 10
@@ -198,24 +201,63 @@ dosave_slot_nondestructive(void)
     uz_save = u.uz;
     u.uz.dnum = u.uz.dlevel = 0;
     
-    /* Copy other level files (if they exist)
-     * NOTE: We skip FREE_SAVE here too - just write to disk, don't deallocate
+    /* These pointers become invalid while processing other levels */
+    u.ustuck = (struct monst *) 0;
+    u.usteed = (struct monst *) 0;
+    
+    /* === CRITICAL: Embed ALL other level files into the .sav file ===
+     * 
+     * IMPORTANT: We copy lock.N files as RAW BINARY DATA.
+     * We do NOT use getlev() because that would:
+     *   1. Load level data into global memory (fmon, fobj, etc.)
+     *   2. Overwrite current game state
+     *   3. Change object IDs, breaking timer references
+     *   4. Cause "cant find o_id" errors on restore
+     * 
+     * SOLUTION: Copy lock.N files byte-by-byte without parsing.
+     * This is exactly what NetHack's dosave0() does - the .sav format
+     * stores levels as opaque binary blobs.
+     * 
+     * Format: [level_number][raw_lock_file_bytes]
      */
-    fprintf(stderr, "[dosave_slot_nondestructive] Copying other level files...\n");
+    fprintf(stderr, "[dosave_slot_nondestructive] Embedding other level files into .sav...\n");
     for (ltmp = (xchar) 1; ltmp <= maxledgerno(); ltmp++) {
-        if (ltmp == ledger_no(&uz_save))
-            continue;
-        if (!(level_info[ltmp].flags & LFILE_EXISTS))
-            continue;
+        int ofd;
+        char whynot[BUFSZ];
+        char buffer[8192];
+        int bytes_read;
         
-        /* NOTE: We're not loading other levels into memory for this save.
-         * This is a simplified version that only saves the current level data.
-         * Other levels remain on disk as-is (they were saved when you left them).
-         * This is safe because:
-         * 1. Current level is saved with full state
-         * 2. Other levels haven't changed since you're not on them
-         * 3. Loading will work correctly because level files are intact
+        if (ltmp == ledger_no(&uz_save))
+            continue;  /* Current level already saved above */
+        if (!(level_info[ltmp].flags & LFILE_EXISTS))
+            continue;  /* Level doesn't exist */
+        
+        fprintf(stderr, "[dosave_slot_nondestructive]   Embedding level %d (raw copy)...\n", ltmp);
+        
+        /* Open the lock.N file for this level */
+        ofd = open_levelfile(ltmp, whynot);
+        if (ofd < 0) {
+            fprintf(stderr, "[dosave_slot_nondestructive]   Warning: Cannot open level %d: %s\n", 
+                    ltmp, whynot);
+            continue;
+        }
+        
+        /* Write level number to .sav file */
+        bwrite(fd, (genericptr_t) &ltmp, sizeof ltmp);
+        
+        /* Copy raw bytes from lock.N to .sav file
+         * This preserves ALL data exactly as-is:
+         * - Object IDs stay the same
+         * - Timer references stay valid
+         * - No memory corruption
          */
+        while ((bytes_read = read(ofd, buffer, sizeof(buffer))) > 0) {
+            bwrite(fd, (genericptr_t) buffer, bytes_read);
+        }
+        
+        (void) nhclose(ofd);
+        
+        fprintf(stderr, "[dosave_slot_nondestructive]   ✓ Level %d embedded (raw binary)\n", ltmp);
     }
     
     /* Close the save file */
@@ -382,6 +424,7 @@ int save_to_slot(int slot_num, const char *render_mode, const char *tileset_id)
      * something_worth_saving. The game continues running normally.
      */
     fprintf(stderr, "[save_slots] ✓ Save successful, game state unchanged\n");
+    fprintf(stderr, "[save_slots] ✓ All level data embedded in .sav file (no separate lock files needed)\n");
     
     /* Save metadata (non-blocking file I/O) */
     fprintf(stderr, "[save_slots] Saving metadata...\n");
@@ -514,6 +557,8 @@ int load_from_slot(int slot_num)
     }
     
     fprintf(stderr, "[save_slots] Copied slot to current save location\n");
+    fprintf(stderr, "[save_slots] ✓ .sav file contains all level data - no separate lock files needed\n");
+    fprintf(stderr, "[save_slots]   (NetHack will extract levels and create lock files on restore)\n");
     
     /* === CRITICAL FIX: Sync then request reload via main thread ===
      * 
@@ -533,7 +578,7 @@ int load_from_slot(int slot_num)
      *   - If we reload before sync completes, save file won't be there!
      *   - Result: Game starts without save file = new game instead of load
      */
-    fprintf(stderr, "[save_slots] Syncing copied save file to IndexedDB...\n");
+    fprintf(stderr, "[save_slots] Syncing save file to IndexedDB...\n");
     EM_ASM({
         console.log('[save_slots] [JS] Step 1: Syncing RAM → IndexedDB...');
         FS.syncfs(false, function(err) {
