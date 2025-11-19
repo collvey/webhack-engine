@@ -71,6 +71,15 @@ static int g_next_menu_id = 1;
 
 /* M4: Status field cache */
 typedef struct {
+    char title[256];       /* Character name and title */
+    char str[32];          /* Strength (can be "18/**") */
+    char dex[32];          /* Dexterity */
+    char con[32];          /* Constitution */
+    char intel[32];        /* Intelligence */
+    char wis[32];          /* Wisdom */
+    char cha[32];          /* Charisma */
+    char align[32];        /* Alignment */
+    long gold;             /* Gold/money */
     int hp;
     int hpmax;
     int pw;
@@ -80,8 +89,10 @@ typedef struct {
     int dlvl;
     long exp;
     int enc;
+    int hunger;            /* Hunger level */
     unsigned long cond;
     long turn;
+    long score;            /* Score */
 } StatusCache;
 
 static StatusCache g_status = {0};
@@ -1010,6 +1021,14 @@ headless_status_init(void)
     
     /* Call generic status initialization to set up status_vals arrays */
     genl_status_init();
+    
+    /* Ensure status flags are enabled (re-apply in case they were reset) */
+    flags.time = TRUE;      /* Show turn counter (BL_TIME) */
+    flags.showexp = TRUE;   /* Show experience points (BL_EXP) */
+    flags.showscore = TRUE; /* Show score (BL_SCORE) */
+    
+    fprintf(stderr, "[STATUS] status_init: flags.time=%d, flags.showexp=%d, flags.showscore=%d\n",
+            flags.time, flags.showexp, flags.showscore);
 }
 
 static void
@@ -1044,16 +1063,40 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
          * BL_RESET means "force redisplay" not "clear cache"
          * Both BL_FLUSH and BL_RESET should emit current status without clearing
          */
-        char buf[512];
+        char buf[1024];
+        char escaped_title[512];
+        char escaped_str[64];
+        char escaped_dex[64];
+        char escaped_con[64];
+        char escaped_int[64];
+        char escaped_wis[64];
+        char escaped_cha[64];
+        char escaped_align[64];
+        
+        /* Escape strings for JSON */
+        json_escape(g_status.title, escaped_title, sizeof(escaped_title));
+        json_escape(g_status.str, escaped_str, sizeof(escaped_str));
+        json_escape(g_status.dex, escaped_dex, sizeof(escaped_dex));
+        json_escape(g_status.con, escaped_con, sizeof(escaped_con));
+        json_escape(g_status.intel, escaped_int, sizeof(escaped_int));
+        json_escape(g_status.wis, escaped_wis, sizeof(escaped_wis));
+        json_escape(g_status.cha, escaped_cha, sizeof(escaped_cha));
+        json_escape(g_status.align, escaped_align, sizeof(escaped_align));
+        
         snprintf(buf, sizeof(buf),
-                 "{\"hp\":%d,\"hpmax\":%d,\"pw\":%d,\"pwmax\":%d,"
+                 "{\"title\":\"%s\",\"str\":\"%s\",\"dex\":\"%s\",\"con\":\"%s\","
+                 "\"int\":\"%s\",\"wis\":\"%s\",\"cha\":\"%s\",\"align\":\"%s\","
+                 "\"gold\":%ld,\"hp\":%d,\"hpmax\":%d,\"pw\":%d,\"pwmax\":%d,"
                  "\"ac\":%d,\"xlvl\":%d,\"dlvl\":%d,\"exp\":%ld,"
-                 "\"enc\":%d,\"cond\":%lu,\"turn\":%ld}",
-                 g_status.hp, g_status.hpmax,
+                 "\"enc\":%d,\"hunger\":%d,\"cond\":%lu,\"turn\":%ld,\"score\":%ld}",
+                 escaped_title, escaped_str, escaped_dex, escaped_con,
+                 escaped_int, escaped_wis, escaped_cha, escaped_align,
+                 g_status.gold, g_status.hp, g_status.hpmax,
                  g_status.pw, g_status.pwmax,
                  g_status.ac, g_status.xlvl, g_status.dlvl,
-                 g_status.exp, g_status.enc, g_status.cond,
-                 g_status.turn);
+                 g_status.exp, g_status.enc, g_status.hunger,
+                 g_status.cond, g_status.turn, g_status.score);
+        fprintf(stderr, "[STATUS] BL_FLUSH: turn=%ld\n", g_status.turn);
         emit_event("STATUS", buf);
         return;
     }
@@ -1064,26 +1107,125 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
     
     /* Update cached fields based on index */
     switch (idx) {
+    case BL_TITLE:
+        if (text) {
+            strncpy(g_status.title, text, sizeof(g_status.title) - 1);
+            g_status.title[sizeof(g_status.title) - 1] = '\0';
+        }
+        break;
+    case BL_STR:
+        /* Format: " St:13" - skip past the colon */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            const char *val = colon ? colon + 1 : text;
+            strncpy(g_status.str, val, sizeof(g_status.str) - 1);
+            g_status.str[sizeof(g_status.str) - 1] = '\0';
+        }
+        break;
+    case BL_DX:
+        /* Format: " Dx:18" - skip past the colon */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            const char *val = colon ? colon + 1 : text;
+            strncpy(g_status.dex, val, sizeof(g_status.dex) - 1);
+            g_status.dex[sizeof(g_status.dex) - 1] = '\0';
+        }
+        break;
+    case BL_CO:
+        /* Format: " Co:13" - skip past the colon */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            const char *val = colon ? colon + 1 : text;
+            strncpy(g_status.con, val, sizeof(g_status.con) - 1);
+            g_status.con[sizeof(g_status.con) - 1] = '\0';
+        }
+        break;
+    case BL_IN:
+        /* Format: " In:10" - skip past the colon */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            const char *val = colon ? colon + 1 : text;
+            strncpy(g_status.intel, val, sizeof(g_status.intel) - 1);
+            g_status.intel[sizeof(g_status.intel) - 1] = '\0';
+        }
+        break;
+    case BL_WI:
+        /* Format: " Wi:10" - skip past the colon */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            const char *val = colon ? colon + 1 : text;
+            strncpy(g_status.wis, val, sizeof(g_status.wis) - 1);
+            g_status.wis[sizeof(g_status.wis) - 1] = '\0';
+        }
+        break;
+    case BL_CH:
+        /* Format: " Ch:11" - skip past the colon */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            const char *val = colon ? colon + 1 : text;
+            strncpy(g_status.cha, val, sizeof(g_status.cha) - 1);
+            g_status.cha[sizeof(g_status.cha) - 1] = '\0';
+        }
+        break;
+    case BL_ALIGN:
+        if (text) {
+            strncpy(g_status.align, text, sizeof(g_status.align) - 1);
+            g_status.align[sizeof(g_status.align) - 1] = '\0';
+        }
+        break;
+    case BL_GOLD:
+        /* Gold comes formatted as "$:5000" or "\GXXXXNNNN:5000" */
+        /* Skip to the colon and parse the number after it */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            if (colon) {
+                g_status.gold = atol(colon + 1);
+            } else {
+                /* Fallback: try to parse as-is */
+                g_status.gold = atol(text);
+            }
+        }
+        break;
     case BL_HP:
-        if (text) g_status.hp = atoi(text);
+        /* Format: " HP:14" - skip past the colon */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            g_status.hp = atoi(colon ? colon + 1 : text);
+        }
         break;
     case BL_HPMAX:
+        /* Format: "(14)" - just parse the number */
         if (text) g_status.hpmax = atoi(text);
         break;
     case BL_ENE:  /* Energy/Power/Mana */
-        if (text) g_status.pw = atoi(text);
+        /* Format: " Pw:5" - skip past the colon */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            g_status.pw = atoi(colon ? colon + 1 : text);
+        }
         break;
     case BL_ENEMAX:
+        /* Format: "(5)" - just parse the number */
         if (text) g_status.pwmax = atoi(text);
         break;
     case BL_AC:
-        if (text) g_status.ac = atoi(text);
+        /* Format: " AC:6" - skip past the colon */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            g_status.ac = atoi(colon ? colon + 1 : text);
+        }
         break;
     case BL_XP:  /* Experience level */
-        if (text) g_status.xlvl = atoi(text);
+        /* Format: " Xp:1" - skip past the colon */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            g_status.xlvl = atoi(colon ? colon + 1 : text);
+        }
         break;
     case BL_EXP:  /* Experience points */
-        if (text) g_status.exp = atol(text);
+        if (text) {
+            g_status.exp = atol(text);
+        }
         break;
     case BL_LEVELDESC:
         /* Parse "Dlvl:5" or "Home 1" format */
@@ -1114,6 +1256,16 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
             else g_status.enc = 0;
         }
         break;
+    case BL_HUNGER:
+        /* Text is like "Hungry", "Weak", "Fainting", "Satiated", etc. */
+        if (text) {
+            if (strstr(text, "Satiated")) g_status.hunger = 1;
+            else if (strstr(text, "Hungry")) g_status.hunger = -1;
+            else if (strstr(text, "Weak")) g_status.hunger = -2;
+            else if (strstr(text, "Fainting")) g_status.hunger = -3;
+            else g_status.hunger = 0;  /* Normal */
+        }
+        break;
     case BL_CONDITION:
         /* Condition is a bitmask passed as long* */
         if (condptr) {
@@ -1121,10 +1273,26 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
         }
         break;
     case BL_TIME:
-        if (text) g_status.turn = atol(text);
+        /* Format: " T:123" - skip past the colon */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            long new_turn = atol(colon ? colon + 1 : text);
+            if (new_turn != g_status.turn) {
+                fprintf(stderr, "[STATUS] Turn update: %ld -> %ld (text='%s')\n", 
+                        g_status.turn, new_turn, text);
+            }
+            g_status.turn = new_turn;
+        }
+        break;
+    case BL_SCORE:
+        /* Format: " S:0" - skip past the colon */
+        if (text) {
+            const char *colon = strchr(text, ':');
+            g_status.score = atol(colon ? colon + 1 : text);
+        }
         break;
     default:
-        /* Ignore other fields (STR, DX, CO, etc.) for now */
+        /* Other fields not tracked */
         break;
     }
 }
