@@ -647,7 +647,7 @@ extern int headless_wait_for_input_blocking(void);
 static int
 headless_nhgetch(void)
 {
-    fprintf(stderr, "[headless] nhgetch: calling library function...\n");
+    fprintf(stdout, "[headless] nhgetch: calling library function...\n");
     
     /* Call the library function - it handles Asyncify internally */
     /* This follows the BrowserHack pattern: library function uses Asyncify.handleSleep */
@@ -1027,7 +1027,7 @@ headless_status_init(void)
     flags.showexp = TRUE;   /* Show experience points (BL_EXP) */
     flags.showscore = TRUE; /* Show score (BL_SCORE) */
     
-    fprintf(stderr, "[STATUS] status_init: flags.time=%d, flags.showexp=%d, flags.showscore=%d\n",
+    fprintf(stdout, "[STATUS] status_init: flags.time=%d, flags.showexp=%d, flags.showscore=%d\n",
             flags.time, flags.showexp, flags.showscore);
 }
 
@@ -1096,7 +1096,7 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
                  g_status.ac, g_status.xlvl, g_status.dlvl,
                  g_status.exp, g_status.enc, g_status.hunger,
                  g_status.cond, g_status.turn, g_status.score);
-        fprintf(stderr, "[STATUS] BL_FLUSH: turn=%ld\n", g_status.turn);
+        fprintf(stdout, "[STATUS] BL_FLUSH: turn=%ld\n", g_status.turn);
         emit_event("STATUS", buf);
         return;
     }
@@ -1278,7 +1278,7 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
             const char *colon = strchr(text, ':');
             long new_turn = atol(colon ? colon + 1 : text);
             if (new_turn != g_status.turn) {
-                fprintf(stderr, "[STATUS] Turn update: %ld -> %ld (text='%s')\n", 
+                fprintf(stdout, "[STATUS] Turn update: %ld -> %ld (text='%s')\n", 
                         g_status.turn, new_turn, text);
             }
             g_status.turn = new_turn;

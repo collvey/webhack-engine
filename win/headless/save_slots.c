@@ -298,7 +298,7 @@ int init_save_slots(void)
         }
     }
     
-    fprintf(stderr, "[save_slots] Initialized save slots directory: %s\n", full_path);
+    fprintf(stdout, "[save_slots] Initialized save slots directory: %s\n", full_path);
     return 1;
 }
 

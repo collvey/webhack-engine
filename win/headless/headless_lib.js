@@ -5,6 +5,21 @@
  * Also handles filesystem initialization for save/level files
  */
 
+// Use the global UniversalLogger loaded by worker/node environment
+// universal-logger.js MUST be loaded before this library is included
+// Worker: importScripts('/universal-logger.js')
+// Node.js: require('universal-logger.js')
+// During Emscripten build, UniversalLogger won't be available - use console fallback
+var logger = (typeof UniversalLogger !== 'undefined') 
+  ? UniversalLogger.get('headless_lib')
+  : {
+      essential: function(msg) { console.log('[headless_lib] ' + msg); },
+      info: function(msg) { console.log('[headless_lib] ' + msg); },
+      debug: function(msg) { console.log('[headless_lib] ' + msg); },
+      verbose: function(msg) { console.log('[headless_lib] ' + msg); },
+      error: function(msg) { console.error('[headless_lib] ' + msg); }
+    };
+
 var LibraryHeadless = {
   $headless__deps: [],
   $headless: {
@@ -14,7 +29,7 @@ var LibraryHeadless = {
      * Based on BrowserHack's approach
      */
     pre_run: function() {
-      console.error('[headless_lib.js] pre_run: Initializing filesystem');
+      logger.info('pre_run: Initializing filesystem');
       
       // Set up environment
       if (typeof ENV !== 'undefined') {
@@ -26,48 +41,48 @@ var LibraryHeadless = {
       try {
         FS.mkdir('/home');
       } catch(e) {
-        console.error('[headless_lib.js] /home already exists or cannot be created');
+        logger.debug('/home already exists or cannot be created');
       }
       
       try {
         FS.mkdir('/home/nethack_player');
       } catch(e) {
-        console.error('[headless_lib.js] /home/nethack_player already exists or cannot be created');
+        logger.debug('/home/nethack_player already exists or cannot be created');
       }
       
       // Create save directory - this is where level files will be stored
       try {
         FS.mkdir('/save');
       } catch(e) {
-        console.error('[headless_lib.js] /save already exists or cannot be created');
+        logger.debug('/save already exists or cannot be created');
       }
       
       // For Node.js environment (testing), we don't use IDBFS
       // For browser environment, we would mount IDBFS here
       if (typeof window !== 'undefined' && typeof indexedDB !== 'undefined') {
-        console.error('[headless_lib.js] Browser environment detected, mounting IDBFS');
+        logger.info('Browser environment detected, mounting IDBFS');
         try {
           FS.mount(IDBFS, {}, '/save');
           
           // Load existing saves from IndexedDB
-          console.error('[headless_lib.js] Syncing filesystem from IndexedDB...');
+          logger.info('Syncing filesystem from IndexedDB...');
           FS.syncfs(true, function(err) {
             if (err) {
-              console.error('[headless_lib.js] Error syncing filesystem: ' + err);
+              logger.info('Error syncing filesystem: ' + err);
             } else {
-              console.error('[headless_lib.js] Filesystem synced successfully');
+              logger.info('Filesystem synced successfully');
             }
           });
         } catch(e) {
-          console.error('[headless_lib.js] Error mounting IDBFS: ' + e);
+          logger.info('Error mounting IDBFS: ' + e);
         }
       } else {
-        console.error('[headless_lib.js] Node.js/testing environment - using memory-only filesystem');
+        logger.debug('Node.js/testing environment - using memory-only filesystem');
         // In Node.js, /save is just a regular in-memory directory
         // Files will be created there but won't persist across runs
       }
       
-      console.error('[headless_lib.js] Filesystem initialized');
+      logger.info('Filesystem initialized');
     }
   }
 };
@@ -77,7 +92,7 @@ mergeInto(LibraryManager.library, LibraryHeadless);
 mergeInto(LibraryManager.library, {
   // Start waiting for input - called from C
   headless_start_input_wait: function() {
-    console.error('[headless_lib.js] start_input_wait called');
+    logger.debug('start_input_wait called');
     
     // Determine the global object (Node.js: global, Web Worker: self, Browser: window)
     var globalObj = (typeof self !== 'undefined') ? self 
@@ -86,7 +101,7 @@ mergeInto(LibraryManager.library, {
                   : null;
     
     if (!globalObj) {
-      console.error('[headless_lib.js] ERROR: Cannot find global object!');
+      logger.error('Cannot find global object!');
       return;
     }
     
@@ -99,24 +114,24 @@ mergeInto(LibraryManager.library, {
     
     // Request input from wasmGetNextInputKey function
     if (typeof globalObj.wasmGetNextInputKey !== 'function') {
-      console.error('[headless_lib.js] ERROR: wasmGetNextInputKey is not defined on global object');
+      logger.error('wasmGetNextInputKey is not defined on global object');
       return;
     }
     
     var result = globalObj.wasmGetNextInputKey();
     
     if (typeof result === 'number') {
-      console.error('[headless_lib.js] Got buffered keycode immediately: ' + result);
+      logger.verbose('Got buffered keycode immediately: ' + result);
       globalObj.headlessInputState.pendingKeycode = result;
       globalObj.headlessInputState.waitingForInput = false;
     } 
     else if (result && typeof result.then === 'function') {
       result.then(function(keycode) {
-        console.error('[headless_lib.js] Got keycode from Promise: ' + keycode);
+        logger.verbose('Got keycode from Promise: ' + keycode);
         globalObj.headlessInputState.pendingKeycode = keycode;
         globalObj.headlessInputState.waitingForInput = false;
       }).catch(function(err) {
-        console.error('[headless_lib.js] FATAL: Input promise failed:', err);
+        logger.error('Input promise failed: ' + err);
         throw new Error('[headless_lib.js] Input system error: ' + err);
       });
     }
@@ -135,7 +150,7 @@ mergeInto(LibraryManager.library, {
     if (globalObj && globalObj.headlessInputState) {
       var ready = globalObj.headlessInputState.pendingKeycode >= 0 ? 1 : 0;
       if (ready) {
-        console.error('[headless_lib.js] Input ready! Keycode: ' + globalObj.headlessInputState.pendingKeycode);
+        logger.verbose('Input ready! Keycode: ' + globalObj.headlessInputState.pendingKeycode);
       }
       return ready;
     }
@@ -151,7 +166,7 @@ mergeInto(LibraryManager.library, {
     
     if (globalObj && globalObj.headlessInputState) {
       var keycode = globalObj.headlessInputState.pendingKeycode;
-      console.error('[headless_lib.js] get_input_keycode returning: ' + keycode);
+      logger.verbose('get_input_keycode returning: ' + keycode);
       globalObj.headlessInputState.pendingKeycode = -1;
       return keycode;
     }
@@ -162,7 +177,7 @@ mergeInto(LibraryManager.library, {
   // Uses Asyncify to block C execution until JavaScript Promise resolves with keycode
   headless_wait_for_input_blocking__deps: ['$Asyncify'],
   headless_wait_for_input_blocking: function() {
-    console.error('[headless_lib.js] C code requesting input');
+    logger.debug('C code requesting input');
     
     var globalObj = (typeof self !== 'undefined') ? self 
                   : (typeof global !== 'undefined') ? global
@@ -183,24 +198,24 @@ mergeInto(LibraryManager.library, {
     // - number: Pre-buffered keycode (rare, for testing environments)
     // - Promise: Will resolve when user presses key
     if (typeof result === 'number') {
-      console.error('[headless_lib.js] Pre-buffered keycode available:', result);
+      logger.verbose('Pre-buffered keycode available: ' + result);
       return result;
     }
     
     if (result && typeof result.then === 'function') {
-      console.error('[headless_lib.js] Waiting for Promise to resolve...');
+      logger.verbose('Waiting for Promise to resolve...');
       
       // Asyncify.handleSleep blocks C execution and resumes when wakeUp() is called
       var asyncifyResult = Asyncify.handleSleep(function(wakeUp) {
         result.then(function(keycode) {
-          console.error('[headless_lib.js] Promise resolved, waking C code with keycode:', keycode);
+          logger.verbose('Promise resolved, waking C code with keycode: ' + keycode);
           wakeUp(keycode);
         }).catch(function(err) {
-          console.error('[headless_lib.js] FATAL: Promise rejected:', err);
+          logger.error('Promise rejected: ' + err);
           throw new Error('[headless_lib.js] Input promise failed: ' + err);
         });
       });
-      console.error('[headless_lib.js] C code resumed with keycode:', asyncifyResult);
+      logger.verbose('C code resumed with keycode: ' + asyncifyResult);
       return asyncifyResult;
     }
     
@@ -212,7 +227,7 @@ mergeInto(LibraryManager.library, {
   // Returns pointer to line in WASM memory (caller must free), or 0 on EOF
   headless_read_line_blocking__deps: ['$Asyncify', '$stringToNewUTF8'],
   headless_read_line_blocking: function() {
-    console.error('[headless_lib.js] C code requesting line from stdin (for RESP)');
+    logger.debug('C code requesting line from stdin (for RESP)');
     
     var globalObj = (typeof self !== 'undefined') ? self 
                   : (typeof global !== 'undefined') ? global
@@ -221,7 +236,7 @@ mergeInto(LibraryManager.library, {
     
     // Check if wasmWaitForStdinLine exists (provided by worker)
     if (typeof globalObj.wasmWaitForStdinLine !== 'function') {
-      console.error('[headless_lib.js] wasmWaitForStdinLine not defined - using fallback fgets');
+      logger.debug('wasmWaitForStdinLine not defined - using fallback fgets');
       return 0; // Return NULL pointer, C will use regular fgets
     }
     
@@ -229,28 +244,28 @@ mergeInto(LibraryManager.library, {
     
     // wasmWaitForStdinLine returns Promise that resolves with a line string
     if (result && typeof result.then === 'function') {
-      console.error('[headless_lib.js] Waiting for stdin line Promise...');
+      logger.verbose('Waiting for stdin line Promise...');
       
       var asyncifyResult = Asyncify.handleSleep(function(wakeUp) {
         result.then(function(lineStr) {
-          console.error('[headless_lib.js] Got stdin line, length:', lineStr.length);
-          console.error('[headless_lib.js]   Line preview:', lineStr.substring(0, 80));
+          logger.verbose('Got stdin line, length: ' + lineStr.length);
+          logger.verbose('  Line preview: ' + lineStr.substring(0, 80));
           
           // Convert JS string to C string in WASM memory
           var strPtr = stringToNewUTF8(lineStr);
-          console.error('[headless_lib.js] Allocated C string at ptr:', strPtr);
+          logger.verbose('Allocated C string at ptr: ' + strPtr);
           wakeUp(strPtr);
         }).catch(function(err) {
-          console.error('[headless_lib.js] stdin line Promise rejected:', err);
+          logger.error('stdin line Promise rejected: ' + err);
           wakeUp(0); // Return NULL on error
         });
       });
       
-      console.error('[headless_lib.js] C code resumed with string ptr:', asyncifyResult);
+      logger.verbose('C code resumed with string ptr: ' + asyncifyResult);
       return asyncifyResult;
     }
     
-    console.error('[headless_lib.js] wasmWaitForStdinLine returned invalid type:', typeof result);
+    logger.debug('wasmWaitForStdinLine returned invalid type: ' + typeof result);
     return 0; // NULL
   }
 });
