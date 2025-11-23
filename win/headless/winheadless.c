@@ -868,7 +868,7 @@ headless_add_menu(winid window, int glyph, const ANY_P *identifier,
     item->group_accel = group_accel;
     item->glyph = glyph;
     item->attr = attr;
-    item->selectable = (identifier && identifier->a_void != 0);
+    item->selectable = (identifier && identifier->a_obj != NULL);
     item->selected = presel;
     item->count = 0;
     
@@ -876,16 +876,34 @@ headless_add_menu(winid window, int glyph, const ANY_P *identifier,
     char escaped[1024];
     json_escape(item->text, escaped, sizeof(escaped));
     
+    /* Escape special characters in accelerators for JSON */
+    char accel_str[16];
+    char group_accel_str[16];
+    char accel_char = accelerator ? accelerator : ' ';
+    char group_char = group_accel ? group_accel : ' ';
+    
+    if (accel_char == '"' || accel_char == '\\') {
+        snprintf(accel_str, sizeof(accel_str), "\\%c", accel_char);
+    } else {
+        snprintf(accel_str, sizeof(accel_str), "%c", accel_char);
+    }
+    
+    if (group_char == '"' || group_char == '\\') {
+        snprintf(group_accel_str, sizeof(group_accel_str), "\\%c", group_char);
+    } else {
+        snprintf(group_accel_str, sizeof(group_accel_str), "%c", group_char);
+    }
+    
     char buf[2048];
     snprintf(buf, sizeof(buf),
-             "{\"id\":%d,\"item_id\":%d,\"text\":\"%s\",\"accel\":\"%c\","
-             "\"group_accel\":\"%c\",\"glyph\":%d,\"attr\":%d,"
+             "{\"id\":%d,\"item_id\":%d,\"text\":\"%s\",\"accel\":\"%s\","
+             "\"group_accel\":\"%s\",\"glyph\":%d,\"attr\":%d,"
              "\"selectable\":%s,\"selected\":%s}",
              g_menu.menu_id,
              (int)(item - g_menu.items),  /* Use array index as item_id */
              escaped,
-             accelerator ? accelerator : ' ',
-             group_accel ? group_accel : ' ',
+             accel_str,
+             group_accel_str,
              glyph,
              attr,
              item->selectable ? "true" : "false",
@@ -896,7 +914,9 @@ headless_add_menu(winid window, int glyph, const ANY_P *identifier,
 static void
 headless_end_menu(winid window, const char *prompt)
 {
-    if (!g_menu.active) return;
+    if (!g_menu.active) {
+        return;
+    }
     
     /* Store prompt */
     if (prompt) {
