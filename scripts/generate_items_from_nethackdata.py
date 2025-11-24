@@ -81,8 +81,8 @@ def extract_objects_from_nethackdata():
     with open('../webhack-client/src/data/NetHackData.ts', 'r', encoding='utf-8') as f:
         content = f.read()
     
-    # Find the OBJECTS section
-    objects_match = re.search(r'export const OBJECTS: Record<number, ObjectData> = \{(.*?)\n\};', content, re.DOTALL)
+    # Find the OBJECTS section only (not MONSTERS)
+    objects_match = re.search(r'export const OBJECTS: Record<number, ObjectData> = \{(.*?)\n\};\s*$', content, re.DOTALL | re.MULTILINE)
     
     if not objects_match:
         raise ValueError("Could not find OBJECTS definition")
