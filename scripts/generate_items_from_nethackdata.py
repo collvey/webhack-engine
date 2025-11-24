@@ -100,6 +100,10 @@ def extract_objects_from_nethackdata():
         name = match.group(2)
         internal_name = match.group(3)
         
+        # Skip ID 0 (Strange Object) - it belongs in Special category
+        if obj_id == 0:
+            continue
+        
         # Determine symbol
         symbol = determine_symbol_from_name(name, obj_id)
         
