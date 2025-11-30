@@ -298,7 +298,7 @@ int init_save_slots(void)
         }
     }
     
-    fprintf(stdout, "[save_slots] Initialized save slots directory: %s\n", full_path);
+    // fprintf(stdout, "[save_slots] Initialized save slots directory: %s\n", full_path);
     return 1;
 }
 
@@ -619,7 +619,7 @@ const char* list_save_slots(void)
     int first = 1;
     struct stat st;
     
-    fprintf(stderr, "[save_slots] list_save_slots: START\n");
+    // fprintf(stderr, "[save_slots] list_save_slots: START\n");
     
     /* Start JSON array */
     strcpy(result, "[");
@@ -662,8 +662,8 @@ const char* list_save_slots(void)
     /* End JSON array */
     strcat(result, "]");
     
-    fprintf(stderr, "[save_slots] list_save_slots: Found %d slots\n", 
-            first ? 0 : (11 - first));
+    // fprintf(stderr, "[save_slots] list_save_slots: Found %d slots\n", 
+    //         first ? 0 : (11 - first));
     
     return result;
 }

@@ -336,7 +336,7 @@ send_request(const char *kind, int req_id, const char *json_data, char *response
     long ts = now_ms();
     if (!g_out) g_out = stdout;
     
-    fprintf(stderr, "[headless] send_request: EMITTING REQ kind=%s id=%d\n", kind, req_id);
+    // fprintf(stderr, "[headless] send_request: EMITTING REQ kind=%s id=%d\n", kind, req_id);
     
     /* Emit REQ */
     if (json_data && *json_data) {
@@ -348,7 +348,7 @@ send_request(const char *kind, int req_id, const char *json_data, char *response
     }
     fflush(g_out);
     
-    fprintf(stderr, "[headless] send_request: WAITING for RESP with corr=%d\n", req_id);
+    // fprintf(stderr, "[headless] send_request: WAITING for RESP with corr=%d\n", req_id);
     
     /* Block waiting for RESP with matching corr */
     response_buf[0] = '\0';
@@ -373,10 +373,10 @@ send_request(const char *kind, int req_id, const char *json_data, char *response
         }
         
         int corr = parse_json_field_int(response_buf, "corr");
-        fprintf(stderr, "[headless] send_request: GOT message corr=%d (want %d) msg='%.80s'\n",
-                corr, req_id, response_buf);
+        // fprintf(stderr, "[headless] send_request: GOT message corr=%d (want %d) msg='%.80s'\n",
+        //         corr, req_id, response_buf);
         if (corr == req_id) {
-            fprintf(stderr, "[headless] send_request: MATCHED! Returning for req_id=%d\n", req_id);
+            // fprintf(stderr, "[headless] send_request: MATCHED! Returning for req_id=%d\n", req_id);
             return;
         }
         fprintf(stderr, "[headless] send_request: MISMATCH, continuing to wait for corr=%d\n", req_id);
@@ -385,10 +385,10 @@ send_request(const char *kind, int req_id, const char *json_data, char *response
     /* Non-WASM: use regular blocking fgets */
     while (fgets(response_buf, bufsz, stdin)) {
         int corr = parse_json_field_int(response_buf, "corr");
-        fprintf(stderr, "[headless] send_request: GOT message corr=%d (want %d) msg='%.80s'\n",
+        // fprintf(stderr, "[headless] send_request: GOT message corr=%d (want %d) msg='%.80s'\n",
                 corr, req_id, response_buf);
         if (corr == req_id) {
-            fprintf(stderr, "[headless] send_request: MATCHED! Returning for req_id=%d\n", req_id);
+            // fprintf(stderr, "[headless] send_request: MATCHED! Returning for req_id=%d\n", req_id);
             return;
         }
         fprintf(stderr, "[headless] send_request: MISMATCH, continuing to wait for corr=%d\n", req_id);
@@ -647,13 +647,13 @@ extern int headless_wait_for_input_blocking(void);
 static int
 headless_nhgetch(void)
 {
-    fprintf(stdout, "[headless] nhgetch: calling library function...\n");
+    // fprintf(stdout, "[headless] nhgetch: calling library function...\n");
     
     /* Call the library function - it handles Asyncify internally */
     /* This follows the BrowserHack pattern: library function uses Asyncify.handleSleep */
     int keycode = headless_wait_for_input_blocking();
     
-    fprintf(stderr, "[headless] nhgetch: received keycode %d\n", keycode);
+    // fprintf(stderr, "[headless] nhgetch: received keycode %d\n", keycode);
     return keycode;
 }
 #else
@@ -664,7 +664,7 @@ headless_nhgetch(void)
     /* M2: Handle key input from stdin */
     char response[16384];
     
-    fprintf(stderr, "[headless] nhgetch: waiting for INPUT...\n");
+    // fprintf(stderr, "[headless] nhgetch: waiting for INPUT...\n");
     
     /* Wait for INPUT event */
     while (1) {
@@ -675,7 +675,7 @@ headless_nhgetch(void)
             return '\033'; /* ESC on EOF */
         }
         
-        fprintf(stderr, "[headless] nhgetch: received line: %.100s\n", response);
+        // fprintf(stderr, "[headless] nhgetch: received line: %.100s\n", response);
         
         char type_str[64];
         if (parse_json_field_str(response, "type", type_str, sizeof(type_str))) {
@@ -683,7 +683,7 @@ headless_nhgetch(void)
                 /* Try keycode field first (for high-bit characters from JS/JSON) */
                 int keycode = parse_json_field_int(response, "keycode");
                 if (keycode >= 0 && keycode <= 255) {
-                    fprintf(stderr, "[headless] nhgetch: returning keycode %d\n", keycode);
+                    // fprintf(stderr, "[headless] nhgetch: returning keycode %d\n", keycode);
                     return keycode;
                 }
                 
@@ -691,15 +691,15 @@ headless_nhgetch(void)
                 char key_str[16];
                 if (parse_json_field_str(response, "key", key_str, sizeof(key_str))) {
                     if (key_str[0]) {
-                        fprintf(stderr, "[headless] nhgetch: returning key '%c' (0x%02x)\n", 
-                                key_str[0], (unsigned char)key_str[0]);
+                        // fprintf(stderr, "[headless] nhgetch: returning key '%c' (0x%02x)\n", 
+                        //         key_str[0], (unsigned char)key_str[0]);
                         return (int)key_str[0];
                     }
                 }
             }
         }
         /* Ignore other events and continue loop */
-        fprintf(stderr, "[headless] nhgetch: ignoring non-INPUT event, continuing...\n");
+        // fprintf(stderr, "[headless] nhgetch: ignoring non-INPUT event, continuing...\n");
     }
 }
 #endif
@@ -728,8 +728,8 @@ headless_yn_function(const char *question, const char *choices, CHAR_P def)
     /* Generate PROMPT_YN request */
     int req_id = g_next_req_id++;
     
-    fprintf(stderr, "[headless] yn_function: ENTER req_id=%d question='%.50s' choices='%s' def='%c'\n",
-            req_id, question, choices ? choices : "NULL", def);
+    // fprintf(stderr, "[headless] yn_function: ENTER req_id=%d question='%.50s' choices='%s' def='%c'\n",
+    //         req_id, question, choices ? choices : "NULL", def);
     
     char escaped_q[4096];
     char escaped_choices[128];
@@ -752,19 +752,19 @@ headless_yn_function(const char *question, const char *choices, CHAR_P def)
              "{\"q\":\"%s\",\"choices\":\"%s\",\"def\":\"%s\"}",
              escaped_q, escaped_choices, escaped_def);
     
-    fprintf(stderr, "[headless] yn_function: SENDING REQ req_id=%d\n", req_id);
+    // fprintf(stderr, "[headless] yn_function: SENDING REQ req_id=%d\n", req_id);
     char response[16384];
     send_request("PROMPT_YN", req_id, req_data, response, sizeof(response));
     
-    fprintf(stderr, "[headless] yn_function: RECEIVED RESP req_id=%d response='%.100s'\n", 
-            req_id, response);
+    // fprintf(stderr, "[headless] yn_function: RECEIVED RESP req_id=%d response='%.100s'\n", 
+    //         req_id, response);
     
     /* Parse response for "ch" field */
     char ch_str[16];
     if (parse_json_field_str(response, "ch", ch_str, sizeof(ch_str))) {
         if (ch_str[0]) {
-            fprintf(stderr, "[headless] yn_function: RETURNING ch='%c' (code=%d) req_id=%d\n",
-                    ch_str[0], (int)ch_str[0], req_id);
+            // fprintf(stderr, "[headless] yn_function: RETURNING ch='%c' (code=%d) req_id=%d\n",
+            //         ch_str[0], (int)ch_str[0], req_id);
             return ch_str[0];
         }
     }
@@ -1047,8 +1047,8 @@ headless_status_init(void)
     flags.showexp = TRUE;   /* Show experience points (BL_EXP) */
     flags.showscore = TRUE; /* Show score (BL_SCORE) */
     
-    fprintf(stdout, "[STATUS] status_init: flags.time=%d, flags.showexp=%d, flags.showscore=%d\n",
-            flags.time, flags.showexp, flags.showscore);
+    // fprintf(stdout, "[STATUS] status_init: flags.time=%d, flags.showexp=%d, flags.showscore=%d\n",
+    //         flags.time, flags.showexp, flags.showscore);
 }
 
 static void
@@ -1116,7 +1116,7 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
                  g_status.ac, g_status.xlvl, g_status.dlvl,
                  g_status.exp, g_status.enc, g_status.hunger,
                  g_status.cond, g_status.turn, g_status.score);
-        fprintf(stdout, "[STATUS] BL_FLUSH: turn=%ld\n", g_status.turn);
+        // fprintf(stdout, "[STATUS] BL_FLUSH: turn=%ld\n", g_status.turn);
         emit_event("STATUS", buf);
         return;
     }
@@ -1297,10 +1297,10 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
         if (text) {
             const char *colon = strchr(text, ':');
             long new_turn = atol(colon ? colon + 1 : text);
-            if (new_turn != g_status.turn) {
-                fprintf(stdout, "[STATUS] Turn update: %ld -> %ld (text='%s')\n", 
-                        g_status.turn, new_turn, text);
-            }
+            // if (new_turn != g_status.turn) {
+            //     fprintf(stdout, "[STATUS] Turn update: %ld -> %ld (text='%s')\n", 
+            //             g_status.turn, new_turn, text);
+            // }
             g_status.turn = new_turn;
         }
         break;
