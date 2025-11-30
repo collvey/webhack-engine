@@ -1046,6 +1046,7 @@ headless_status_init(void)
     flags.time = TRUE;      /* Show turn counter (BL_TIME) */
     flags.showexp = TRUE;   /* Show experience points (BL_EXP) */
     flags.showscore = TRUE; /* Show score (BL_SCORE) */
+    flags.pickup = FALSE;   /* Disable auto-pickup by default */
     
     // fprintf(stdout, "[STATUS] status_init: flags.time=%d, flags.showexp=%d, flags.showscore=%d\n",
     //         flags.time, flags.showexp, flags.showscore);
