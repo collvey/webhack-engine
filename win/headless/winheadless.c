@@ -172,13 +172,15 @@ emit_message(const char *text, const char *style)
     emit_event("MESSAGE", buf);
 }
 
-/* M2: Emit map frame with all glyphs */
+/* M2: Emit map frame with all glyphs
+ * If force is TRUE, emit even if map isn't dirty (for cursor-only updates)
+ */
 static void
-emit_map_frame(void)
+emit_map_frame_ex(int force)
 {
     int y, x;
     
-    if (!g_map_dirty) return;
+    if (!g_map_dirty && !force) return;
     
     /* Build JSON for map frame with full cell data (char, color, special) */
     /* Format: {"width":80,"height":21,"cursor":{"x":X,"y":Y},"cells":[{"x":X,"y":Y,"glyph":N,"ch":"C","color":N,"special":N},...]} */
@@ -247,6 +249,13 @@ emit_map_frame(void)
             g_map[y][x].dirty = 0;
         }
     }
+}
+
+/* Wrapper for backward compatibility */
+static void
+emit_map_frame(void)
+{
+    emit_map_frame_ex(0);
 }
 
 /* ========================================================================
@@ -553,6 +562,8 @@ static void
 headless_display_nhwindow(winid window, BOOLEAN_P blocking)
 {
     /* no-op for M1 */
+    (void)window;
+    (void)blocking;
 }
 
 static void
@@ -561,17 +572,21 @@ headless_destroy_nhwindow(winid window)
     /* no-op for M1 */
 }
 
+/* Track if cursor position changed - used to emit frame before input */
+static int g_cursor_dirty = 0;
+
 static void
 headless_curs(winid window, int x, int y)
 {
-    /* M2: Update cursor position and trigger map flush if needed */
+    /* Win32-style: Just store cursor position and mark dirty.
+     * Do NOT emit immediately - wait until nhgetch() before blocking for input.
+     * This batches multiple curs() calls (e.g., far look mode calls curs 3x)
+     * into a single MAP_FRAME emission. */
+    if (g_cursor_x != x || g_cursor_y != y) {
+        g_cursor_dirty = 1;
+    }
     g_cursor_x = x;
     g_cursor_y = y;
-    
-    /* Emit map frame when cursor moves (indicates end of drawing cycle) */
-    if (g_map_dirty) {
-        emit_map_frame();
-    }
 }
 
 static void
@@ -647,13 +662,19 @@ extern int headless_wait_for_input_blocking(void);
 static int
 headless_nhgetch(void)
 {
-    // fprintf(stdout, "[headless] nhgetch: calling library function...\n");
+    /* Win32-style: Flush pending map/cursor updates before blocking for input.
+     * This is where mswin_map_update() is called in Win32's mswin_main_loop().
+     * By emitting here, we batch all curs()/print_glyph() calls into one frame. */
+    if (g_map_dirty) {
+        emit_map_frame();
+        g_cursor_dirty = 0;
+    } else if (g_cursor_dirty) {
+        emit_map_frame_ex(1);  /* Force emit for cursor-only update */
+        g_cursor_dirty = 0;
+    }
     
     /* Call the library function - it handles Asyncify internally */
-    /* This follows the BrowserHack pattern: library function uses Asyncify.handleSleep */
     int keycode = headless_wait_for_input_blocking();
-    
-    // fprintf(stderr, "[headless] nhgetch: received keycode %d\n", keycode);
     return keycode;
 }
 #else
@@ -1325,9 +1346,15 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
 static void
 headless_mark_synch(void)
 {
-    /* Flush any batched map output */
+    /* Flush any batched map output.
+     * Note: Primary emission now happens in nhgetch() before input.
+     * mark_synch() is still called by NetHack in some cases. */
     if (g_map_dirty) {
         emit_map_frame();
+        g_cursor_dirty = 0;
+    } else if (g_cursor_dirty) {
+        emit_map_frame_ex(1);
+        g_cursor_dirty = 0;
     }
     if (g_out) fflush(g_out);
 }
@@ -1342,15 +1369,13 @@ headless_wait_synch(void)
 static void
 headless_cliparound(int x, int y)
 {
-    /* M2: Handle map viewport centering */
-    /* For now, just update cursor - full viewport logic in later optimization */
-    g_cursor_x = x;
-    g_cursor_y = y;
-    
-    /* Emit map frame if dirty */
-    if (g_map_dirty) {
-        emit_map_frame();
-    }
+    /* cliparound is for VIEWPORT scrolling, not cursor positioning.
+     * It tells the display which portion of the map to show.
+     * For our full-map emit model, we don't need viewport logic.
+     * Do NOT set g_cursor here - that's curs()'s job. */
+    (void)x;
+    (void)y;
+    /* No action needed - we emit the full map in nhgetch() */
 }
 
 static void
