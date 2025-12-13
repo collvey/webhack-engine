@@ -56,7 +56,10 @@ emcc -O2 ^
      -s STACK_SIZE=5MB ^
      -lidbfs.js ^
      --js-library win/headless/headless_lib.js ^
-     --preload-file binary@/ ^
+     --preload-file sys/wasm/.nethackrc@/.nethackrc ^
+     --preload-file sys/wasm/sysconf@/sysconf ^
+     --preload-file sys/wasm/nhdat@/nhdat ^
+     --preload-file sys/wasm/dungeon@/dungeon ^
      --exclude-file *.exe ^
      --exclude-file *.dll ^
      --exclude-file *.PDB ^

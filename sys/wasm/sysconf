@@ -1,0 +1,8 @@
+# NetHack 3.6 sysconf - WASM configuration
+# Minimal config for WebAssembly build
+
+# Wizards mode allowed (for testing)
+WIZARDS=*
+
+# Options
+OPTIONS=windowtype:headless,number_pad:0
