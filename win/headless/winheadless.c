@@ -1062,14 +1062,6 @@ headless_status_init(void)
     
     /* Call generic status initialization to set up status_vals arrays */
     genl_status_init();
-    
-    /* Ensure status flags are enabled (re-apply in case they were reset) */
-    flags.time = TRUE;      /* Show turn counter (BL_TIME) */
-    flags.showexp = TRUE;   /* Show experience points (BL_EXP) */
-    flags.showscore = TRUE; /* Show score (BL_SCORE) */
-    
-    // fprintf(stdout, "[STATUS] status_init: flags.time=%d, flags.showexp=%d, flags.showscore=%d\n",
-    //         flags.time, flags.showexp, flags.showscore);
 }
 
 static void
