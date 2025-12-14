@@ -17,7 +17,7 @@
 #
 # Use the IBM character set rather than just plain ascii characters
 # for tty window-port.
-OPTIONS=symset:IBMGraphics_2,roguesymset:RogueEpyx
+# OPTIONS=symset:IBMGraphics_2,roguesymset:RogueEpyx
 
 # Here is a suggested symbol set from Michael Feir, 
 # for use by blind NetHack players
@@ -58,7 +58,9 @@ OPTIONS=!autopickup
 # Highlight menu lines with different colors. You need to define the colors
 # with MENUCOLOR lines.
 #  Toggle menucolor use on or off
-OPTIONS=menucolors,color
+OPTIONS=menucolors
+#  This allows exploreed unlit areas to be shown
+OPTIONS=color
 # Define color used for a certain menu line. Format is
 #    MENUCOLOR="regular expression"=color
 # or
