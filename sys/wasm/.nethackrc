@@ -58,7 +58,7 @@ OPTIONS=!autopickup
 # Highlight menu lines with different colors. You need to define the colors
 # with MENUCOLOR lines.
 #  Toggle menucolor use on or off
-OPTIONS=menucolors
+OPTIONS=menucolors,color
 # Define color used for a certain menu line. Format is
 #    MENUCOLOR="regular expression"=color
 # or
