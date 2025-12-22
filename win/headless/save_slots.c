@@ -318,7 +318,8 @@ int save_to_slot(int slot_num, const char *render_mode, const char *tileset_id)
     
     fprintf(stderr, "[save_slots] save_to_slot: slot=%d START\n", slot_num);
     
-    if (slot_num < 1 || slot_num > MAX_SLOTS) {
+    /* Validate slot number, slot number 0 is used for temporary load */
+    if (slot_num < 0 || slot_num > MAX_SLOTS) {
         fprintf(stderr, "[save_slots] Invalid slot number: %d\n", slot_num);
         return 0;
     }
@@ -497,16 +498,16 @@ int save_to_slot(int slot_num, const char *render_mode, const char *tileset_id)
  * Returns: 1 on success, 0 on failure
  */
 EMSCRIPTEN_KEEPALIVE
-int load_from_slot(int slot_num)
+int load_from_slot(int slot_num, int should_reload)
 {
     char slot_relpath[256];
     const char *slot_save;
     const char *current_save;
     struct stat st;
     
-    fprintf(stderr, "[save_slots] load_from_slot: slot=%d START\n", slot_num);
+    fprintf(stderr, "[save_slots] load_from_slot: slot=%d, reload=%d START\n", slot_num, should_reload);
     
-    if (slot_num < 1 || slot_num > MAX_SLOTS) {
+    if (slot_num < 0 || slot_num > MAX_SLOTS) {
         fprintf(stderr, "[save_slots] Invalid slot number: %d\n", slot_num);
         return 0;
     }
@@ -577,31 +578,62 @@ int load_from_slot(int slot_num)
      *   - IndexedDB sync is async (takes ~10-50ms)
      *   - If we reload before sync completes, save file won't be there!
      *   - Result: Game starts without save file = new game instead of load
+     * 
+     * OPTIONAL RELOAD:
+     *   - If should_reload is 0, only sync to IndexedDB without reloading
+     *   - Useful for extracting lock files before OAuth redirect
      */
     fprintf(stderr, "[save_slots] Syncing save file to IndexedDB...\n");
-    EM_ASM({
-        console.log('[save_slots] [JS] Step 1: Syncing RAM → IndexedDB...');
-        FS.syncfs(false, function(err) {
-            if (err) {
-                console.error('[save_slots] [JS] ✗ Sync FAILED:', err);
-                console.error('[save_slots] [JS] Cannot reload - save file not persisted!');
-            } else {
-                console.log('[save_slots] [JS] ✓ Sync complete!');
-                console.log('[save_slots] [JS] Step 2: Requesting main thread to reload page...');
-                
-                // Send message to worker → worker forwards to main thread
-                // Worker context: self.postMessage() sends to worker's message handler
-                // Main thread context: postMessage() would send to window
-                postMessage({ 
-                    type: 'REQUEST_PAGE_RELOAD', 
-                    reason: 'load_save_slot',
-                    message: 'Save file restored, reloading to load game...'
-                });
-            }
+    if (should_reload) {
+        EM_ASM({
+            console.log('[save_slots] [JS] Step 1: Syncing RAM → IndexedDB...');
+            FS.syncfs(false, function(err) {
+                if (err) {
+                    console.error('[save_slots] [JS] ✗ Sync FAILED:', err);
+                    console.error('[save_slots] [JS] Cannot reload - save file not persisted!');
+                } else {
+                    console.log('[save_slots] [JS] ✓ Sync complete!');
+                    console.log('[save_slots] [JS] Step 2: Requesting main thread to reload page...');
+                    
+                    // Send message to worker → worker forwards to main thread
+                    // Worker context: self.postMessage() sends to worker's message handler
+                    // Main thread context: postMessage() would send to window
+                    postMessage({ 
+                        type: 'REQUEST_PAGE_RELOAD', 
+                        reason: 'load_save_slot',
+                        message: 'Save file restored, reloading to load game...'
+                    });
+                }
+            });
         });
-    });
-    
-    fprintf(stderr, "[save_slots] Reload request sent to main thread\n");
+        fprintf(stderr, "[save_slots] Reload request sent to main thread\n");
+    } else {
+        EM_ASM({
+            var slotNum = $0;
+            console.log('[save_slots] [JS] Syncing RAM → IndexedDB (no reload)...');
+            FS.syncfs(false, function(err) {
+                if (err) {
+                    console.error('[save_slots] [JS] ✗ Sync FAILED:', err);
+                    // Send failure message
+                    postMessage({
+                        type: 'LOAD_SLOT_SYNC_COMPLETE',
+                        slotNum: slotNum,
+                        success: false,
+                        error: 'Sync failed'
+                    });
+                } else {
+                    console.log('[save_slots] [JS] ✓ Sync complete (no reload requested)');
+                    // Send success message
+                    postMessage({
+                        type: 'LOAD_SLOT_SYNC_COMPLETE',
+                        slotNum: slotNum,
+                        success: true
+                    });
+                }
+            });
+        }, slot_num);
+        fprintf(stderr, "[save_slots] Sync started (will notify when complete)\n");
+    }
     return 1;
 }
 
