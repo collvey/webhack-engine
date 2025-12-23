@@ -6945,4 +6945,21 @@ set_playmode()
 
 #endif /* OPTION_LISTS_ONLY */
 
+#ifdef WASM
+#include <emscripten.h>
+
+/* Expose option setter to JavaScript for runtime option updates
+ * This allows browser UI to change options without triggering the O command menu
+ */
+EMSCRIPTEN_KEEPALIVE
+void
+set_option_direct(const char *option_string)
+{
+    /* Call existing parseoptions() function - same code path as O command */
+    if (option_string && *option_string) {
+        parseoptions((char *) option_string, TRUE, FALSE);
+    }
+}
+#endif /* WASM */
+
 /*options.c*/
