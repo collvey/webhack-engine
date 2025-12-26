@@ -33,7 +33,7 @@ extern int FDECL(open_levelfile, (int, char *));  /* Opens lock.N file for readi
 
 /* Forward declarations */
 static boolean copy_file(const char *src, const char *dst);
-static boolean save_slot_metadata(int slot_num, const char *render_mode, const char *tileset_id);
+static boolean save_slot_metadata(int slot_num, const char *render_mode, const char *tileset_id, const char *game_mode);
 static int create_slot_savefile(int slot_num);
 static int dosave_slot_nondestructive(void);
 
@@ -77,10 +77,10 @@ copy_file(const char *src, const char *dst)
 }
 
 /* Generate metadata JSON for current game state
- * UI preferences (render_mode, tileset_id) are passed from JavaScript
+ * UI preferences (render_mode, tileset_id, game_mode) are passed from JavaScript
  */
 static boolean
-save_slot_metadata(int slot_num, const char *render_mode, const char *tileset_id)
+save_slot_metadata(int slot_num, const char *render_mode, const char *tileset_id, const char *game_mode)
 {
     char meta_relpath[256];
     const char *meta_path;
@@ -89,9 +89,10 @@ save_slot_metadata(int slot_num, const char *render_mode, const char *tileset_id
     char timestamp[64];
     
     fprintf(stderr, "[save_slots] save_slot_metadata: slot=%d START\n", slot_num);
-    fprintf(stderr, "[save_slots]   UI: render_mode=%s, tileset_id=%s\n", 
+    fprintf(stderr, "[save_slots]   UI: render_mode=%s, tileset_id=%s, game_mode=%s\n", 
             render_mode ? render_mode : "NULL", 
-            tileset_id ? tileset_id : "NULL");
+            tileset_id ? tileset_id : "NULL",
+            game_mode ? game_mode : "NULL");
     
     /* Build relative path */
     sprintf(meta_relpath, "%s/slot_%03d.meta", SLOT_DIR, slot_num);
@@ -132,7 +133,10 @@ save_slot_metadata(int slot_num, const char *render_mode, const char *tileset_id
     fprintf(fp, "  \"ui\": {\n");
     fprintf(fp, "    \"render_mode\": \"%s\",\n", render_mode ? render_mode : "text");
     fprintf(fp, "    \"tileset_id\": \"%s\"\n", tileset_id ? tileset_id : "");
-    fprintf(fp, "  }\n");
+    fprintf(fp, "  },\n");
+    
+    /* Game mode (first-time or classic) */
+    fprintf(fp, "  \"game_mode\": \"%s\"\n", game_mode ? game_mode : "first-time");
     
     fprintf(fp, "}\n");
     
@@ -308,7 +312,7 @@ int init_save_slots(void)
  * Returns: 1 on success, 0 on failure
  */
 EMSCRIPTEN_KEEPALIVE
-int save_to_slot(int slot_num, const char *render_mode, const char *tileset_id)
+int save_to_slot(int slot_num, const char *render_mode, const char *tileset_id, const char *game_mode)
 {
     char slot_save[256];
     char slot_relpath[256];
@@ -402,7 +406,7 @@ int save_to_slot(int slot_num, const char *render_mode, const char *tileset_id)
      */
     
     /* Save metadata (non-blocking file I/O) */
-    if (!save_slot_metadata(slot_num, render_mode, tileset_id)) {
+    if (!save_slot_metadata(slot_num, render_mode, tileset_id, game_mode)) {
         /* Continue anyway - slot file is valid */
     }
     
