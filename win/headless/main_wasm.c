@@ -190,6 +190,10 @@ int main(int argc, char* argv[]) {
     }
     
     if (!resuming) {
+        /* Apply character options from JavaScript (if provided) */
+        extern int apply_character_options_from_js(void);
+        int opts_applied = apply_character_options_from_js();
+        
         /* Set up character and start new game */
         player_selection();
         newgame();

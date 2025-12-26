@@ -368,10 +368,8 @@ send_request(const char *kind, int req_id, const char *json_data, char *response
     while (1) {
         char *line = headless_read_line_blocking();
         if (!line) {
-            fprintf(stderr, "[headless] send_request: headless_read_line_blocking returned NULL\n");
             /* Fall back to regular fgets for compatibility */
             if (!fgets(response_buf, bufsz, stdin)) {
-                fprintf(stderr, "[headless] send_request: EOF reached while waiting for corr=%d!\n", req_id);
                 return;
             }
         } else {
@@ -382,27 +380,18 @@ send_request(const char *kind, int req_id, const char *json_data, char *response
         }
         
         int corr = parse_json_field_int(response_buf, "corr");
-        // fprintf(stderr, "[headless] send_request: GOT message corr=%d (want %d) msg='%.80s'\n",
-        //         corr, req_id, response_buf);
         if (corr == req_id) {
-            // fprintf(stderr, "[headless] send_request: MATCHED! Returning for req_id=%d\n", req_id);
             return;
         }
-        fprintf(stderr, "[headless] send_request: MISMATCH, continuing to wait for corr=%d\n", req_id);
     }
 #else
     /* Non-WASM: use regular blocking fgets */
     while (fgets(response_buf, bufsz, stdin)) {
         int corr = parse_json_field_int(response_buf, "corr");
-        // fprintf(stderr, "[headless] send_request: GOT message corr=%d (want %d) msg='%.80s'\n",
-                corr, req_id, response_buf);
         if (corr == req_id) {
-            // fprintf(stderr, "[headless] send_request: MATCHED! Returning for req_id=%d\n", req_id);
             return;
         }
-        fprintf(stderr, "[headless] send_request: MISMATCH, continuing to wait for corr=%d\n", req_id);
     }
-    fprintf(stderr, "[headless] send_request: EOF reached while waiting for corr=%d!\n", req_id);
 #endif
 }
 
@@ -449,6 +438,131 @@ headless_init_nhwindows(int *argcp, char **argv)
     emit_event("INIT", debug_buf);
 }
 
+#ifdef __EMSCRIPTEN__
+/* Apply character options from JavaScript character creation UI
+ * Called from main_wasm.c before player_selection()
+ * Returns 1 if options were applied, 0 if not available */
+EMSCRIPTEN_KEEPALIVE
+int apply_character_options_from_js(void)
+{
+    /* Check if character options exist */
+    int has_options = EM_ASM_INT({
+        if (typeof Module.characterOptions !== "undefined" && 
+            Module.characterOptions) {
+            return 1;
+        }
+        return 0;
+    });
+    
+    if (!has_options) {
+        return 0;
+    }
+    
+    /* Read individual character option fields */
+    char *name = (char*)EM_ASM_INT({
+        if (!Module.characterOptions.name) return 0;
+        var nameLen = lengthBytesUTF8(Module.characterOptions.name) + 1;
+        var namePtr = _malloc(nameLen);
+        stringToUTF8(Module.characterOptions.name, namePtr, nameLen);
+        return namePtr;
+    });
+    
+    /* Get role string and map to index */
+    char *roleStr = (char*)EM_ASM_INT({
+        if (!Module.characterOptions.role) return 0;
+        var s = Module.characterOptions.role.toLowerCase();
+        var len = lengthBytesUTF8(s) + 1;
+        var ptr = _malloc(len);
+        stringToUTF8(s, ptr, len);
+        return ptr;
+    });
+    
+    char *raceStr = (char*)EM_ASM_INT({
+        if (!Module.characterOptions.race) return 0;
+        var s = Module.characterOptions.race.toLowerCase();
+        var len = lengthBytesUTF8(s) + 1;
+        var ptr = _malloc(len);
+        stringToUTF8(s, ptr, len);
+        return ptr;
+    });
+    
+    char *genderStr = (char*)EM_ASM_INT({
+        if (!Module.characterOptions.gender) return 0;
+        var s = Module.characterOptions.gender.toLowerCase();
+        var len = lengthBytesUTF8(s) + 1;
+        var ptr = _malloc(len);
+        stringToUTF8(s, ptr, len);
+        return ptr;
+    });
+    
+    char *alignStr = (char*)EM_ASM_INT({
+        if (!Module.characterOptions.alignment) return 0;
+        var s = Module.characterOptions.alignment.toLowerCase();
+        var len = lengthBytesUTF8(s) + 1;
+        var ptr = _malloc(len);
+        stringToUTF8(s, ptr, len);
+        return ptr;
+    });
+    
+    /* Apply name */
+    if (name && *name) {
+        strncpy(plname, name, PL_NSIZ - 1);
+        plname[PL_NSIZ - 1] = '\0';
+        free(name);
+    }
+    
+    /* Map role string to index */
+    if (roleStr) {
+        if (strcmp(roleStr, "archeologist") == 0) flags.initrole = 0;
+        else if (strcmp(roleStr, "barbarian") == 0) flags.initrole = 1;
+        else if (strcmp(roleStr, "caveman") == 0) flags.initrole = 2;
+        else if (strcmp(roleStr, "healer") == 0) flags.initrole = 3;
+        else if (strcmp(roleStr, "knight") == 0) flags.initrole = 4;
+        else if (strcmp(roleStr, "monk") == 0) flags.initrole = 5;
+        else if (strcmp(roleStr, "priest") == 0) flags.initrole = 6;
+        else if (strcmp(roleStr, "ranger") == 0) flags.initrole = 7;
+        else if (strcmp(roleStr, "rogue") == 0) flags.initrole = 8;
+        else if (strcmp(roleStr, "samurai") == 0) flags.initrole = 9;
+        else if (strcmp(roleStr, "tourist") == 0) flags.initrole = 10;
+        else if (strcmp(roleStr, "valkyrie") == 0) flags.initrole = 11;
+        else if (strcmp(roleStr, "wizard") == 0) flags.initrole = 12;
+        free(roleStr);
+    }
+    
+    /* Map race string to index */
+    if (raceStr) {
+        if (strcmp(raceStr, "human") == 0) flags.initrace = 0;
+        else if (strcmp(raceStr, "elf") == 0) flags.initrace = 1;
+        else if (strcmp(raceStr, "dwarf") == 0) flags.initrace = 2;
+        else if (strcmp(raceStr, "gnome") == 0) flags.initrace = 3;
+        else if (strcmp(raceStr, "orc") == 0) flags.initrace = 4;
+        free(raceStr);
+    }
+    
+    /* Map gender string to index */
+    if (genderStr) {
+        if (strcmp(genderStr, "male") == 0) {
+            flags.initgend = 0;
+            flags.female = 0;
+        } else if (strcmp(genderStr, "female") == 0) {
+            flags.initgend = 1;
+            flags.female = 1;
+        }
+        free(genderStr);
+    }
+    
+    /* Map alignment string to index */
+    if (alignStr) {
+        if (strcmp(alignStr, "lawful") == 0) flags.initalign = 0;
+        else if (strcmp(alignStr, "neutral") == 0) flags.initalign = 1;
+        else if (strcmp(alignStr, "chaotic") == 0) flags.initalign = 2;
+        free(alignStr);
+    }
+    
+    return 1;
+}
+#endif
+
 static void
 headless_player_selection(void)
 {
@@ -456,7 +570,7 @@ headless_player_selection(void)
      * This is needed for headless/WASM builds where interactive
      * character selection is not available */
     
-    /* Use ROLE_RANDOM to trigger automatic selection */
+    /* Use ROLE_RANDOM to trigger automatic selection ONLY if not already set */
     if (flags.initrole == ROLE_NONE) {
         flags.initrole = ROLE_RANDOM;
     }
