@@ -504,6 +504,16 @@ int apply_character_options_from_js(void)
         return ptr;
     });
     
+    /* Read game mode ("first-time" or "classic") */
+    char *gameModeStr = (char*)EM_ASM_INT({
+        if (!Module.characterOptions.gameMode) return 0;
+        var s = Module.characterOptions.gameMode.toLowerCase();
+        var len = lengthBytesUTF8(s) + 1;
+        var ptr = _malloc(len);
+        stringToUTF8(s, ptr, len);
+        return ptr;
+    });
+    
     /* Apply name */
     if (name && *name) {
         strncpy(plname, name, PL_NSIZ - 1);
@@ -557,6 +567,18 @@ int apply_character_options_from_js(void)
         else if (strcmp(alignStr, "neutral") == 0) flags.initalign = 1;
         else if (strcmp(alignStr, "chaotic") == 0) flags.initalign = 2;
         free(alignStr);
+    }
+    
+    /* Set beginner flag based on game mode
+     * first-time: beginner = 1 (gives +5000 gold and magic whistle)
+     * classic: beginner = 0 (standard NetHack experience) */
+    if (gameModeStr) {
+        if (strcmp(gameModeStr, "first-time") == 0) {
+            flags.beginner = 1;
+        } else if (strcmp(gameModeStr, "classic") == 0) {
+            flags.beginner = 0;
+        }
+        free(gameModeStr);
     }
     
     return 1;

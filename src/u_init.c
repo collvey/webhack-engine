@@ -5,6 +5,10 @@
 
 #include "hack.h"
 
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#endif
+
 struct trobj {
     short trotyp;
     schar trspe;
@@ -588,7 +592,9 @@ u_init()
     struct u_roleplay tmpuroleplay = u.uroleplay; /* set by rcfile options */
 
     flags.female = flags.initgend;
-    flags.beginner = 1;
+    /* flags.beginner is now set by apply_character_options_from_js() based on gameMode
+     * Do NOT hardcode it here or it will override the JavaScript setting */
+    /* OLD CODE: flags.beginner = 1; */
 
     /* zero u, including pointer values --
      * necessary when aborting from a failed restore */
@@ -677,7 +683,7 @@ u_init()
             ini_inv(Magicmarker);
         knows_object(SACK);
         knows_object(TOUCHSTONE);
-        u.umoney0 = 0 + 5000;  /* Original 0 plus 5000 */
+        u.umoney0 = 0;
         skill_init(Skill_A);
         break;
     case PM_BARBARIAN:
@@ -690,17 +696,17 @@ u_init()
             ini_inv(Lamp);
         knows_class(WEAPON_CLASS);
         knows_class(ARMOR_CLASS);
-        u.umoney0 = 0 + 5000;  /* Original 0 plus 5000 */
+        u.umoney0 = 0;
         skill_init(Skill_B);
         break;
     case PM_CAVEMAN:
         Cave_man[C_AMMO].trquan = rn1(11, 10); /* 10..20 */
         ini_inv(Cave_man);
-        u.umoney0 = 0 + 5000;  /* Original 0 plus 5000 */
+        u.umoney0 = 0;
         skill_init(Skill_C);
         break;
     case PM_HEALER:
-        u.umoney0 = rn1(1000, 1001) + 5000;  /* Original random 1001-2000 plus 5000 */
+        u.umoney0 = rn1(1000, 1001);
         ini_inv(Healer);
         if (!rn2(25))
             ini_inv(Lamp);
@@ -713,7 +719,7 @@ u_init()
         knows_class(ARMOR_CLASS);
         /* give knights chess-like mobility--idea from wooledge@..cwru.edu */
         HJumping |= FROMOUTSIDE;
-        u.umoney0 = 0 + 5000;  /* Original 0 plus 5000 */
+        u.umoney0 = 0;
         skill_init(Skill_K);
         break;
     case PM_MONK: {
@@ -728,7 +734,7 @@ u_init()
         knows_class(ARMOR_CLASS);
         /* sufficiently martial-arts oriented item to ignore language issue */
         knows_object(SHURIKEN);
-        u.umoney0 = 0 + 5000;  /* Original 0 plus 5000 */
+        u.umoney0 = 0;
         skill_init(Skill_Mon);
         break;
     }
@@ -739,7 +745,7 @@ u_init()
         else if (!rn2(10))
             ini_inv(Lamp);
         knows_object(POT_WATER);
-        u.umoney0 = 0 + 5000;  /* Original 0 plus 5000 */
+        u.umoney0 = 0;
         skill_init(Skill_P);
         /* KMH, conduct --
          * Some may claim that this isn't agnostic, since they
@@ -753,12 +759,12 @@ u_init()
         Ranger[RAN_TWO_ARROWS].trquan = rn1(10, 50);
         Ranger[RAN_ZERO_ARROWS].trquan = rn1(10, 30);
         ini_inv(Ranger);
-        u.umoney0 = 0 + 5000;  /* Original 0 plus 5000 */
+        u.umoney0 = 0;
         skill_init(Skill_Ran);
         break;
     case PM_ROGUE:
         Rogue[R_DAGGERS].trquan = rn1(10, 6);
-        u.umoney0 = 0 + 5000;  /* Original 0 plus 5000 */
+        u.umoney0 = 0;
         ini_inv(Rogue);
         if (!rn2(5))
             ini_inv(Blindfold);
@@ -772,12 +778,12 @@ u_init()
             ini_inv(Blindfold);
         knows_class(WEAPON_CLASS);
         knows_class(ARMOR_CLASS);
-        u.umoney0 = 0 + 5000;  /* Original 0 plus 5000 */
+        u.umoney0 = 0;
         skill_init(Skill_S);
         break;
     case PM_TOURIST:
         Tourist[T_DARTS].trquan = rn1(20, 21);
-        u.umoney0 = rnd(1000) + 5000;  /* Original random 1-1000 plus 5000 */
+        u.umoney0 = rnd(1000);
         ini_inv(Tourist);
         if (!rn2(25))
             ini_inv(Tinopener);
@@ -795,7 +801,7 @@ u_init()
             ini_inv(Lamp);
         knows_class(WEAPON_CLASS);
         knows_class(ARMOR_CLASS);
-        u.umoney0 = 0 + 5000;  /* Original 0 plus 5000 */
+        u.umoney0 = 0;
         skill_init(Skill_V);
         break;
     case PM_WIZARD:
@@ -804,13 +810,17 @@ u_init()
             ini_inv(Magicmarker);
         if (!rn2(5))
             ini_inv(Blindfold);
-        u.umoney0 = 0 + 5000;  /* Original 0 plus 5000 */
+        u.umoney0 = 0;
         skill_init(Skill_W);
         break;
 
     default: /* impossible */
         break;
     }
+
+    /* Add beginner bonus to starting gold (first-time mode) */
+    if (flags.beginner)
+        u.umoney0 += 5000;
 
     /*** Race-specific initializations ***/
     switch (Race_switch) {
@@ -891,8 +901,9 @@ u_init()
         ini_inv(Money);
     u.umoney0 += hidden_gold(); /* in case sack has gold in it */
 
-    /* Give every role a magic whistle */
-    ini_inv(MagicWhistle);
+    /* Give magic whistle only in first-time mode */
+    if (flags.beginner)
+        ini_inv(MagicWhistle);
 
     find_ac();     /* get initial ac value */
     init_attr(75); /* init attribute values */
