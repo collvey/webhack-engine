@@ -48,7 +48,7 @@ emcc -O2 ^
      -s EXPORT_NAME=NetHackModule ^
      -s ENVIRONMENT=web ^
      -s EXPORTED_RUNTIME_METHODS=FS,ccall,cwrap,UTF8ToString,allocateUTF8 ^
-     -s EXPORTED_FUNCTIONS=_main,_save_to_slot,_load_from_slot,_list_save_slots,_delete_save_slot,_init_save_slots,_set_option_direct ^
+     -s EXPORTED_FUNCTIONS=_main,_save_to_slot,_load_from_slot,_list_save_slots,_delete_save_slot,_init_save_slots,_wasm_early_init,_set_option_direct ^
      -s INITIAL_MEMORY=67108864 ^
      -s ASYNCIFY=1 ^
      -s ASYNCIFY_STACK_SIZE=262144 ^

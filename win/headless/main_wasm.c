@@ -92,6 +92,52 @@ void wasm_cleanup_stale_lockfiles(void) {
     }
 }
 
+/* Early WASM initialization - called from worker before main()
+ * This sets up the environment so file operations work correctly:
+ * 1. Initializes file path prefixes (fqn_prefix[]) for fqname() 
+ * 2. Cleans up stale lock files from previous session
+ * 
+ * MUST be called after filesystem mount/sync but before any file operations
+ * like list_save_slots(), init_save_slots(), etc.
+ */
+EMSCRIPTEN_KEEPALIVE
+void wasm_early_init(void) {
+    static boolean early_init_done = FALSE;
+    
+    if (early_init_done) {
+        return;
+    }
+    
+    /* Step 1: Initialize file path prefixes for fqname() */
+    
+#ifdef VAR_PLAYGROUND
+    {
+        int len = strlen(VAR_PLAYGROUND);
+        fqn_prefix[SCOREPREFIX] = (char *) alloc(len + 2);
+        Strcpy(fqn_prefix[SCOREPREFIX], VAR_PLAYGROUND);
+        if (fqn_prefix[SCOREPREFIX][len - 1] != '/') {
+            fqn_prefix[SCOREPREFIX][len] = '/';
+            fqn_prefix[SCOREPREFIX][len + 1] = '\0';
+        }
+        /* Point all file prefixes to VAR_PLAYGROUND */
+        fqn_prefix[LEVELPREFIX] = fqn_prefix[SCOREPREFIX];
+        fqn_prefix[SAVEPREFIX] = fqn_prefix[SCOREPREFIX];
+        fqn_prefix[BONESPREFIX] = fqn_prefix[SCOREPREFIX];
+        fqn_prefix[LOCKPREFIX] = fqn_prefix[SCOREPREFIX];
+        fqn_prefix[TROUBLEPREFIX] = fqn_prefix[SCOREPREFIX];
+    }
+#endif
+    
+    /* Step 2: Clean up stale lock files from previous session
+     * Lock files are only valid during active gameplay. When the page loads,
+     * any lock files in IndexedDB are stale (from crashed/closed browser).
+     * Do this early so the filesystem is clean before any game operations.
+     */
+    wasm_cleanup_stale_lockfiles();
+    
+    early_init_done = TRUE;
+}
+
 /* Sync saves to IndexedDB (call after NetHack saves) */
 void wasm_sync_saves(void) {
     EM_ASM(
@@ -123,24 +169,9 @@ int main(int argc, char* argv[]) {
     /* Set up options */
     initoptions();
     
-    /* Set up file prefixes for save/level files (from unixmain.c) */
-#ifdef VAR_PLAYGROUND
-    {
-        int len = strlen(VAR_PLAYGROUND);
-        fqn_prefix[SCOREPREFIX] = (char *) alloc(len + 2);
-        Strcpy(fqn_prefix[SCOREPREFIX], VAR_PLAYGROUND);
-        if (fqn_prefix[SCOREPREFIX][len - 1] != '/') {
-            fqn_prefix[SCOREPREFIX][len] = '/';
-            fqn_prefix[SCOREPREFIX][len + 1] = '\0';
-        }
-        /* Point all file prefixes to VAR_PLAYGROUND */
-        fqn_prefix[LEVELPREFIX] = fqn_prefix[SCOREPREFIX];
-        fqn_prefix[SAVEPREFIX] = fqn_prefix[SCOREPREFIX];
-        fqn_prefix[BONESPREFIX] = fqn_prefix[SCOREPREFIX];
-        fqn_prefix[LOCKPREFIX] = fqn_prefix[SCOREPREFIX];
-        fqn_prefix[TROUBLEPREFIX] = fqn_prefix[SCOREPREFIX];
-    }
-#endif
+    /* Run early initialization (may have already been called from worker)
+     * This initializes file prefixes and cleans up stale lock files */
+    wasm_early_init();
     
     /* Initialize game data files (MUST be before vision_init) */
     dlb_init();
@@ -151,14 +182,6 @@ int main(int argc, char* argv[]) {
     
     /* Create game windows (WIN_MAP, WIN_MESSAGE, etc.) */
     display_gamewindows();
-    
-    /* Clean up stale lock files before checking for save file
-     * Lock files are temporary level storage created during gameplay.
-     * If the browser was closed mid-game, lock files persist in IndexedDB.
-     * When we restore from a .sav file, dorecover() will extract fresh
-     * lock files from the save, so pre-existing ones are stale and must be deleted.
-     */
-    wasm_cleanup_stale_lockfiles();
     
     /* Set default player name so we have a save filename to check */
     strcpy(plname, "player");

@@ -366,13 +366,6 @@ int save_to_slot(int slot_num, const char *render_mode, const char *tileset_id)
      * NetHack has internal flags that control whether saving is allowed.
      * If a previous save didn't clean up properly, these flags might block us.
      */
-    fprintf(stderr, "\n[DEBUG] === PROGRAM STATE BEFORE dosave0() ===\n");
-    fprintf(stderr, "[DEBUG] program_state.gameover = %d (should be 0)\n", program_state.gameover);
-    fprintf(stderr, "[DEBUG] program_state.something_worth_saving = %d (should be 1)\n", program_state.something_worth_saving);
-    fprintf(stderr, "[DEBUG] program_state.panicking = %d (should be 0)\n", program_state.panicking);
-    fprintf(stderr, "[DEBUG] program_state.done_hup = %d (should be 0)\n", program_state.done_hup);
-    fprintf(stderr, "[DEBUG] SAVEF = '%s'\n", SAVEF);
-    fprintf(stderr, "[DEBUG] ==========================================\n\n");
     
     /* Call our non-destructive save function
      * This is a modified version of dosave0() that DOES NOT free memory.
@@ -387,17 +380,9 @@ int save_to_slot(int slot_num, const char *render_mode, const char *tileset_id)
      * NetHack tries to compress the save file using fork(), which
      * doesn't work in browsers. The save still succeeds uncompressed.
      */
-    fprintf(stderr, "[save_slots] Calling dosave_slot_nondestructive()...\n");
     result = dosave_slot_nondestructive();
-    fprintf(stderr, "[save_slots] dosave_slot_nondestructive() returned: %d (1=success)\n", result);
     
     /* === DEBUG: Check program state AFTER save === */
-    fprintf(stderr, "\n[DEBUG] === PROGRAM STATE AFTER dosave0() ===\n");
-    fprintf(stderr, "[DEBUG] program_state.gameover = %d\n", program_state.gameover);
-    fprintf(stderr, "[DEBUG] program_state.something_worth_saving = %d\n", program_state.something_worth_saving);
-    fprintf(stderr, "[DEBUG] program_state.panicking = %d\n", program_state.panicking);
-    fprintf(stderr, "[DEBUG] program_state.done_hup = %d\n", program_state.done_hup);
-    fprintf(stderr, "[DEBUG] =========================================\n\n");
     
     if (result) {
         fprintf(stderr, "[save_slots] ✓ Game state saved to memory (temporary storage)\n");
@@ -405,17 +390,8 @@ int save_to_slot(int slot_num, const char *render_mode, const char *tileset_id)
     
     /* Restore original SAVEF */
     strcpy(SAVEF, original_savef);
-    fprintf(stderr, "[save_slots] Restored SAVEF to: '%s'\n", SAVEF);
     
     if (!result) {
-        fprintf(stderr, "\n[ERROR] ❌ Save FAILED!\n");
-        fprintf(stderr, "[ERROR] This means the save function couldn't write the file.\n");
-        fprintf(stderr, "[ERROR] Common reasons:\n");
-        fprintf(stderr, "[ERROR]   1. program_state.something_worth_saving is FALSE\n");
-        fprintf(stderr, "[ERROR]   2. SAVEF path is empty or invalid\n");
-        fprintf(stderr, "[ERROR]   3. File couldn't be opened for writing\n");
-        fprintf(stderr, "[ERROR]   4. Disk/filesystem error\n");
-        fprintf(stderr, "[ERROR] Check the DEBUG output above for the actual state values.\n\n");
         return 0;
     }
     
@@ -424,13 +400,9 @@ int save_to_slot(int slot_num, const char *render_mode, const char *tileset_id)
      * Unlike dosave0(), it doesn't set gameover, done_hup, or clear
      * something_worth_saving. The game continues running normally.
      */
-    fprintf(stderr, "[save_slots] ✓ Save successful, game state unchanged\n");
-    fprintf(stderr, "[save_slots] ✓ All level data embedded in .sav file (no separate lock files needed)\n");
     
     /* Save metadata (non-blocking file I/O) */
-    fprintf(stderr, "[save_slots] Saving metadata...\n");
     if (!save_slot_metadata(slot_num, render_mode, tileset_id)) {
-        fprintf(stderr, "[save_slots] Warning: metadata save failed\n");
         /* Continue anyway - slot file is valid */
     }
     
@@ -651,8 +623,6 @@ const char* list_save_slots(void)
     int first = 1;
     struct stat st;
     
-    // fprintf(stderr, "[save_slots] list_save_slots: START\n");
-    
     /* Start JSON array */
     strcpy(result, "[");
     
@@ -672,7 +642,6 @@ const char* list_save_slots(void)
         /* Read metadata file */
         fp = fopen(meta_path, "r");
         if (!fp) {
-            fprintf(stderr, "[save_slots] Failed to open metadata: %s\n", meta_path);
             continue;
         }
         
@@ -694,9 +663,6 @@ const char* list_save_slots(void)
     /* End JSON array */
     strcat(result, "]");
     
-    // fprintf(stderr, "[save_slots] list_save_slots: Found %d slots\n", 
-    //         first ? 0 : (11 - first));
-    
     return result;
 }
 
@@ -708,8 +674,6 @@ int delete_save_slot(int slot_num)
     char meta_relpath[256];
     const char *slot_save;
     const char *meta_path;
-    
-    fprintf(stderr, "[save_slots] delete_save_slot: slot=%d\n", slot_num);
     
     if (slot_num < 1 || slot_num > MAX_SLOTS) {
         return 0;
