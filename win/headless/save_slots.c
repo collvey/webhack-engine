@@ -630,8 +630,8 @@ const char* list_save_slots(void)
     /* Start JSON array */
     strcpy(result, "[");
     
-    /* Check each slot */
-    for (slot = 1; slot <= MAX_SLOTS; slot++) {
+    /* Check each slot (starting from 0 for auto-save) */
+    for (slot = 0; slot <= MAX_SLOTS; slot++) {
         /* Build relative path for metadata */
         sprintf(meta_relpath, "%s/slot_%03d.meta", SLOT_DIR, slot);
         
@@ -679,7 +679,7 @@ int delete_save_slot(int slot_num)
     const char *slot_save;
     const char *meta_path;
     
-    if (slot_num < 1 || slot_num > MAX_SLOTS) {
+    if (slot_num < 0 || slot_num > MAX_SLOTS) {
         return 0;
     }
     
