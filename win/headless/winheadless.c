@@ -1509,6 +1509,14 @@ static void
 headless_update_inventory(void)
 {
     /* M3: inventory updates */
+    /* When perm_invent is enabled, the game calls this to notify the frontend
+     * that inventory has changed (item picked up, dropped, used, etc.)
+     * Frontend should refresh its permanent inventory display */
+    // fprintf(stderr, "[headless] update_inventory: perm_invent=%d worth_saving=%d\n", 
+    //         iflags.perm_invent, program_state.something_worth_saving);
+    if (iflags.perm_invent && program_state.something_worth_saving) {
+        emit_event("UPDATE_INVENTORY", NULL);
+    }
 }
 
 static void

@@ -29,7 +29,6 @@ var LibraryHeadless = {
      * Based on BrowserHack's approach
      */
     pre_run: function() {
-      logger.info('pre_run: Initializing filesystem');
       
       // Set up environment
       if (typeof ENV !== 'undefined') {
@@ -60,29 +59,22 @@ var LibraryHeadless = {
       // For Node.js environment (testing), we don't use IDBFS
       // For browser environment, we would mount IDBFS here
       if (typeof window !== 'undefined' && typeof indexedDB !== 'undefined') {
-        logger.info('Browser environment detected, mounting IDBFS');
         try {
           FS.mount(IDBFS, {}, '/save');
           
-          // Load existing saves from IndexedDB
-          logger.info('Syncing filesystem from IndexedDB...');
           FS.syncfs(true, function(err) {
             if (err) {
-              logger.info('Error syncing filesystem: ' + err);
-            } else {
-              logger.info('Filesystem synced successfully');
+              logger.error('Error syncing filesystem: ' + err);
             }
           });
         } catch(e) {
-          logger.info('Error mounting IDBFS: ' + e);
+          logger.error('Error mounting IDBFS: ' + e);
         }
       } else {
         logger.debug('Node.js/testing environment - using memory-only filesystem');
         // In Node.js, /save is just a regular in-memory directory
         // Files will be created there but won't persist across runs
       }
-      
-      logger.info('Filesystem initialized');
     }
   }
 };
@@ -92,7 +84,6 @@ mergeInto(LibraryManager.library, LibraryHeadless);
 mergeInto(LibraryManager.library, {
   // Start waiting for input - called from C
   headless_start_input_wait: function() {
-    logger.debug('start_input_wait called');
     
     // Determine the global object (Node.js: global, Web Worker: self, Browser: window)
     var globalObj = (typeof self !== 'undefined') ? self 
@@ -121,13 +112,11 @@ mergeInto(LibraryManager.library, {
     var result = globalObj.wasmGetNextInputKey();
     
     if (typeof result === 'number') {
-      logger.verbose('Got buffered keycode immediately: ' + result);
       globalObj.headlessInputState.pendingKeycode = result;
       globalObj.headlessInputState.waitingForInput = false;
     } 
     else if (result && typeof result.then === 'function') {
       result.then(function(keycode) {
-        logger.verbose('Got keycode from Promise: ' + keycode);
         globalObj.headlessInputState.pendingKeycode = keycode;
         globalObj.headlessInputState.waitingForInput = false;
       }).catch(function(err) {
@@ -149,9 +138,6 @@ mergeInto(LibraryManager.library, {
     
     if (globalObj && globalObj.headlessInputState) {
       var ready = globalObj.headlessInputState.pendingKeycode >= 0 ? 1 : 0;
-      if (ready) {
-        logger.verbose('Input ready! Keycode: ' + globalObj.headlessInputState.pendingKeycode);
-      }
       return ready;
     }
     return 0;
@@ -166,7 +152,6 @@ mergeInto(LibraryManager.library, {
     
     if (globalObj && globalObj.headlessInputState) {
       var keycode = globalObj.headlessInputState.pendingKeycode;
-      logger.verbose('get_input_keycode returning: ' + keycode);
       globalObj.headlessInputState.pendingKeycode = -1;
       return keycode;
     }
@@ -176,9 +161,7 @@ mergeInto(LibraryManager.library, {
   // Called from C when NetHack needs keyboard input (nhgetch)
   // Uses Asyncify to block C execution until JavaScript Promise resolves with keycode
   headless_wait_for_input_blocking__deps: ['$Asyncify'],
-  headless_wait_for_input_blocking: function() {
-    logger.debug('C code requesting input');
-    
+  headless_wait_for_input_blocking: function() {    
     var globalObj = (typeof self !== 'undefined') ? self 
                   : (typeof global !== 'undefined') ? global
                   : (typeof window !== 'undefined') ? window
@@ -198,24 +181,20 @@ mergeInto(LibraryManager.library, {
     // - number: Pre-buffered keycode (rare, for testing environments)
     // - Promise: Will resolve when user presses key
     if (typeof result === 'number') {
-      logger.verbose('Pre-buffered keycode available: ' + result);
       return result;
     }
     
     if (result && typeof result.then === 'function') {
-      logger.verbose('Waiting for Promise to resolve...');
       
       // Asyncify.handleSleep blocks C execution and resumes when wakeUp() is called
       var asyncifyResult = Asyncify.handleSleep(function(wakeUp) {
         result.then(function(keycode) {
-          logger.verbose('Promise resolved, waking C code with keycode: ' + keycode);
           wakeUp(keycode);
         }).catch(function(err) {
           logger.error('Promise rejected: ' + err);
           throw new Error('[headless_lib.js] Input promise failed: ' + err);
         });
       });
-      logger.verbose('C code resumed with keycode: ' + asyncifyResult);
       return asyncifyResult;
     }
     
@@ -227,7 +206,6 @@ mergeInto(LibraryManager.library, {
   // Returns pointer to line in WASM memory (caller must free), or 0 on EOF
   headless_read_line_blocking__deps: ['$Asyncify', '$stringToNewUTF8'],
   headless_read_line_blocking: function() {
-    logger.debug('C code requesting line from stdin (for RESP)');
     
     var globalObj = (typeof self !== 'undefined') ? self 
                   : (typeof global !== 'undefined') ? global
@@ -236,7 +214,6 @@ mergeInto(LibraryManager.library, {
     
     // Check if wasmWaitForStdinLine exists (provided by worker)
     if (typeof globalObj.wasmWaitForStdinLine !== 'function') {
-      logger.debug('wasmWaitForStdinLine not defined - using fallback fgets');
       return 0; // Return NULL pointer, C will use regular fgets
     }
     
@@ -244,16 +221,12 @@ mergeInto(LibraryManager.library, {
     
     // wasmWaitForStdinLine returns Promise that resolves with a line string
     if (result && typeof result.then === 'function') {
-      logger.verbose('Waiting for stdin line Promise...');
       
       var asyncifyResult = Asyncify.handleSleep(function(wakeUp) {
         result.then(function(lineStr) {
-          logger.verbose('Got stdin line, length: ' + lineStr.length);
-          logger.verbose('  Line preview: ' + lineStr.substring(0, 80));
           
           // Convert JS string to C string in WASM memory
           var strPtr = stringToNewUTF8(lineStr);
-          logger.verbose('Allocated C string at ptr: ' + strPtr);
           wakeUp(strPtr);
         }).catch(function(err) {
           logger.error('stdin line Promise rejected: ' + err);
@@ -261,11 +234,9 @@ mergeInto(LibraryManager.library, {
         });
       });
       
-      logger.verbose('C code resumed with string ptr: ' + asyncifyResult);
       return asyncifyResult;
     }
     
-    logger.debug('wasmWaitForStdinLine returned invalid type: ' + typeof result);
     return 0; // NULL
   }
 });
