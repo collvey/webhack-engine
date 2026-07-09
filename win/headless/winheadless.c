@@ -186,10 +186,20 @@ emit_map_frame_ex(int force)
     /* Format: {"width":80,"height":21,"cursor":{"x":X,"y":Y},"cells":[{"x":X,"y":Y,"glyph":N,"ch":"C","color":N,"special":N},...]} */
     char buf[131072];  /* Larger buffer for full cell data */
     int pos = 0;
-    
+
+    /* Branch identity for the current level.  NetHack keeps walls as the same
+     * cmap glyph everywhere and swaps in alternate wall tiles per branch via
+     * substitute_tiles() (see win/share/tilemap.c).  The headless port sends
+     * the branch so the client can perform the equivalent tile substitution. */
+    const char *branch = "main";
+    if (In_sokoban(&u.uz))      branch = "sokoban";
+    else if (In_mines(&u.uz))   branch = "mines";
+    else if (Is_knox(&u.uz))    branch = "knox";
+    else if (In_hell(&u.uz))    branch = "gehennom";
+
     pos += snprintf(buf + pos, sizeof(buf) - pos,
-                    "{\"width\":%d,\"height\":%d,\"cursor\":{\"x\":%d,\"y\":%d},\"cells\":[",
-                    MAP_COLS, MAP_ROWS, g_cursor_x, g_cursor_y);
+                    "{\"width\":%d,\"height\":%d,\"branch\":\"%s\",\"cursor\":{\"x\":%d,\"y\":%d},\"cells\":[",
+                    MAP_COLS, MAP_ROWS, branch, g_cursor_x, g_cursor_y);
     
     /* Emit cells with mapglyph conversion */
     int first = 1;
