@@ -21,7 +21,7 @@ int mnum;
     case PM_JACKAL: return "\350\261\272"; /* 豺 */
     case PM_FOX: return "\347\213\220\347\213\270"; /* 狐狸 */
     case PM_COYOTE: return "\351\203\212\347\213\274"; /* 郊狼 */
-    case PM_WEREJACKAL: return "\347\213\274\344\272\272\350\261\272"; /* 狼人豺 */
+    case PM_WEREJACKAL: return "\347\213\274\344\272\272\350\261\272"; /* 豺狼人 */
     case PM_LITTLE_DOG: return "\345\260\217\347\213\227"; /* 小狗 */
     case PM_DINGO: return "\346\276\263\346\264\262\351\207\216\347\212\254"; /* 澳洲野犬 */
     case PM_DOG: return "\347\213\227"; /* 狗 */
