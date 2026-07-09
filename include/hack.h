@@ -484,7 +484,10 @@ enum bodypart_types {
 #ifndef min
 #define min(x, y) ((x) < (y) ? (x) : (y))
 #endif
-#define plur(x) (((x) == 1) ? "" : "s")
+/* English plural "s" suffix appended into format strings; no-plural languages
+   (zh) never want it — gate on nhi18n_uses_plurals() so "%ld gold piece%s" reads
+   "5 gold pieces" in English but "5金币" (no stray 's') in Chinese. */
+#define plur(x) ((nhi18n_uses_plurals() && (x) != 1) ? "s" : "")
 
 #define ARM_BONUS(obj)                      \
     (objects[(obj)->otyp].a_ac + (obj)->spe \
@@ -537,5 +540,9 @@ enum bodypart_types {
 
 #define DEVTEAM_EMAIL "devteam@nethack.org"
 #define DEVTEAM_URL "https://www.nethack.org/"
+
+/* WebHack i18n layer. Included last (after config.h has pulled in system
+   headers) so the gettext-style `_` macro cannot shadow system uses of `_`. */
+#include "nhi18n.h"
 
 #endif /* HACK_H */

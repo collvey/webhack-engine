@@ -89,7 +89,7 @@ boolean quietly;
                 if (!quietly)
                     /* have just been given "You <do something with>
                        the figurine and it transforms." message */
-                    pline("... into a pile of dust.");
+                    pline(_("... into a pile of dust."));
                 break; /* mtmp is null */
             }
         } else if (!rn2(3)) {
@@ -98,7 +98,7 @@ boolean quietly;
             pm = rndmonst();
             if (!pm) {
                 if (!quietly)
-                    There("seems to be nothing available for a familiar.");
+                    There(_("seems to be nothing available for a familiar."));
                 break;
             }
         }
@@ -106,7 +106,7 @@ boolean quietly;
         mtmp = makemon(pm, x, y, MM_EDOG | MM_IGNOREWATER | NO_MINVENT);
         if (otmp && !mtmp) { /* monster was genocided or square occupied */
             if (!quietly)
-                pline_The("figurine writhes and then shatters into pieces!");
+                pline_The(_("figurine writhes and then shatters into pieces!"));
             break;
         }
     } while (!mtmp && --trycnt > 0);
@@ -128,7 +128,7 @@ boolean quietly;
             mtmp->mtame = 0;   /* not tame after all */
             if (chance == 2) { /* hostile (cursed figurine) */
                 if (!quietly)
-                    You("get a bad feeling about this.");
+                    You(_("get a bad feeling about this."));
                 mtmp->mpeaceful = 0;
                 set_malign(mtmp);
             }
@@ -172,13 +172,13 @@ makedog()
     if (!*petname && pettype == PM_LITTLE_DOG) {
         /* All of these names were for dogs. */
         if (Role_if(PM_CAVEMAN))
-            petname = "Slasher"; /* The Warrior */
+            petname = _("Slasher"); /* The Warrior */
         if (Role_if(PM_SAMURAI))
-            petname = "Hachi"; /* Shibuya Station */
+            petname = _("Hachi"); /* Shibuya Station */
         if (Role_if(PM_BARBARIAN))
-            petname = "Idefix"; /* Obelix */
+            petname = _("Idefix"); /* Obelix */
         if (Role_if(PM_RANGER))
-            petname = "Sirius"; /* Orion's dog */
+            petname = _("Sirius"); /* Orion's dog */
     }
 
     mtmp = makemon(&mons[pettype], u.ux, u.uy, MM_EDOG);
@@ -608,21 +608,21 @@ boolean pets_only; /* true for ascension or final escape */
                 mdrop_special_objs(mtmp); /* drop Amulet */
             } else if (mtmp->meating || mtmp->mtrapped) {
                 if (canseemon(mtmp))
-                    pline("%s is still %s.", Monnam(mtmp),
-                          mtmp->meating ? "eating" : "trapped");
+                    pline(_("%s is still %s."), Monnam(mtmp),
+                          mtmp->meating ? _("eating") : _("trapped"));
                 stay_behind = TRUE;
             } else if (mon_has_amulet(mtmp)) {
                 if (canseemon(mtmp))
-                    pline("%s seems very disoriented for a moment.",
+                    pline(_("%s seems very disoriented for a moment."),
                           Monnam(mtmp));
                 stay_behind = TRUE;
             }
             if (stay_behind) {
                 if (mtmp->mleashed) {
-                    pline("%s leash suddenly comes loose.",
+                    pline(_("%s leash suddenly comes loose."),
                           humanoid(mtmp->data)
-                              ? (mtmp->female ? "Her" : "His")
-                              : "Its");
+                              ? (mtmp->female ? _("Her") : _("His"))
+                              : _("Its"));
                     m_unleash(mtmp, FALSE);
                 }
                 if (mtmp == u.usteed) {
@@ -666,7 +666,7 @@ boolean pets_only; /* true for ascension or final escape */
         } else if (mtmp->mleashed) {
             /* this can happen if your quest leader ejects you from the
                "home" level while a leashed pet isn't next to you */
-            pline("%s leash goes slack.", s_suffix(Monnam(mtmp)));
+            pline(_("%s leash goes slack."), s_suffix(Monnam(mtmp)));
             m_unleash(mtmp, FALSE);
         }
     }
@@ -904,10 +904,10 @@ register struct obj *obj;
                 boolean big_corpse =
                     (obj->otyp == CORPSE && obj->corpsenm >= LOW_PM
                      && mons[obj->corpsenm].msize > mtmp->data->msize);
-                pline("%s catches %s%s", Monnam(mtmp), the(xname(obj)),
-                      !big_corpse ? "." : ", or vice versa!");
+                pline(_("%s catches %s%s"), Monnam(mtmp), the(xname(obj)),
+                      !big_corpse ? "." : _(", or vice versa!"));
             } else if (cansee(mtmp->mx, mtmp->my))
-                pline("%s.", Tobjnam(obj, "stop"));
+                pline(_("%s."), Tobjnam(obj, _("stop")));
             /* dog_eat expects a floor object */
             place_object(obj, mtmp->mx, mtmp->my);
             (void) dog_eat(mtmp, obj, mtmp->mx, mtmp->my, FALSE);
@@ -987,11 +987,11 @@ boolean was_dead;
         if (!quietly && cansee(mtmp->mx, mtmp->my)) {
             if (haseyes(youmonst.data)) {
                 if (haseyes(mtmp->data))
-                    pline("%s %s to look you in the %s.", Monnam(mtmp),
-                          mtmp->mpeaceful ? "seems unable" : "refuses",
+                    pline(_("%s %s to look you in the %s."), Monnam(mtmp),
+                          mtmp->mpeaceful ? _("seems unable") : _("refuses"),
                           body_part(EYE));
                 else
-                    pline("%s avoids your gaze.", Monnam(mtmp));
+                    pline(_("%s avoids your gaze."), Monnam(mtmp));
             }
         }
     } else {
@@ -1003,8 +1003,8 @@ boolean was_dead;
 
     if (!mtmp->mtame) {
         if (!quietly && canspotmon(mtmp))
-            pline("%s %s.", Monnam(mtmp),
-                  mtmp->mpeaceful ? "is no longer tame" : "has become feral");
+            pline(_("%s %s."), Monnam(mtmp),
+                  mtmp->mpeaceful ? _("is no longer tame") : _("has become feral"));
         newsym(mtmp->mx, mtmp->my);
         /* a life-saved monster might be leashed;
            don't leave it that way if it's no longer tame */

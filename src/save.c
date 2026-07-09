@@ -81,13 +81,13 @@ dosave()
     if (iflags.debug_fuzzer)
         return 0;
     clear_nhwindow(WIN_MESSAGE);
-    if (yn("Really save?") == 'n') {
+    if (yn(_("Really save?")) == 'n') {
         clear_nhwindow(WIN_MESSAGE);
         if (multi > 0)
             nomul(0);
     } else {
         clear_nhwindow(WIN_MESSAGE);
-        pline("Saving...");
+        pline(_("Saving..."));
 #if defined(UNIX) || defined(VMS) || defined(__EMX__)
         program_state.done_hup = 0;
 #endif
@@ -95,7 +95,7 @@ dosave()
             u.uhp = -1; /* universal game's over indicator */
             /* make sure they see the Saving message */
             display_nhwindow(WIN_MESSAGE, TRUE);
-            exit_nhwindows("Be seeing you...");
+            exit_nhwindows(_("Be seeing you..."));
             nh_terminate(EXIT_SUCCESS);
         } else
             (void) doredraw();
@@ -146,8 +146,8 @@ dosave0()
         if (fd > 0) {
             (void) nhclose(fd);
             clear_nhwindow(WIN_MESSAGE);
-            There("seems to be an old save file.");
-            if (yn("Overwrite the old file?") == 'n') {
+            There(_("seems to be an old save file."));
+            if (yn(_("Overwrite the old file?")) == 'n') {
                 nh_compress(fq_save);
                 return 0;
             }
@@ -158,7 +158,7 @@ dosave0()
 
     fd = create_savefile();
     if (fd < 0) {
-        HUP pline("Cannot open save file.");
+        HUP pline(_("Cannot open save file."));
         (void) delete_savefile(); /* ab@unido */
         return 0;
     }
@@ -179,7 +179,7 @@ dosave0()
     dotrow = 2;
     curs(WIN_MAP, 1, 1);
     if (!WINDOWPORT("X11"))
-        putstr(WIN_MAP, 0, "Saving:");
+        putstr(WIN_MAP, 0, _("Saving:"));
 #endif
 #ifdef MFLOPPY
     /* make sure there is enough disk space */
@@ -197,8 +197,8 @@ dosave0()
         if (needed > fds) {
             HUP
             {
-                There("is insufficient space on SAVE disk.");
-                pline("Require %ld bytes but only have %ld.", needed, fds);
+                There(_("is insufficient space on SAVE disk."));
+                pline(_("Require %ld bytes but only have %ld."), needed, fds);
             }
             flushout();
             (void) nhclose(fd);
@@ -362,7 +362,7 @@ char *whynot;
 {
     if (fd < 0) {
         pline1(whynot);
-        pline("Probably someone removed it.");
+        pline(_("Probably someone removed it."));
         Strcpy(killer.name, whynot);
         done(TRICKED);
         return TRUE;
@@ -1414,7 +1414,7 @@ int lev;
                 return FALSE;
     }
     if (wizard) {
-        pline("Swapping in `%s'.", from);
+        pline(_("Swapping in `%s'."), from);
         wait_synch();
     }
     copyfile(from, to);
@@ -1445,7 +1445,7 @@ swapout_oldest()
     set_levelfile_name(from, oldest);
     set_levelfile_name(to, oldest);
     if (wizard) {
-        pline("Swapping out `%s'.", from);
+        pline(_("Swapping out `%s'."), from);
         wait_synch();
     }
     copyfile(from, to);

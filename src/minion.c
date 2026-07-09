@@ -61,7 +61,7 @@ struct monst *mon;
 
         if (uwep && uwep->oartifact == ART_DEMONBANE && is_demon(ptr)) {
             if (canseemon(mon))
-                pline("%s looks puzzled for a moment.", Monnam(mon));
+                pline(_("%s looks puzzled for a moment."), Monnam(mon));
             return 0;
         }
 
@@ -148,7 +148,7 @@ struct monst *mon;
                     (atyp != u.ualign.type) ^ !mtmp->mpeaceful;
             }
             if (is_demon(ptr) && canseemon(mtmp))
-                pline("%s appears in a cloud of smoke!", Amonnam(mtmp));
+                pline(_("%s appears in a cloud of smoke!"), Amonnam(mtmp));
         }
         cnt--;
     }
@@ -209,13 +209,13 @@ boolean talk;
     if (mon) {
         if (talk) {
             if (!Deaf)
-                pline_The("voice of %s booms:", align_gname(alignment));
+                pline_The(_("voice of %s booms:"), align_gname(alignment));
             else
-                You_feel("%s booming voice:",
+                You_feel(_("%s booming voice:"),
                          s_suffix(align_gname(alignment)));
-            verbalize("Thou shalt pay for thine indiscretion!");
+            verbalize(_("Thou shalt pay for thine indiscretion!"));
             if (canspotmon(mon))
-                pline("%s appears before you.", Amonnam(mon));
+                pline(_("%s appears before you."), Amonnam(mon));
             mon->mstrategy &= ~STRAT_APPEARMSG;
         }
         mon->mpeaceful = FALSE;
@@ -233,7 +233,7 @@ register struct monst *mtmp;
     long cash, demand, offer;
 
     if (uwep && uwep->oartifact == ART_EXCALIBUR) {
-        pline("%s looks very angry.", Amonnam(mtmp));
+        pline(_("%s looks very angry."), Amonnam(mtmp));
         mtmp->mpeaceful = mtmp->mtame = 0;
         set_malign(mtmp);
         newsym(mtmp->mx, mtmp->my);
@@ -256,17 +256,17 @@ register struct monst *mtmp;
 
         mtmp->minvis = mtmp->perminvis = 0;
         if (wasunseen && canspotmon(mtmp)) {
-            pline("%s appears before you.", Amonnam(mtmp));
+            pline(_("%s appears before you."), Amonnam(mtmp));
             mtmp->mstrategy &= ~STRAT_APPEARMSG;
         }
         newsym(mtmp->mx, mtmp->my);
     }
     if (youmonst.data->mlet == S_DEMON) { /* Won't blackmail their own. */
         if (!Deaf)
-            pline("%s says, \"Good hunting, %s.\"", Amonnam(mtmp),
-                  flags.female ? "Sister" : "Brother");
+            pline(_("%s says, \"Good hunting, %s.\""), Amonnam(mtmp),
+                  flags.female ? _("Sister") : _("Brother"));
         else if (canseemon(mtmp))
-            pline("%s says something.", Amonnam(mtmp));
+            pline(_("%s says something."), Amonnam(mtmp));
         if (!tele_restrict(mtmp))
             (void) rloc(mtmp, TRUE);
         return 1;
@@ -292,21 +292,21 @@ register struct monst *mtmp;
             demand = cash + (long) rn1(1000, 125);
 
         if (!Deaf)
-            pline("%s demands %ld %s for safe passage.",
+            pline(_("%s demands %ld %s for safe passage."),
                   Amonnam(mtmp), demand, currency(demand));
         else if (canseemon(mtmp))
-            pline("%s seems to be demanding something.", Amonnam(mtmp));
+            pline(_("%s seems to be demanding something."), Amonnam(mtmp));
 
         offer = 0L;
         if (!Deaf && ((offer = bribe(mtmp)) >= demand)) {
-            pline("%s vanishes, laughing about cowardly mortals.",
+            pline(_("%s vanishes, laughing about cowardly mortals."),
                   Amonnam(mtmp));
         } else if (offer > 0L
                    && (long) rnd(5 * ACURR(A_CHA)) > (demand - offer)) {
-            pline("%s scowls at you menacingly, then vanishes.",
+            pline(_("%s scowls at you menacingly, then vanishes."),
                   Amonnam(mtmp));
         } else {
-            pline("%s gets angry...", Amonnam(mtmp));
+            pline(_("%s gets angry..."), Amonnam(mtmp));
             mtmp->mpeaceful = 0;
             set_malign(mtmp);
             return 0;
@@ -324,23 +324,23 @@ struct monst *mtmp;
     long offer;
     long umoney = money_cnt(invent);
 
-    getlin("How much will you offer?", buf);
+    getlin(_("How much will you offer?"), buf);
     if (sscanf(buf, "%ld", &offer) != 1)
         offer = 0L;
 
     /*Michael Paddon -- fix for negative offer to monster*/
     /*JAR880815 - */
     if (offer < 0L) {
-        You("try to shortchange %s, but fumble.", mon_nam(mtmp));
+        You(_("try to shortchange %s, but fumble."), mon_nam(mtmp));
         return 0L;
     } else if (offer == 0L) {
-        You("refuse.");
+        You(_("refuse."));
         return 0L;
     } else if (offer >= umoney) {
-        You("give %s all your gold.", mon_nam(mtmp));
+        You(_("give %s all your gold."), mon_nam(mtmp));
         offer = umoney;
     } else {
-        You("give %s %ld %s.", mon_nam(mtmp), offer, currency(offer));
+        You(_("give %s %ld %s."), mon_nam(mtmp), offer, currency(offer));
     }
     (void) money2mon(mtmp, offer);
     context.botl = 1;
@@ -437,10 +437,10 @@ struct monst *mon; /* if null, angel hasn't been created yet */
     if (mon) {
         if (canspotmon(mon)) {
             if (!Deaf) {
-                pline("%s rebukes you, saying:", Monnam(mon));
-                verbalize("Since you desire conflict, have some more!");
+                pline(_("%s rebukes you, saying:"), Monnam(mon));
+                verbalize(_("Since you desire conflict, have some more!"));
             } else {
-                pline("%s vanishes!", Monnam(mon));
+                pline(_("%s vanishes!"), Monnam(mon));
             }
         }
         mongone(mon);
@@ -467,18 +467,18 @@ gain_guardian_angel()
                      message will be heard even if that fails) */
     if (Conflict) {
         if (!Deaf)
-            pline("A voice booms:");
+            pline(_("A voice booms:"));
         else
-            You_feel("a booming voice:");
-        verbalize("Thy desire for conflict shall be fulfilled!");
+            You_feel(_("a booming voice:"));
+        verbalize(_("Thy desire for conflict shall be fulfilled!"));
         /* send in some hostile angels instead */
         lose_guardian_angel((struct monst *) 0);
     } else if (u.ualign.record > 8) { /* fervent */
         if (!Deaf)
-            pline("A voice whispers:");
+            pline(_("A voice whispers:"));
         else
-            You_feel("a soft voice:");
-        verbalize("Thou hast been worthy of me!");
+            You_feel(_("a soft voice:"));
+        verbalize(_("Thou hast been worthy of me!"));
         mm.x = u.ux;
         mm.y = u.uy;
         if (enexto(&mm, mm.x, mm.y, &mons[PM_ANGEL])
@@ -494,9 +494,9 @@ gain_guardian_angel()
             /* for 'hilite_pet'; after making tame, before next message */
             newsym(mtmp->mx, mtmp->my);
             if (!Blind)
-                pline("An angel appears near you.");
+                pline(_("An angel appears near you."));
             else
-                You_feel("the presence of a friendly angel near you.");
+                You_feel(_("the presence of a friendly angel near you."));
             /* make him strong enough vs. endgame foes */
             mtmp->m_lev = rn1(8, 15);
             mtmp->mhp = mtmp->mhpmax =

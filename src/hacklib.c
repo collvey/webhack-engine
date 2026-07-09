@@ -309,6 +309,12 @@ const char *s;
     Static char buf[BUFSZ];
 
     Strcpy(buf, s);
+    if (!nhi18n_uses_articles()) {
+        /* zh: possessive is the particle 的 (from the catalog); it -> its,
+           you -> your, and X -> X's all collapse to X的, so just append it */
+        Strcat(buf, _("'s"));
+        return buf;
+    }
     if (!strcmpi(buf, "it")) /* it -> its */
         Strcat(buf, "s");
     else if (!strcmpi(buf, "you")) /* you -> your */
@@ -542,6 +548,8 @@ int n;               /* note: should be non-negative */
 {
     register int dd = n % 10;
 
+    if (!nhi18n_uses_plurals()) /* zh: no English ordinal suffix (uses 第N instead) */
+        return "";
     return (dd == 0 || dd > 3 || (n % 100) / 10 == 1) ? "th"
                : (dd == 1) ? "st" : (dd == 2) ? "nd" : "rd";
 }

@@ -151,14 +151,14 @@ boolean talk;
 
     if (wizard && talk) {
         if (u.ualign.type != original_alignment) {
-            You("are currently %s instead of %s.", align_str(u.ualign.type),
+            You(_("are currently %s instead of %s."), align_str(u.ualign.type),
                 align_str(original_alignment));
         } else if (u.ualignbase[A_CURRENT] != original_alignment) {
-            You("have converted.");
+            You(_("have converted."));
         } else if (u.ualign.record < MIN_QUEST_ALIGN) {
-            You("are currently %d and require %d.", u.ualign.record,
+            You(_("are currently %d and require %d."), u.ualign.record,
                 MIN_QUEST_ALIGN);
-            if (yn_function("adjust?", (char *) 0, 'y') == 'y')
+            if (yn_function(_("adjust?"), (char *) 0, 'y') == 'y')
                 u.ualign.record = MIN_QUEST_ALIGN;
         }
     }
@@ -385,8 +385,8 @@ struct monst *mtmp;
         && (mtmp->mstrategy & STRAT_WAITMASK)) {
         /* Awaken the prisoner */
         if (canseemon(mtmp))
-            pline("%s speaks:", Monnam(mtmp));
-        verbalize("I'm finally free!");
+            pline(_("%s speaks:"), Monnam(mtmp));
+        verbalize(_("I'm finally free!"));
         mtmp->mstrategy &= ~STRAT_WAITMASK;
         mtmp->mpeaceful = 1;
 

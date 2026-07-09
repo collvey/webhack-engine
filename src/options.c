@@ -905,7 +905,7 @@ initoptions_finish()
      */
     if (!WINDOWPORT("safe-startup")) {
         if (iflags.hilite_delta && !wc2_supported("statushilites")) {
-            raw_printf("Status highlighting not supported for %s interface.",
+            raw_printf(_("Status highlighting not supported for %s interface."),
                        windowprocs.name);
             iflags.hilite_delta = 0;
         }
@@ -1032,9 +1032,9 @@ rejectoption(optname)
 const char *optname;
 {
 #ifdef MICRO
-    pline("\"%s\" settable only from %s.", optname, configfile);
+    pline(_("\"%s\" settable only from %s."), optname, configfile);
 #else
-    pline("%s can be set only from NETHACKOPTIONS or %s.", optname,
+    pline(_("%s can be set only from NETHACKOPTIONS or %s."), optname,
           configfile);
 #endif
 }
@@ -1096,8 +1096,8 @@ bad_negation(optname, with_parameter)
 const char *optname;
 boolean with_parameter;
 {
-    pline_The("%s option may not %sbe negated.", optname,
-              with_parameter ? "both have a value and " : "");
+    pline_The(_("%s option may not %sbe negated."), optname,
+              with_parameter ? _("both have a value and ") : "");
 }
 
 /*
@@ -1202,7 +1202,7 @@ const char *optn;
         return 0;
     if (fnv > get_current_feature_ver()) {
         if (!initial) {
-            You_cant("disable new feature alerts for future versions.");
+            You_cant(_("disable new feature alerts for future versions."));
         } else {
             config_error_add(
                         "%s=%s Invalid reference to a future version ignored",
@@ -1216,7 +1216,7 @@ const char *optn;
         Sprintf(buf, "%lu.%lu.%lu", FEATURE_NOTICE_VER_MAJ,
                 FEATURE_NOTICE_VER_MIN, FEATURE_NOTICE_VER_PATCH);
         pline(
-          "Feature change alerts disabled for NetHack %s features and prior.",
+          _("Feature change alerts disabled for NetHack %s features and prior."),
               buf);
     }
     return 1;
@@ -1489,7 +1489,7 @@ const char *prompt;
                  (colornames[i].color == NO_COLOR) ? MENU_SELECTED
                                                    : MENU_UNSELECTED);
     }
-    end_menu(tmpwin, (prompt && *prompt) ? prompt : "Pick a color");
+    end_menu(tmpwin, (prompt && *prompt) ? prompt : _("Pick a color"));
     pick_cnt = select_menu(tmpwin, PICK_ONE, &picks);
     destroy_nhwindow(tmpwin);
     if (pick_cnt > 0) {
@@ -1536,7 +1536,7 @@ const char *prompt;
                  (attrnames[i].attr == default_attr) ? MENU_SELECTED
                                                      : MENU_UNSELECTED);
     }
-    end_menu(tmpwin, (prompt && *prompt) ? prompt : "Pick an attribute");
+    end_menu(tmpwin, (prompt && *prompt) ? prompt : _("Pick an attribute"));
     pick_cnt = select_menu(tmpwin, allow_many ? PICK_ANY : PICK_ONE, &picks);
     destroy_nhwindow(tmpwin);
     if (pick_cnt > 0) {
@@ -1630,9 +1630,9 @@ query_msgtype()
         if (msgtype_names[i].descr) {
             any.a_int = msgtype_names[i].msgtyp + 1;
             add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE,
-                 msgtype_names[i].descr, MENU_UNSELECTED);
+                 _(msgtype_names[i].descr), MENU_UNSELECTED);
         }
-    end_menu(tmpwin, "How to show the message");
+    end_menu(tmpwin, _("How to show the message"));
     pick_cnt = select_menu(tmpwin, PICK_ONE, &picks);
     destroy_nhwindow(tmpwin);
     if (pick_cnt > 0) {
@@ -2668,7 +2668,7 @@ boolean tinitial, tfrom_file;
                a new fruit; it can only be nonNull if no fruits have
                been created since the previous name was put in place */
             (void) fruitadd(pl_fruit, forig);
-            pline("Fruit is now \"%s\".", pl_fruit);
+            pline(_("Fruit is now \"%s\"."), pl_fruit);
         }
         /* If initial, then initoptions is allowed to do it instead
          * of here (initoptions always has to do it even if there's
@@ -3038,7 +3038,7 @@ boolean tinitial, tfrom_file;
                 boolean wasspace;
 
                 use_menu = FALSE;
-                Sprintf(qbuf, "New %s: [%s am] (%s)", fullname, ocl,
+                Sprintf(qbuf, _("New %s: [%s am] (%s)"), fullname, ocl,
                         *tbuf ? tbuf : "all");
                 abuf[0] = '\0';
                 getlin(qbuf, abuf);
@@ -3056,7 +3056,7 @@ boolean tinitial, tfrom_file;
             if (use_menu) {
                 if (wizard && !index(ocl, VENOM_SYM))
                     strkitten(ocl, VENOM_SYM);
-                (void) choose_classes_menu("Autopickup what?", 1, TRUE, ocl,
+                (void) choose_classes_menu(_("Autopickup what?"), 1, TRUE, ocl,
                                            tbuf);
                 op = tbuf;
             }
@@ -4038,7 +4038,7 @@ boolean tinitial, tfrom_file;
             /* options that don't exist */
             if (!boolopt[i].addr) {
                 if (!initial && !negated)
-                    pline_The("\"%s\" option is not available.",
+                    pline_The(_("\"%s\" option is not available."),
                               boolopt[i].name);
                 return retval;
             }
@@ -4279,7 +4279,7 @@ add_menu_cmd_alias(from_ch, to_ch)
 char from_ch, to_ch;
 {
     if (n_menu_mapped >= MAX_MENU_MAPPED_CMDS) {
-        pline("out of menu map space.");
+        pline(_("out of menu map space."));
     } else {
         mapped_menu_cmds[n_menu_mapped] = from_ch;
         mapped_menu_op[n_menu_mapped] = to_ch;
@@ -4328,14 +4328,14 @@ boolean dolist;
 {
     char buf[BUFSZ];
 
-    putstr(win, 0, "Menu control keys:");
+    putstr(win, 0, _("Menu control keys:"));
     if (dolist) {
         int i;
 
         for (i = 0; i < SIZE(default_menu_cmd_info); i++) {
             Sprintf(buf, "%-8s %s",
                     visctrl(get_menu_cmd_key(default_menu_cmd_info[i].cmd)),
-                    default_menu_cmd_info[i].desc);
+                    _(default_menu_cmd_info[i].desc));
             putstr(win, 0, buf);
         }
     } else {
@@ -4346,48 +4346,48 @@ boolean dolist;
             fmt0[] = " %14s  %s";
 
         putstr(win, 0, "");
-        putstr(win, 0, "Selection:       On page   Full menu");
-        Sprintf(buf, fmt2, "Select all",
+        putstr(win, 0, _("Selection:       On page   Full menu"));
+        Sprintf(buf, fmt2, _("Select all"),
                 visctrl(get_menu_cmd_key(MENU_SELECT_PAGE)),
                 visctrl(get_menu_cmd_key(MENU_SELECT_ALL)));
         putstr(win, 0, buf);
-        Sprintf(buf, fmt2, "Deselect all",
+        Sprintf(buf, fmt2, _("Deselect all"),
                 visctrl(get_menu_cmd_key(MENU_UNSELECT_PAGE)),
                 visctrl(get_menu_cmd_key(MENU_UNSELECT_ALL)));
         putstr(win, 0, buf);
-        Sprintf(buf, fmt2, "Invert all",
+        Sprintf(buf, fmt2, _("Invert all"),
                 visctrl(get_menu_cmd_key(MENU_INVERT_PAGE)),
                 visctrl(get_menu_cmd_key(MENU_INVERT_ALL)));
         putstr(win, 0, buf);
-        Sprintf(buf, fmt3, "Text match", "",
+        Sprintf(buf, fmt3, _("Text match"), "",
                 visctrl(get_menu_cmd_key(MENU_SEARCH)),
-                "Search and toggle matching entries");
+                _("Search and toggle matching entries"));
         putstr(win, 0, buf);
         putstr(win, 0, "");
-        putstr(win, 0, "Navigation:");
-        Sprintf(buf, fmt1, "Go to     ",
+        putstr(win, 0, _("Navigation:"));
+        Sprintf(buf, fmt1, _("Go to     "),
                 visctrl(get_menu_cmd_key(MENU_NEXT_PAGE)),
-                "Next page");
+                _("Next page"));
         putstr(win, 0, buf);
         Sprintf(buf, fmt1, "",
                 visctrl(get_menu_cmd_key(MENU_PREVIOUS_PAGE)),
-                "Previous page");
+                _("Previous page"));
         putstr(win, 0, buf);
         Sprintf(buf, fmt1, "",
                 visctrl(get_menu_cmd_key(MENU_FIRST_PAGE)),
-                "First page");
+                _("First page"));
         putstr(win, 0, buf);
         Sprintf(buf, fmt1, "",
                 visctrl(get_menu_cmd_key(MENU_LAST_PAGE)),
-                "Last page");
+                _("Last page"));
         putstr(win, 0, buf);
-        Sprintf(buf, fmt0, "SPACE", "Next page, if any, otherwise RETURN");
+        Sprintf(buf, fmt0, _("SPACE"), _("Next page, if any, otherwise RETURN"));
         putstr(win, 0, buf);
-        Sprintf(buf, fmt0, "RETURN/ENTER",
-                "Finish menu with any selection(s) made");
+        Sprintf(buf, fmt0, _("RETURN/ENTER"),
+                _("Finish menu with any selection(s) made"));
         putstr(win, 0, buf);
-        Sprintf(buf, fmt0, "ESCAPE",
-                "Cancel menu without selecting anything");
+        Sprintf(buf, fmt0, _("ESCAPE"),
+                _("Cancel menu without selecting anything"));
         putstr(win, 0, buf);
     }
 }
@@ -4410,7 +4410,7 @@ const char *option; /* option name */
 int indexoffset;    /* value to add to index in compopt[], or zero
                        if option cannot be changed */
 {
-    const char *value = "unknown"; /* current value */
+    const char *value = _("unknown"); /* current value */
     char buf[BUFSZ], buf2[BUFSZ];
     anything any;
     int i;
@@ -4456,7 +4456,7 @@ int nset;
 
     any.a_int = id;
     if (!bufx)
-        Sprintf(buf2, n_currently_set, nset);
+        Sprintf(buf2, _(n_currently_set), nset);
     else
         Sprintf(buf2, "%s", bufx);
     if (!iflags.menu_tab_sep)
@@ -4562,7 +4562,7 @@ doset() /* changing options via menu by Per Liboriussen */
 
     any = zeroany;
     add_menu(tmpwin, NO_GLYPH, &any, 0, 0, iflags.menu_headings,
-             "Booleans (selecting will toggle value):", MENU_UNSELECTED);
+             _("Booleans (selecting will toggle value):"), MENU_UNSELECTED);
     any.a_int = 0;
     /* first list any other non-modifiable booleans, then modifiable ones */
     for (pass = 0; pass <= 1; pass++)
@@ -4594,7 +4594,7 @@ doset() /* changing options via menu by Per Liboriussen */
     any = zeroany;
     add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, "", MENU_UNSELECTED);
     add_menu(tmpwin, NO_GLYPH, &any, 0, 0, iflags.menu_headings,
-             "Compounds (selecting will prompt for new value):",
+             _("Compounds (selecting will prompt for new value):"),
              MENU_UNSELECTED);
 
     /* deliberately put playmode, name, role+race+gender+align first */
@@ -4623,13 +4623,13 @@ doset() /* changing options via menu by Per Liboriussen */
     any = zeroany;
     add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, "", MENU_UNSELECTED);
     add_menu(tmpwin, NO_GLYPH, &any, 0, 0, iflags.menu_headings,
-             "Other settings:", MENU_UNSELECTED);
+             _("Other settings:"), MENU_UNSELECTED);
 
     for (i = 0; (name = othropt[i].name) != 0; i++) {
         if ((is_wc_option(name) && !wc_supported(name))
             || (is_wc2_option(name) && !wc2_supported(name)))
             continue;
-        opts_add_others(tmpwin, name, othropt[i].code,
+        opts_add_others(tmpwin, _(name), othropt[i].code,
                         (char *) 0, othropt[i].othr_count_func());
     }
 
@@ -4637,11 +4637,11 @@ doset() /* changing options via menu by Per Liboriussen */
     any = zeroany;
     add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, "", MENU_UNSELECTED);
     add_menu(tmpwin, NO_GLYPH, &any, 0, 0, iflags.menu_headings,
-             "Variable playground locations:", MENU_UNSELECTED);
+             _("Variable playground locations:"), MENU_UNSELECTED);
     for (i = 0; i < PREFIX_COUNT; i++)
         doset_add_menu(tmpwin, fqn_prefix_names[i], 0);
 #endif
-    end_menu(tmpwin, "Set what options?");
+    end_menu(tmpwin, _("Set what options?"));
     need_redraw = FALSE;
     if ((pick_cnt = select_menu(tmpwin, PICK_ANY, &pick_list)) > 0) {
         /*
@@ -4660,7 +4660,7 @@ doset() /* changing options via menu by Per Liboriussen */
 #ifdef STATUS_HILITES
             } else if (opt_indx == OPT_OTHER_STATHILITE) {
                 if (!status_hilite_menu()) {
-                    pline("Bad status hilite(s) specified.");
+                    pline(_("Bad status hilite(s) specified."));
                 } else {
                     if (wc2_supported("hilite_status"))
                         preference_update("hilite_status");
@@ -4687,7 +4687,7 @@ doset() /* changing options via menu by Per Liboriussen */
                                       fromfile)) {
                     char abuf[BUFSZ];
 
-                    Sprintf(buf, "Set %s to what?", compopt[opt_indx].name);
+                    Sprintf(buf, _("Set %s to what?"), compopt[opt_indx].name);
                     abuf[0] = '\0';
                     getlin(buf, abuf);
                     if (abuf[0] == '\033')
@@ -4746,12 +4746,12 @@ int numtotal;
         /* omit list and remove if there aren't any yet */
         if (!numtotal && (i == 1 || i == 2))
             continue;
-        Sprintf(tmpbuf, action_titles[i].desc,
+        Sprintf(tmpbuf, _(action_titles[i].desc),
                 (i == 1) ? makeplural(optname) : optname);
         add_menu(tmpwin, NO_GLYPH, &any, action_titles[i].letr, 0, ATR_NONE,
                  tmpbuf, (i == 3) ? MENU_SELECTED : MENU_UNSELECTED);
     }
-    end_menu(tmpwin, "Do what?");
+    end_menu(tmpwin, _("Do what?"));
     if ((pick_cnt = select_menu(tmpwin, PICK_ONE, &pick_list)) > 0) {
         opt_idx = pick_list[0].item.a_int - 1;
         if (pick_cnt > 1 && opt_idx == 3)
@@ -4796,7 +4796,7 @@ boolean setinitial, setfromfile;
             add_menu(tmpwin, NO_GLYPH, &any, *style_name, 0, ATR_NONE,
                      style_name, MENU_UNSELECTED);
         }
-        end_menu(tmpwin, "Select menustyle:");
+        end_menu(tmpwin, _("Select menustyle:"));
         if (select_menu(tmpwin, PICK_ONE, &style_pick) > 0) {
             flags.menu_style = style_pick->item.a_int - 1;
             free((genericptr_t) style_pick);
@@ -4813,12 +4813,12 @@ boolean setinitial, setfromfile;
                 continue;
             any.a_int = paranoia[i].flagmask;
             add_menu(tmpwin, NO_GLYPH, &any, *paranoia[i].argname, 0,
-                     ATR_NONE, paranoia[i].explain,
+                     ATR_NONE, _(paranoia[i].explain),
                      (flags.paranoia_bits & paranoia[i].flagmask)
                          ? MENU_SELECTED
                          : MENU_UNSELECTED);
         }
-        end_menu(tmpwin, "Actions requiring extra confirmation:");
+        end_menu(tmpwin, _("Actions requiring extra confirmation:"));
         i = select_menu(tmpwin, PICK_ANY, &paranoia_picks);
         if (i >= 0) {
             /* player didn't cancel; we reset all the paranoia options
@@ -4846,7 +4846,7 @@ boolean setinitial, setfromfile;
             add_menu(tmpwin, NO_GLYPH, &any, burden_letters[i], 0, ATR_NONE,
                      burden_name, MENU_UNSELECTED);
         }
-        end_menu(tmpwin, "Select encumbrance level:");
+        end_menu(tmpwin, _("Select encumbrance level:"));
         if (select_menu(tmpwin, PICK_ONE, &burden_pick) > 0) {
             flags.pickup_burden = burden_pick->item.a_int - 1;
             free((genericptr_t) burden_pick);
@@ -4879,7 +4879,7 @@ boolean setinitial, setfromfile;
                      ATR_NONE, buf, MENU_UNSELECTED);
             disc_cat[i] = 0;
         }
-        end_menu(tmpwin, "Change which disclosure options categories:");
+        end_menu(tmpwin, _("Change which disclosure options categories:"));
         pick_cnt = select_menu(tmpwin, PICK_ANY, &disclosure_pick);
         if (pick_cnt > 0) {
             for (pick_idx = 0; pick_idx < pick_cnt; ++pick_idx) {
@@ -4894,7 +4894,7 @@ boolean setinitial, setfromfile;
         for (i = 0; i < NUM_DISCLOSURE_OPTIONS; i++) {
             if (disc_cat[i]) {
                 c = flags.end_disclose[i];
-                Sprintf(buf, "Disclosure options for %s:",
+                Sprintf(buf, _("Disclosure options for %s:"),
                         disclosure_names[i]);
                 tmpwin = create_nhwindow(NHW_MENU);
                 start_menu(tmpwin);
@@ -4902,31 +4902,31 @@ boolean setinitial, setfromfile;
                 /* 'y','n',and '+' work as alternate selectors; '-' doesn't */
                 any.a_char = DISCLOSE_NO_WITHOUT_PROMPT;
                 add_menu(tmpwin, NO_GLYPH, &any, 0, any.a_char, ATR_NONE,
-                         "Never disclose, without prompting",
+                         _("Never disclose, without prompting"),
                          (c == any.a_char) ? MENU_SELECTED : MENU_UNSELECTED);
                 any.a_char = DISCLOSE_YES_WITHOUT_PROMPT;
                 add_menu(tmpwin, NO_GLYPH, &any, 0, any.a_char, ATR_NONE,
-                         "Always disclose, without prompting",
+                         _("Always disclose, without prompting"),
                          (c == any.a_char) ? MENU_SELECTED : MENU_UNSELECTED);
                 if (*disclosure_names[i] == 'v') {
                     any.a_char = DISCLOSE_SPECIAL_WITHOUT_PROMPT; /* '#' */
                     add_menu(tmpwin, NO_GLYPH, &any, 0, any.a_char, ATR_NONE,
-                             "Always disclose, pick sort order from menu",
+                             _("Always disclose, pick sort order from menu"),
                              (c == any.a_char) ? MENU_SELECTED
                                                : MENU_UNSELECTED);
                 }
                 any.a_char = DISCLOSE_PROMPT_DEFAULT_NO;
                 add_menu(tmpwin, NO_GLYPH, &any, 0, any.a_char, ATR_NONE,
-                         "Prompt, with default answer of \"No\"",
+                         _("Prompt, with default answer of \"No\""),
                          (c == any.a_char) ? MENU_SELECTED : MENU_UNSELECTED);
                 any.a_char = DISCLOSE_PROMPT_DEFAULT_YES;
                 add_menu(tmpwin, NO_GLYPH, &any, 0, any.a_char, ATR_NONE,
-                         "Prompt, with default answer of \"Yes\"",
+                         _("Prompt, with default answer of \"Yes\""),
                          (c == any.a_char) ? MENU_SELECTED : MENU_UNSELECTED);
                 if (*disclosure_names[i] == 'v') {
                     any.a_char = DISCLOSE_PROMPT_DEFAULT_SPECIAL; /* '?' */
                     add_menu(tmpwin, NO_GLYPH, &any, 0, any.a_char, ATR_NONE,
-                "Prompt, with default answer of \"Ask\" to request sort menu",
+                _("Prompt, with default answer of \"Ask\" to request sort menu"),
                              (c == any.a_char) ? MENU_SELECTED
                                                : MENU_UNSELECTED);
                 }
@@ -4954,7 +4954,7 @@ boolean setinitial, setfromfile;
             add_menu(tmpwin, NO_GLYPH, &any, *mode_name, 0, ATR_NONE,
                      mode_name, MENU_UNSELECTED);
         }
-        end_menu(tmpwin, "Select run/travel display mode:");
+        end_menu(tmpwin, _("Select run/travel display mode:"));
         if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
             flags.runmode = mode_pick->item.a_int - 1;
             free((genericptr_t) mode_pick);
@@ -4970,46 +4970,46 @@ boolean setinitial, setfromfile;
         any = zeroany;
         any.a_char = GPCOORDS_COMPASS;
         add_menu(tmpwin, NO_GLYPH, &any, GPCOORDS_COMPASS, 0, ATR_NONE,
-                 "compass ('east' or '3s' or '2n,4w')",
+                 _("compass ('east' or '3s' or '2n,4w')"),
                  (gp == GPCOORDS_COMPASS) ? MENU_SELECTED : MENU_UNSELECTED);
         any.a_char = GPCOORDS_COMFULL;
         add_menu(tmpwin, NO_GLYPH, &any, GPCOORDS_COMFULL, 0, ATR_NONE,
-                 "full compass ('east' or '3south' or '2north,4west')",
+                 _("full compass ('east' or '3south' or '2north,4west')"),
                  (gp == GPCOORDS_COMFULL) ? MENU_SELECTED : MENU_UNSELECTED);
         any.a_char = GPCOORDS_MAP;
         add_menu(tmpwin, NO_GLYPH, &any, GPCOORDS_MAP, 0, ATR_NONE,
-                 "map <x,y>",
+                 _("map <x,y>"),
                  (gp == GPCOORDS_MAP) ? MENU_SELECTED : MENU_UNSELECTED);
         any.a_char = GPCOORDS_SCREEN;
         add_menu(tmpwin, NO_GLYPH, &any, GPCOORDS_SCREEN, 0, ATR_NONE,
-                 "screen [row,column]",
+                 _("screen [row,column]"),
                  (gp == GPCOORDS_SCREEN) ? MENU_SELECTED : MENU_UNSELECTED);
         any.a_char = GPCOORDS_NONE;
         add_menu(tmpwin, NO_GLYPH, &any, GPCOORDS_NONE, 0, ATR_NONE,
-                 "none (no coordinates displayed)",
+                 _("none (no coordinates displayed)"),
                  (gp == GPCOORDS_NONE) ? MENU_SELECTED : MENU_UNSELECTED);
         any.a_long = 0L;
         add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, "", MENU_UNSELECTED);
-        Sprintf(buf, "map: upper-left: <%d,%d>, lower-right: <%d,%d>%s",
+        Sprintf(buf, _("map: upper-left: <%d,%d>, lower-right: <%d,%d>%s"),
                 1, 0, COLNO - 1, ROWNO - 1,
-                flags.verbose ? "; column 0 unused, off left edge" : "");
+                flags.verbose ? _("; column 0 unused, off left edge") : "");
         add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
         if (strcmp(windowprocs.name, "tty")) /* only show for non-tty */
             add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE,
-       "screen: row is offset to accommodate tty interface's use of top line",
+       _("screen: row is offset to accommodate tty interface's use of top line"),
                      MENU_UNSELECTED);
 #if COLNO == 80
-#define COL80ARG flags.verbose ? "; column 80 is not used" : ""
+#define COL80ARG flags.verbose ? _("; column 80 is not used") : ""
 #else
 #define COL80ARG ""
 #endif
-        Sprintf(buf, "screen: upper-left: [%02d,%02d], lower-right: [%d,%d]%s",
+        Sprintf(buf, _("screen: upper-left: [%02d,%02d], lower-right: [%d,%d]%s"),
                 0 + 2, 1, ROWNO - 1 + 2, COLNO - 1, COL80ARG);
 #undef COL80ARG
         add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf, MENU_UNSELECTED);
         add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, "", MENU_UNSELECTED);
         end_menu(tmpwin,
-            "Select coordinate display when auto-describing a map position:");
+            _("Select coordinate display when auto-describing a map position:"));
         if ((pick_cnt = select_menu(tmpwin, PICK_ONE, &window_pick)) > 0) {
             iflags.getpos_coords = window_pick[0].item.a_char;
             /* PICK_ONE doesn't unselect preselected entry when
@@ -5029,18 +5029,18 @@ boolean setinitial, setfromfile;
         any = zeroany;
         any.a_char = (GFILTER_NONE + 1);
         add_menu(tmpwin, NO_GLYPH, &any, 'n',
-                 0, ATR_NONE, "no filtering",
+                 0, ATR_NONE, _("no filtering"),
                  (gf == GFILTER_NONE) ? MENU_SELECTED : MENU_UNSELECTED);
         any.a_char = (GFILTER_VIEW + 1);
         add_menu(tmpwin, NO_GLYPH, &any, 'v',
-                 0, ATR_NONE, "in view only",
+                 0, ATR_NONE, _("in view only"),
                  (gf == GFILTER_VIEW) ? MENU_SELECTED : MENU_UNSELECTED);
         any.a_char = (GFILTER_AREA + 1);
         add_menu(tmpwin, NO_GLYPH, &any, 'a',
-                 0, ATR_NONE, "in same area",
+                 0, ATR_NONE, _("in same area"),
                  (gf == GFILTER_AREA) ? MENU_SELECTED : MENU_UNSELECTED);
         end_menu(tmpwin,
-      "Select location filtering when going for next/previous map position:");
+      _("Select location filtering when going for next/previous map position:"));
         if ((pick_cnt = select_menu(tmpwin, PICK_ONE, &window_pick)) > 0) {
             iflags.getloc_filter = (window_pick[0].item.a_char - 1);
             /* PICK_ONE doesn't unselect preselected entry when
@@ -5062,18 +5062,18 @@ boolean setinitial, setfromfile;
             if (!WINDOWPORT("curses")) {
                 any.a_char = 's';
                 add_menu(tmpwin, NO_GLYPH, &any, 's', 0, ATR_NONE,
-                         "single", MENU_UNSELECTED);
+                         _("single"), MENU_UNSELECTED);
                 any.a_char = 'c';
                 add_menu(tmpwin, NO_GLYPH, &any, 'c', 0, ATR_NONE,
-                         "combination", MENU_UNSELECTED);
+                         _("combination"), MENU_UNSELECTED);
             }
             any.a_char = 'f';
-            add_menu(tmpwin, NO_GLYPH, &any, 'f', 0, ATR_NONE, "full",
+            add_menu(tmpwin, NO_GLYPH, &any, 'f', 0, ATR_NONE, _("full"),
                      MENU_UNSELECTED);
             any.a_char = 'r';
-            add_menu(tmpwin, NO_GLYPH, &any, 'r', 0, ATR_NONE, "reversed",
+            add_menu(tmpwin, NO_GLYPH, &any, 'r', 0, ATR_NONE, _("reversed"),
                      MENU_UNSELECTED);
-            end_menu(tmpwin, "Select message history display type:");
+            end_menu(tmpwin, _("Select message history display type:"));
             if (select_menu(tmpwin, PICK_ONE, &window_pick) > 0) {
                 iflags.prevmsg_window = window_pick->item.a_char;
                 free((genericptr_t) window_pick);
@@ -5081,7 +5081,7 @@ boolean setinitial, setfromfile;
             destroy_nhwindow(tmpwin);
         } else
 #endif /* msg_window for tty or curses */
-            pline("'%s' option is not supported for '%s'.",
+            pline(_("'%s' option is not supported for '%s'."),
                   optname, windowprocs.name);
     } else if (!strcmp("sortloot", optname)) {
         const char *sortl_name;
@@ -5097,7 +5097,7 @@ boolean setinitial, setfromfile;
                      sortl_name, (flags.sortloot == *sortl_name)
                                     ? MENU_SELECTED : MENU_UNSELECTED);
         }
-        end_menu(tmpwin, "Select loot sorting type:");
+        end_menu(tmpwin, _("Select loot sorting type:"));
         n = select_menu(tmpwin, PICK_ONE, &sortl_pick);
         if (n > 0) {
             char c = sortl_pick[0].item.a_char;
@@ -5129,7 +5129,7 @@ boolean setinitial, setfromfile;
         any.a_int = ALIGN_RIGHT;
         add_menu(tmpwin, NO_GLYPH, &any, 'r', 0, ATR_NONE, "right",
                  MENU_UNSELECTED);
-        Sprintf(abuf, "Select %s window placement relative to the map:",
+        Sprintf(abuf, _("Select %s window placement relative to the map:"),
                 msg ? "message" : "status");
         end_menu(tmpwin, abuf);
         if (select_menu(tmpwin, PICK_ONE, &window_pick) > 0) {
@@ -5155,9 +5155,9 @@ boolean setinitial, setfromfile;
         for (i = 0; i < SIZE(npchoices); i++) {
             any.a_int = i + 1;
             add_menu(tmpwin, NO_GLYPH, &any, 'a' + i, 0, ATR_NONE,
-                     npchoices[i], MENU_UNSELECTED);
+                     _(npchoices[i]), MENU_UNSELECTED);
         }
-        end_menu(tmpwin, "Select number_pad mode:");
+        end_menu(tmpwin, _("Select number_pad mode:"));
         if (select_menu(tmpwin, PICK_ONE, &mode_pick) > 0) {
             switch (mode_pick->item.a_int - 1) {
             case 0:
@@ -5192,7 +5192,7 @@ boolean setinitial, setfromfile;
         }
         destroy_nhwindow(tmpwin);
     } else if (!strcmp("menu_headings", optname)) {
-        int mhattr = query_attr("How to highlight menu headings:");
+        int mhattr = query_attr(_("How to highlight menu headings:"));
 
         if (mhattr != -1)
             iflags.menu_headings = mhattr;
@@ -5202,19 +5202,19 @@ boolean setinitial, setfromfile;
 
  msgtypes_again:
         nmt = msgtype_count();
-        opt_idx = handle_add_list_remove("message type", nmt);
+        opt_idx = handle_add_list_remove(_("message type"), nmt);
         if (opt_idx == 3) { /* done */
             return TRUE;
         } else if (opt_idx == 0) { /* add new */
             mtbuf[0] = '\0';
-            getlin("What new message pattern?", mtbuf);
+            getlin(_("What new message pattern?"), mtbuf);
             if (*mtbuf == '\033')
                 return TRUE;
             if (*mtbuf
                 && test_regex_pattern(mtbuf, (const char *)0)
                 && (mttyp = query_msgtype()) != -1
                 && !msgtype_add(mttyp, mtbuf)) {
-                pline("Error adding the message type.");
+                pline(_("Error adding the message type."));
                 wait_synch();
             }
             goto msgtypes_again;
@@ -5243,8 +5243,8 @@ boolean setinitial, setfromfile;
                          MENU_UNSELECTED);
                 tmp = tmp->next;
             }
-            Sprintf(mtbuf, "%s message types",
-                    (opt_idx == 1) ? "List of" : "Remove which");
+            Sprintf(mtbuf, _("%s message types"),
+                    (opt_idx == 1) ? _("List of") : _("Remove which"));
             end_menu(tmpwin, mtbuf);
             pick_cnt = select_menu(tmpwin,
                                    (opt_idx == 1) ? PICK_NONE : PICK_ANY,
@@ -5279,12 +5279,12 @@ boolean setinitial, setfromfile;
                player how to use them */
             else if (nmc > 0)
                 pline(
-    "To have menu colors become active, toggle 'menucolors' option to True.");
+    _("To have menu colors become active, toggle 'menucolors' option to True."));
             return TRUE;
 
         } else if (opt_idx == 0) { /* add new */
             mcbuf[0] = '\0';
-            getlin("What new menucolor pattern?", mcbuf);
+            getlin(_("What new menucolor pattern?"), mcbuf);
             if (*mcbuf == '\033')
                 goto menucolors_done;
             if (*mcbuf
@@ -5292,7 +5292,7 @@ boolean setinitial, setfromfile;
                 && (mcclr = query_color((char *) 0)) != -1
                 && (mcattr = query_attr((char *) 0)) != -1
                 && !add_menu_coloring_parsed(mcbuf, mcclr, mcattr)) {
-                pline("Error adding the menu color.");
+                pline(_("Error adding the menu color."));
                 wait_synch();
             }
             goto menucolors_again;
@@ -5332,8 +5332,8 @@ boolean setinitial, setfromfile;
                          MENU_UNSELECTED);
                 tmp = tmp->next;
             }
-            Sprintf(mcbuf, "%s menu colors",
-                    (opt_idx == 1) ? "List of" : "Remove which");
+            Sprintf(mcbuf, _("%s menu colors"),
+                    (opt_idx == 1) ? _("List of") : _("Remove which"));
             end_menu(tmpwin, mcbuf);
             pick_cnt = select_menu(tmpwin,
                                    (opt_idx == 1) ? PICK_NONE : PICK_ANY,
@@ -5355,14 +5355,14 @@ boolean setinitial, setfromfile;
 
  ape_again:
         numapes = count_apes();
-        opt_idx = handle_add_list_remove("autopickup exception", numapes);
+        opt_idx = handle_add_list_remove(_("autopickup exception"), numapes);
         if (opt_idx == 3) { /* done */
             return TRUE;
         } else if (opt_idx == 0) { /* add new */
             /* EDIT_GETLIN:  assume user doesn't user want previous
                exception used as default input string for this one... */
             apebuf[0] = apebuf[1] = '\0';
-            getlin("What new autopickup exception pattern?", &apebuf[1]);
+            getlin(_("What new autopickup exception pattern?"), &apebuf[1]);
             mungspaces(&apebuf[1]); /* regularize whitespace */
             if (apebuf[1] == '\033')
                 return TRUE;
@@ -5386,7 +5386,7 @@ boolean setinitial, setfromfile;
                 ape = apelist;
                 any = zeroany;
                 add_menu(tmpwin, NO_GLYPH, &any, 0, 0, iflags.menu_headings,
-                         "Always pickup '<'; never pickup '>'",
+                         _("Always pickup '<'; never pickup '>'"),
                          MENU_UNSELECTED);
                 for (i = 0; i < numapes && ape; i++) {
                     any.a_void = (opt_idx == 1) ? 0 : ape;
@@ -5399,8 +5399,8 @@ boolean setinitial, setfromfile;
                     ape = ape->next;
                 }
             }
-            Sprintf(apebuf, "%s autopickup exceptions",
-                    (opt_idx == 1) ? "List of" : "Remove which");
+            Sprintf(apebuf, _("%s autopickup exceptions"),
+                    (opt_idx == 1) ? _("List of") : _("Remove which"));
             end_menu(tmpwin, apebuf);
             pick_cnt = select_menu(tmpwin,
                                    (opt_idx == 1) ? PICK_NONE : PICK_ANY,
@@ -5438,7 +5438,7 @@ boolean setinitial, setfromfile;
 
         if (res && symset_list) {
             int thissize,
-                biggest = (int) (sizeof "Default Symbols" - sizeof ""),
+                biggest = (int) (sizeof _("Default Symbols") - sizeof ""),
                 big_desc = 0;
 
             for (sl = symset_list; sl; sl = sl->next) {
@@ -5460,8 +5460,8 @@ boolean setinitial, setfromfile;
                     big_desc = thissize;
             }
             if (!setcount) {
-                pline("There are no appropriate %s symbol sets available.",
-                      rogueflag ? "rogue level" : "primary");
+                pline(_("There are no appropriate %s symbol sets available."),
+                      rogueflag ? _("rogue level") : _("primary"));
                 return TRUE;
             }
 
@@ -5473,7 +5473,7 @@ boolean setinitial, setfromfile;
             if (!symset_name)
                 defindx = any.a_int;
             add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE,
-                     "Default Symbols",
+                     _("Default Symbols"),
                      (any.a_int == defindx) ? MENU_SELECTED
                                             : MENU_UNSELECTED);
 
@@ -5498,8 +5498,8 @@ boolean setinitial, setfromfile;
                                                     : MENU_UNSELECTED);
                 }
             }
-            Sprintf(buf, "Select %ssymbol set:",
-                    rogueflag ? "rogue level " : "");
+            Sprintf(buf, _("Select %ssymbol set:"),
+                    rogueflag ? _("rogue level ") : "");
             end_menu(tmpwin, buf);
             n = select_menu(tmpwin, PICK_ONE, &symset_pick);
             if (n > 0) {
@@ -5537,11 +5537,11 @@ boolean setinitial, setfromfile;
                 nothing_to_do = TRUE;
         } else if (!res) {
             /* The symbols file could not be accessed */
-            pline("Unable to access \"%s\" file.", SYMBOLS);
+            pline(_("Unable to access \"%s\" file."), SYMBOLS);
             return TRUE;
         } else if (!symset_list) {
             /* The symbols file was empty */
-            pline("There were no symbol sets found in \"%s\".", SYMBOLS);
+            pline(_("There were no symbol sets found in \"%s\"."), SYMBOLS);
             return TRUE;
         }
 
@@ -5629,7 +5629,7 @@ char *buf;
     else if (!strcmp(optname, "altkeyhandler"))
         Sprintf(buf, "%s",
                 (iflags.key_handling == ray_keyhandling)
-                    ? "ray"
+                    ? _("ray")
                     : (iflags.key_handling == nh340_keyhandling)
                         ? "340"
                         : "default");
@@ -5653,9 +5653,9 @@ char *buf;
     else if (!strcmp(optname, "dogname"))
         Sprintf(buf, "%s", dogname[0] ? dogname : none);
     else if (!strcmp(optname, "dungeon"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "effects"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "font_map"))
         Sprintf(buf, "%s", iflags.wc_font_map ? iflags.wc_font_map : defopt);
     else if (!strcmp(optname, "font_message"))
@@ -5720,39 +5720,39 @@ char *buf;
     } else if (!strcmp(optname, "menustyle"))
         Sprintf(buf, "%s", menutype[(int) flags.menu_style]);
     else if (!strcmp(optname, "menu_deselect_all"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "menu_deselect_page"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "menu_first_page"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "menu_invert_all"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "menu_headings"))
         Sprintf(buf, "%s", attr2attrname(iflags.menu_headings));
     else if (!strcmp(optname, "menu_invert_page"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "menu_last_page"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "menu_next_page"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "menu_previous_page"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "menu_search"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "menu_select_all"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "menu_select_page"))
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     else if (!strcmp(optname, "monsters")) {
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     } else if (!strcmp(optname, "msghistory")) {
         Sprintf(buf, "%u", iflags.msg_history);
 #ifdef TTY_GRAPHICS
     } else if (!strcmp(optname, "msg_window")) {
-        Sprintf(buf, "%s", (iflags.prevmsg_window == 's') ? "single"
-                           : (iflags.prevmsg_window == 'c') ? "combination"
-                             : (iflags.prevmsg_window == 'f') ? "full"
-                               : "reversed");
+        Sprintf(buf, "%s", (iflags.prevmsg_window == 's') ? _("single")
+                           : (iflags.prevmsg_window == 'c') ? _("combination")
+                             : (iflags.prevmsg_window == 'f') ? _("full")
+                               : _("reversed"));
 #endif
     } else if (!strcmp(optname, "name")) {
         Sprintf(buf, "%s", plname);
@@ -5787,9 +5787,9 @@ char *buf;
                                            : (Cmd.pcHack_compat ? 2 : 1))
                        : Cmd.swap_yz ? 5 : 0;
 
-        Strcpy(buf, numpadmodes[indx]);
+        Strcpy(buf, _(numpadmodes[indx]));
     } else if (!strcmp(optname, "objects")) {
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     } else if (!strcmp(optname, "packorder")) {
         oc_to_str(flags.inv_order, ocl);
         Sprintf(buf, "%s", ocl);
@@ -5818,9 +5818,9 @@ char *buf;
         else
             Strcpy(buf, defopt);
     } else if (!strcmp(optname, "pettype")) {
-        Sprintf(buf, "%s", (preferred_pet == 'c') ? "cat"
-                           : (preferred_pet == 'd') ? "dog"
-                             : (preferred_pet == 'h') ? "horse"
+        Sprintf(buf, "%s", (preferred_pet == 'c') ? _("cat")
+                           : (preferred_pet == 'd') ? _("dog")
+                             : (preferred_pet == 'h') ? _("horse")
                                : (preferred_pet == 'n') ? "none"
                                  : "random");
     } else if (!strcmp(optname, "pickup_burden")) {
@@ -5838,7 +5838,7 @@ char *buf;
         Sprintf(buf, "%s",
                 symset[ROGUESET].name ? symset[ROGUESET].name : "default");
         if (currentgraphics == ROGUESET && symset[ROGUESET].name)
-            Strcat(buf, ", active");
+            Strcat(buf, _(", active"));
     } else if (!strcmp(optname, "role")) {
         Sprintf(buf, "%s", rolestring(flags.initrole, roles, name.m));
     } else if (!strcmp(optname, "runmode")) {
@@ -5846,18 +5846,18 @@ char *buf;
     } else if (!strcmp(optname, "whatis_coord")) {
         Sprintf(buf, "%s",
                 (iflags.getpos_coords == GPCOORDS_MAP) ? "map"
-                : (iflags.getpos_coords == GPCOORDS_COMPASS) ? "compass"
-                : (iflags.getpos_coords == GPCOORDS_COMFULL) ? "full compass"
-                : (iflags.getpos_coords == GPCOORDS_SCREEN) ? "screen"
+                : (iflags.getpos_coords == GPCOORDS_COMPASS) ? _("compass")
+                : (iflags.getpos_coords == GPCOORDS_COMFULL) ? _("full compass")
+                : (iflags.getpos_coords == GPCOORDS_SCREEN) ? _("screen")
                 : "none");
     } else if (!strcmp(optname, "whatis_filter")) {
         Sprintf(buf, "%s",
-                (iflags.getloc_filter == GFILTER_VIEW) ? "view"
-                : (iflags.getloc_filter == GFILTER_AREA) ? "area"
+                (iflags.getloc_filter == GFILTER_VIEW) ? _("view")
+                : (iflags.getloc_filter == GFILTER_AREA) ? _("area")
                 : "none");
     } else if (!strcmp(optname, "scores")) {
-        Sprintf(buf, "%d top/%d around%s", flags.end_top, flags.end_around,
-                flags.end_own ? "/own" : "");
+        Sprintf(buf, _("%d top/%d around%s"), flags.end_top, flags.end_around,
+                flags.end_own ? _("/own") : "");
     } else if (!strcmp(optname, "scroll_amount")) {
         if (iflags.wc_scroll_amount)
             Sprintf(buf, "%d", iflags.wc_scroll_amount);
@@ -5875,23 +5875,23 @@ char *buf;
                 break;
             }
     } else if (!strcmp(optname, "player_selection")) {
-        Sprintf(buf, "%s", iflags.wc_player_selection ? "prompts" : "dialog");
+        Sprintf(buf, "%s", iflags.wc_player_selection ? _("prompts") : "dialog");
 #ifdef MSDOS
     } else if (!strcmp(optname, "soundcard")) {
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
 #endif
 #ifdef STATUS_HILITES
     } else if (!strcmp("statushilites", optname)) {
         if (!iflags.hilite_delta)
-            Strcpy(buf, "0 (off: don't highlight status fields)");
+            Strcpy(buf, _("0 (off: don't highlight status fields)"));
         else
-            Sprintf(buf, "%ld (on: highlight status for %ld turns)",
+            Sprintf(buf, _("%ld (on: highlight status for %ld turns)"),
                     iflags.hilite_delta, iflags.hilite_delta);
 #endif
     } else if (!strcmp(optname,"statuslines")) {
         if (wc2_supported(optname))
             Strcpy(buf, (iflags.wc2_statuslines < 3) ? "2" : "3");
-        /* else default to "unknown" */
+        /* else default to _("unknown") */
     } else if (!strcmp(optname, "suppress_alert")) {
         if (flags.suppress_alert == 0L)
             Strcpy(buf, none);
@@ -5902,7 +5902,7 @@ char *buf;
         Sprintf(buf, "%s",
                 symset[PRIMARY].name ? symset[PRIMARY].name : "default");
         if (currentgraphics == PRIMARY && symset[PRIMARY].name)
-            Strcat(buf, ", active");
+            Strcat(buf, _(", active"));
     } else if (!strcmp(optname, "term_cols")) {
         if (iflags.wc2_term_cols)
             Sprintf(buf, "%d", iflags.wc2_term_cols);
@@ -5927,7 +5927,7 @@ char *buf;
         else
             Strcpy(buf, defopt);
     } else if (!strcmp(optname, "traps")) {
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
     } else if (!strcmp(optname, "vary_msgcount")) {
         if (iflags.wc_vary_msgcount)
             Sprintf(buf, "%d", iflags.wc_vary_msgcount);
@@ -5935,7 +5935,7 @@ char *buf;
             Strcpy(buf, defopt);
 #ifdef MSDOS
     } else if (!strcmp(optname, "video")) {
-        Sprintf(buf, "%s", to_be_done);
+        Sprintf(buf, "%s", _(to_be_done));
 #endif
 #ifdef VIDEOSHADES
     } else if (!strcmp(optname, "videoshades")) {
@@ -5951,9 +5951,9 @@ char *buf;
 #endif /* VIDEOSHADES */
     } else if (!strcmp(optname,"windowborders")) {
         Sprintf(buf, "%s",
-                (iflags.wc2_windowborders == 0) ? "0=off"
-                : (iflags.wc2_windowborders == 1) ? "1=on"
-                  : (iflags.wc2_windowborders == 2) ? "2=auto"
+                (iflags.wc2_windowborders == 0) ? _("0=off")
+                : (iflags.wc2_windowborders == 1) ? _("1=on")
+                  : (iflags.wc2_windowborders == 2) ? _("2=auto")
                     : defopt);
     } else if (!strcmp(optname, "windowtype")) {
         Sprintf(buf, "%s", windowprocs.name);
@@ -5979,7 +5979,7 @@ char *buf;
     }
 
     if (!buf[0])
-        Strcpy(buf, "unknown");
+        Strcpy(buf, _("unknown"));
     return buf;
 }
 
@@ -5991,16 +5991,16 @@ dotogglepickup()
     flags.pickup = !flags.pickup;
     if (flags.pickup) {
         oc_to_str(flags.pickup_types, ocl);
-        Sprintf(buf, "ON, for %s objects%s", ocl[0] ? ocl : "all",
+        Sprintf(buf, _("ON, for %s objects%s"), ocl[0] ? ocl : "all",
                 (apelist)
                     ? ((count_apes() == 1)
-                           ? ", with one exception"
-                           : ", with some exceptions")
+                           ? _(", with one exception")
+                           : _(", with some exceptions"))
                     : "");
     } else {
-        Strcpy(buf, "OFF");
+        Strcpy(buf, _("OFF"));
     }
-    pline("Autopickup: %s.", buf);
+    pline(_("Autopickup: %s."), buf);
     return 0;
 }
 
@@ -6267,10 +6267,10 @@ option_help()
     winid datawin;
 
     datawin = create_nhwindow(NHW_TEXT);
-    Sprintf(buf, "Set options as OPTIONS=<options> in %s", configfile);
+    Sprintf(buf, _("Set options as OPTIONS=<options> in %s"), configfile);
     opt_intro[CONFIG_SLOT] = (const char *) buf;
     for (i = 0; opt_intro[i]; i++)
-        putstr(datawin, 0, opt_intro[i]);
+        putstr(datawin, 0, (i == CONFIG_SLOT) ? opt_intro[i] : _(opt_intro[i]));
 
     /* Boolean options */
     for (i = 0; boolopt[i].name; i++) {
@@ -6285,7 +6285,7 @@ option_help()
     next_opt(datawin, "");
 
     /* Compound options */
-    putstr(datawin, 0, "Compound options:");
+    putstr(datawin, 0, _("Compound options:"));
     for (i = 0; compopt[i].name; i++) {
         Sprintf(buf2, "`%s'", compopt[i].name);
         Sprintf(buf, "%-20s - %s%c", buf2, compopt[i].descr,
@@ -6294,7 +6294,7 @@ option_help()
     }
 
     for (i = 0; opt_epilog[i]; i++)
-        putstr(datawin, 0, opt_epilog[i]);
+        putstr(datawin, 0, _(opt_epilog[i]));
 
     display_nhwindow(datawin, FALSE);
     destroy_nhwindow(datawin);
@@ -6556,7 +6556,7 @@ char *class_select;
         any = zeroany;
         add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, "", MENU_UNSELECTED);
         any.a_int = (int) ' ';
-        Sprintf(buf, "%c  %s", (char) any.a_int, "all classes of objects");
+        Sprintf(buf, "%c  %s", (char) any.a_int, _("all classes of objects"));
         /* we won't preselect this even if the incoming list is empty;
            having it selected means that it would have to be explicitly
            de-selected in order to select anything else */

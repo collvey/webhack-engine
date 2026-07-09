@@ -964,7 +964,7 @@ headless_get_ext_cmd(void)
     int ret;
     
     /* Directly prompt for command name (like Win32) */
-    headless_getlin("Extended command: ", buf);
+    headless_getlin(_("Extended command: "), buf);
     
     if (buf[0] == '\033' || buf[0] == '\0') {
         return -1;  /* Cancelled or empty */
@@ -978,7 +978,7 @@ headless_get_ext_cmd(void)
     }
     
     /* No match found */
-    pline("Unknown extended command '%s'.", buf);
+    pline(_("Unknown extended command '%s'."), buf);
     return -1;
 }
 
@@ -1562,7 +1562,7 @@ static void
 headless_outrip(winid window, int how, time_t when)
 {
     /* M5: death screen */
-    emit_message("Game Over", "bold");
+    emit_message(_("Game Over"), "bold");
 }
 
 static void

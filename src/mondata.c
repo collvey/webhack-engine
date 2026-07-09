@@ -1102,7 +1102,7 @@ const char *def;
 {
     int capitalize = (*def == highc(*def));
 
-    return (is_floater(ptr) ? levitate[capitalize]
+    return _(is_floater(ptr) ? levitate[capitalize]
             : (is_flyer(ptr) && ptr->msize <= MZ_SMALL) ? flys[capitalize]
               : (is_flyer(ptr) && ptr->msize > MZ_SMALL) ? flyl[capitalize]
                 : slithy(ptr) ? slither[capitalize]
@@ -1119,7 +1119,7 @@ const char *def;
 {
     int capitalize = 2 + (*def == highc(*def));
 
-    return (is_floater(ptr) ? levitate[capitalize]
+    return _(is_floater(ptr) ? levitate[capitalize]
             : (is_flyer(ptr) && ptr->msize <= MZ_SMALL) ? flys[capitalize]
               : (is_flyer(ptr) && ptr->msize > MZ_SMALL) ? flyl[capitalize]
                 : slithy(ptr) ? slither[capitalize]
@@ -1166,7 +1166,7 @@ struct attack *mattk;
         what = (mattk->aatyp == AT_HUGS) ? "being roasted" : "on fire";
         break;
     }
-    return what;
+    return _(what);
 }
 
 /*

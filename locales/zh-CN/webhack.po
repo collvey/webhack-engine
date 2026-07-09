@@ -1,0 +1,1841 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WebHack\n"
+"Language: zh-CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/allmain.c:840
+msgid "-%sversion can only be extended with -%sversion:paste.\n"
+msgstr "-%sversion 只能用 -%sversion:paste 扩展。\\n"
+
+#: src/pager.c:817
+msgid "'data' file in wrong format or corrupted"
+msgstr "'data' 文件格式错误或已损坏"
+
+#: src/files.c:1892
+msgid "(Perhaps you are running NetHack from inside the distribution package?)."
+msgstr "（或许你在发行包内部运行 NetHack？）。"
+
+#: src/files.c:3844
+msgid "\nCannot recover savefile %s.\n"
+msgstr "\\n无法恢复存档文件 %s。\\n"
+
+#: src/files.c:3814
+msgid "\nCheckpointing was not in effect for %s -- recovery impossible.\n"
+msgstr "\\n%s 未启用检查点 —— 无法恢复。\\n"
+
+#: src/files.c:3828
+msgid "\nError reading %s -- can't recover.\n"
+msgstr "\\n读取 %s 出错 —— 无法恢复。\\n"
+
+#: src/files.c:3869
+msgid "\nError writing %s; recovery failed (savefile_info).\n"
+msgstr "\\n写入 %s 出错；恢复失败（savefile_info）。\\n"
+
+#: src/files.c:3860
+msgid "\nError writing %s; recovery failed."
+msgstr "\\n写入 %s 出错；恢复失败。"
+
+#: src/mhitu.c:214
+msgid "%s attacks you without knowing your location?"
+msgstr "%s在不知道你位置的情况下攻击你？"
+
+#: src/mcastu.c:283
+msgid "%s casting non-hand-to-hand version of hand-to-hand spell %d?"
+msgstr "%s在施放近身法术%d的非近身版本？"
+
+#: src/teleport.c:459
+msgid "%s is leashed, without a leash."
+msgstr "%s被拴住了，却没有牵绳。"
+
+#: src/engrave.c:364
+msgid "%s is written in a very strange way."
+msgstr "%s以一种非常奇怪的方式书写。"
+
+#: src/mkobj.c:2529
+msgid "%s obj %s in container %s, not %s"
+msgstr "%s物品%s在容器%s中，而非%s"
+
+#: src/shk.c:143
+msgid "%s paying without %s money?"
+msgstr "%s没有%s的钱就付款？"
+
+#: src/shk.c:108
+msgid "%s payment in money2mon!"
+msgstr "%s以money2mon付款！"
+
+#: src/shk.c:139
+msgid "%s payment in money2u!"
+msgstr "%s以money2u付款！"
+
+#: src/muse.c:1006
+#: src/muse.c:1565
+#: src/muse.c:1979
+msgid "%s wanted to perform action %d?"
+msgstr "%s想要执行动作%d吗？"
+
+#: src/shk.c:829
+msgid "%s? (rmno=%d, rtype=%d, mnum=%d, \"%s\")"
+msgstr "%s？(rmno=%d, rtype=%d, mnum=%d, \\\"%s\\\")"
+
+#: src/pickup.c:2136
+msgid "<in> no current_container?"
+msgstr "<in> 没有current_container？"
+
+#: src/pickup.c:2303
+msgid "<out> no current_container?"
+msgstr "<out> 没有current_container？"
+
+#: src/botl.c:950
+msgid "2nd status_initialize with full init."
+msgstr "第二次status_initialize进行完整初始化。"
+
+#: src/mon.c:1508
+msgid "A monster looked at a very strange trap of type %d."
+msgstr "一只怪物看着一个非常奇怪的%d型陷阱。"
+
+#: src/files.c:2075
+#: src/files.c:3042
+msgid "Access to %s denied (%d)."
+msgstr "访问 %s 被拒绝（%d）。"
+
+#: src/sp_lev.c:5562
+msgid "adding different types"
+msgstr "添加不同类型"
+
+#: src/sp_lev.c:5557
+msgid "adding weird types"
+msgstr "添加奇怪类型"
+
+#: src/objnam.c:1805
+msgid "Alphabet soup: 'an(%s)'."
+msgstr "字母汤：'an(%s)'。"
+
+#: src/objnam.c:1836
+msgid "Alphabet soup: 'the(%s)'."
+msgstr "字母汤：'the(%s)'。"
+
+#: src/invent.c:814
+msgid "already have amulet?"
+msgstr "已经有护身符了？"
+
+#: src/invent.c:819
+msgid "already have candelabrum?"
+msgstr "已经有烛台了？"
+
+#: src/invent.c:835
+msgid "already have quest artifact?"
+msgstr "已经有任务神器了？"
+
+#: src/invent.c:824
+msgid "already have silver bell?"
+msgstr "已经有银铃了？"
+
+#: src/invent.c:829
+msgid "already have the book?"
+msgstr "已经有这本书了？"
+
+#: src/mon.c:3266
+msgid "animal_list already exists"
+msgstr "animal_list 已存在"
+
+#: src/pager.c:69
+msgid "append_str: 'buf' contains %lu characters."
+msgstr "append_str：'buf' 包含 %lu 个字符。"
+
+#: src/artifact.c:1447
+msgid "arti_invoke without obj"
+msgstr "arti_invoke 缺少 obj"
+
+#: src/ball.c:1055
+msgid "Attached %s%s%s without being Punished?"
+msgstr "在未受惩罚的情况下接上了%s%s%s？"
+
+#: src/artifact.c:1202
+msgid "attacking yourself with weapon?"
+msgstr "用武器攻击自己？"
+
+#: src/timeout.c:1913
+msgid "Attempted to start duplicate %s, aborted."
+msgstr "试图启动重复的%s，已中止。"
+
+#: src/priest.c:527
+msgid "attempting to manipulate shrine data for non-priest?"
+msgstr "试图为非祭司操作神龛数据？"
+
+#: src/zap.c:729
+msgid "Attempting to revive %s?"
+msgstr "试图复活%s？"
+
+#: src/ball.c:1107
+msgid "b&c distance: you@<%d,%d>, chain@<%d,%d>, ball@<%d,%d>"
+msgstr "球链距离：你@<%d,%d>，链@<%d,%d>，球@<%d,%d>"
+
+#: src/display.c:1817
+msgid "back_to_glyph:  unknown level type [ = %d ]"
+msgstr "back_to_glyph：未知的层类型 [ = %d ]"
+
+#: src/polyself.c:1155
+msgid "bad attack type in dospit"
+msgstr "dospit 中的攻击类型错误"
+
+#: src/mthrowu.c:774
+#: src/mthrowu.c:975
+msgid "bad attack type in spitmu"
+msgstr "spitmu 中的攻击类型错误"
+
+#: src/cmd.c:4473
+msgid "Bad autocomplete: invalid extended command '%s'."
+msgstr "自动补全错误：无效的扩展命令 '%s'。"
+
+#: src/makemon.c:2283
+msgid "bad bag o' tricks"
+msgstr "戏法袋错误"
+
+#: src/polyself.c:1128
+msgid "bad breath attack?"
+msgstr "吐息攻击错误？"
+
+#: src/ball.c:777
+msgid "bad chain movement"
+msgstr "链条移动错误"
+
+#: src/trap.c:4974
+msgid "bad chest trap"
+msgstr "箱子陷阱错误"
+
+#: src/dbridge.c:258
+msgid "bad direction in create_drawbridge"
+msgstr "create_drawbridge 中的方向错误"
+
+#: src/options.c:3229
+msgid "bad disclosure index %d %c"
+msgstr "披露索引错误 %d %c"
+
+#: src/pager.c:581
+msgid "bad do_look buffer passed (%s)!"
+msgstr "传入了错误的 do_look 缓冲区 (%s)！"
+
+#: src/worn.c:674
+msgid "bad flag in which_armor"
+msgstr "which_armor 中的标志错误"
+
+#: src/objnam.c:603
+msgid "Bad fruit #%d?"
+msgstr "水果错误 #%d？"
+
+#: src/shk.c:2117
+msgid "bad glass gem %d?"
+msgstr "玻璃宝石错误 %d？"
+
+#: src/mkobj.c:2205
+msgid "bad horn o' plenty"
+msgstr "丰饶之角错误"
+
+#: src/topten.c:111
+msgid "bad killer format? (%d)"
+msgstr "杀手格式错误？(%d)"
+
+#: src/restore.c:459
+msgid "bad monster weapon restore"
+msgstr "怪物武器恢复错误"
+
+#: src/mplayer.c:258
+msgid "bad mplayer monster"
+msgstr "mplayer 怪物错误"
+
+#: src/uhitm.c:1672
+msgid "bad shade attack function flow?"
+msgstr "幽影攻击函数流程错误？"
+
+#: src/shk.c:3354
+msgid "Bad shopkeeper administration."
+msgstr "店主管理错误。"
+
+#: src/polyself.c:1147
+msgid "bad spit attack?"
+msgstr "喷吐攻击错误？"
+
+#: src/mcastu.c:403
+msgid "bad wizard cloning?"
+msgstr "巫师克隆错误？"
+
+#: src/files.c:4236
+msgid "Basic data files%s are collected inside:"
+msgstr "基础数据文件%s收纳于："
+
+#: src/files.c:4252
+msgid "Basic data files%s are in many separate files."
+msgstr "基础数据文件%s分散在多个文件中。"
+
+#: src/ball.c:203
+#: src/ball.c:249
+#: src/ball.c:350
+msgid "bc already placed?"
+msgstr "bc 已放置？"
+
+#: src/ball.c:377
+msgid "bc_order:  ball&chain not in same location!"
+msgstr "bc_order：球链不在同一位置！"
+
+#: src/timeout.c:1499
+msgid "begin burn: unexpected %s"
+msgstr "begin burn：意外的%s"
+
+#: src/timeout.c:1525
+msgid "begin_burn: can't get obj position"
+msgstr "begin_burn: 无法获取物品位置"
+
+#: src/zap.c:1878
+msgid "bhito: obj is not floor or Stone To Flesh spell"
+msgstr "bhito: 物品不是地板也不是石化为肉法术"
+
+#: src/do_wear.c:1169
+msgid "Blindf_off without otmp"
+msgstr "Blindf_off 缺少 otmp"
+
+#: src/dothrow.c:2087
+msgid "breaking odd object?"
+msgstr "破坏奇怪的物品？"
+
+#: src/mthrowu.c:1032
+#: src/mthrowu.c:845
+msgid "Breath weapon %d used"
+msgstr "使用了呼吸武器 %d"
+
+#: src/timeout.c:1401
+msgid "burn_object: unexpected obj %s"
+msgstr "burn_object: 意外的物品 %s"
+
+#: src/shk.c:4793
+msgid "cad: unknown gender"
+msgstr "cad: 未知性别"
+
+#: src/files.c:1873
+msgid "Can't find file %s to lock!"
+msgstr "找不到要锁定的文件 %s！"
+
+#: src/rumors.c:155
+msgid "Can't find non-cookie rumor?"
+msgstr "找不到非幸运饼干的传闻？"
+
+#: src/pager.c:720
+msgid "can't get to start of 'data' file"
+msgstr "无法到达“data”文件的起始处"
+
+#: src/windows.c:374
+msgid "Can't locate processor '-chainin'"
+msgstr "找不到处理器“-chainin”"
+
+#: src/windows.c:382
+msgid "Can't locate processor '-chainout'"
+msgstr "找不到处理器“-chainout”"
+
+#: src/files.c:1883
+msgid "Can't lock %s due to directory protection."
+msgstr "由于目录保护，无法锁定 %s。"
+
+#: src/dungeon.c:2037
+msgid "Can't note branch for unseen level (%d, %d)"
+msgstr "无法为未探索的层记录分支(%d, %d)"
+
+#: src/rumors.c:569
+msgid "Can't open '%s' file."
+msgstr "无法打开“%s”文件。"
+
+#: src/mklev.c:1123
+msgid "Can't place branch!"
+msgstr "无法放置分支！"
+
+#: src/mon.c:2537
+msgid "Can't polystone %s!"
+msgstr "无法将%s石化！"
+
+#: src/pager.c:725
+msgid "can't read 'data' file"
+msgstr "无法读取“data”文件"
+
+#: src/files.c:1964
+msgid "Can't remove fcntl lock on %s."
+msgstr "无法移除 %s 上的 fcntl 锁。"
+
+#: src/files.c:1975
+msgid "Can't unlink %s."
+msgstr "无法删除 %s。"
+
+#: src/light.c:725
+msgid "candlelight for %d?"
+msgstr "用%d点烛光？"
+
+#: src/sp_lev.c:4709
+msgid "Cannot create drawbridge."
+msgstr "无法创建吊桥。"
+
+#: src/files.c:1898
+msgid "Cannot lock %s for unknown reason (%d)."
+msgstr "因未知原因无法锁定 %s（%d）。"
+
+#: src/files.c:1891
+msgid "Cannot lock %s."
+msgstr "无法锁定 %s。"
+
+#: src/files.c:1815
+msgid "Cannot open file %s.  Is NetHack installed correctly?"
+msgstr "无法打开文件 %s。NetHack 是否正确安装？"
+
+#: src/topten.c:1191
+msgid "Cannot open record file!"
+msgstr "无法打开记录文件！"
+
+#: src/mcastu.c:530
+msgid "cast directed cleric spell (%d) with dmg=0?"
+msgstr "施放伤害为0的定向牧师法术(%d)？"
+
+#: src/mcastu.c:373
+msgid "cast directed wizard spell (%d) with dmg=0?"
+msgstr "施放伤害为0的定向法师法术(%d)？"
+
+#: src/dog.c:550
+msgid "catching up for leashed monster?"
+msgstr "为拴绳怪物补进度？"
+
+#: src/dog.c:478
+msgid "catchup from now?"
+msgstr "从现在开始补进度？"
+
+#: src/trap.c:4841
+msgid "chest disarm bug"
+msgstr "箱子解除陷阱错误"
+
+#: src/options.c:6535
+msgid "choose_classes_menu: invalid category %d"
+msgstr "choose_classes_menu：无效类别%d"
+
+#: src/timeout.c:1566
+msgid "cleanup_burn: obj %s not lit"
+msgstr "cleanup_burn：物品%s未点燃"
+
+#: src/makemon.c:824
+msgid "clone_mon trying to create a monster at <%d,%d>?"
+msgstr "clone_mon试图在<%d,%d>创建怪物？"
+
+#: src/vision.c:1667
+msgid "close_shadow:  bad value"
+msgstr "close_shadow：错误的值"
+
+#: src/pager.c:1891
+msgid "cmdhelp: mismatched &? &: &. conditionals."
+msgstr "cmdhelp：&? &: &. 条件不匹配。"
+
+#: src/pager.c:1768
+msgid "cmdhelp: unrecognized &%c conditional at line %d: \"%.20s\""
+msgstr "cmdhelp：无法识别的条件 &%c 于第 %d 行：\\\"%.20s\\\""
+
+#: src/questpgr.c:608
+msgid "com_pager: message %d not found."
+msgstr "com_pager：未找到消息%d。"
+
+#: src/pray.c:1216
+msgid "Confused deity!"
+msgstr "困惑的神明！"
+
+#: src/dungeon.c:425
+msgid "correct_branch_type: unknown branch type"
+msgstr "correct_branch_type：未知的分支类型"
+
+#: src/extralev.c:146
+msgid "corridor in direction %d?"
+msgstr "方向%d上的走廊？"
+
+#: src/sp_lev.c:1493
+msgid "couldn't create secret door on any walls 0x%x"
+msgstr "无法在任何墙壁上创建暗门 0x%x"
+
+#: src/artifact.c:905
+msgid "couldn't discover artifact (%d)"
+msgstr "无法发现神器(%d)"
+
+#: src/mkmaze.c:1019
+msgid "Couldn't load \"%s\" - making a maze."
+msgstr "无法加载\\\"%s\\\"——正在生成迷宫。"
+
+#: src/files.c:2169
+msgid "Couldn't open default config file %s %s(%d)."
+msgstr "无法打开默认配置文件 %s %s（%d）。"
+
+#: src/files.c:3081
+msgid "Couldn't open default wizkit file %s (%d)."
+msgstr "无法打开默认 wizkit 文件 %s（%d）。"
+
+#: src/files.c:2085
+#: src/files.c:3052
+msgid "Couldn't open requested config file %s (%d)."
+msgstr "无法打开所请求的配置文件 %s（%d）。"
+
+#: src/mkmaze.c:318
+msgid "Couldn't place lregion type %d!"
+msgstr "无法放置lregion类型%d！"
+
+#: src/sp_lev.c:1441
+msgid "create_door: Can't find a proper place!"
+msgstr "create_door：找不到合适的位置！"
+
+#: src/sp_lev.c:1681
+msgid "create_monster: can't find feature \"%s\""
+msgstr "create_monster：找不到地物\\\"%s\\\""
+
+#: src/sp_lev.c:1695
+msgid "create_monster: can't find object \"%s\""
+msgstr "create_monster：找不到物品\\\"%s\\\""
+
+#: src/sp_lev.c:1733
+msgid "create_monster: invalid %s (\"%s\")"
+msgstr "create_monster：无效的%s（\\\"%s\\\"）"
+
+#: src/sp_lev.c:1671
+msgid "create_monster: mon has an appearance, \"%s\", but no type"
+msgstr "create_monster：怪物有外观\\\"%s\\\"，但没有类型"
+
+#: src/sp_lev.c:1774
+msgid "create_monster: unimplemented mon appear type [%d,\"%s\"]"
+msgstr "create_monster：未实现的怪物外观类型[%d,\\\"%s\\\"]"
+
+#: src/sp_lev.c:1944
+msgid "create_object: no container"
+msgstr "create_object: 没有容器"
+
+#: src/sp_lev.c:1978
+msgid "create_object: too deeply nested containers."
+msgstr "create_object: 容器嵌套层数过深。"
+
+#: src/do_wear.c:1553
+msgid "cursed without otmp"
+msgstr "cursed without otmp"
+
+#: src/worm.c:347
+msgid "cutworm: no segment at (%d,%d)"
+msgstr "cutworm: 在 (%d,%d) 处没有分节"
+
+#: src/rnd.c:185
+msgid "d(%d,%d) attempted"
+msgstr "尝试了 d(%d,%d)"
+
+#: src/mon.c:69
+msgid "dead monster on %s; %s at <%d,%d>"
+msgstr "%s 上有死怪物；%s 位于 <%d,%d>"
+
+#: src/cmd.c:3036
+msgid "dead without dying?"
+msgstr "没死却已死亡？"
+
+#: src/end.c:2177
+msgid "dealloc_killer (#%d) not on list"
+msgstr "dealloc_killer (#%d) 不在列表中"
+
+#: src/light.c:125
+msgid "del_light_source: not found type=%d, id=%s"
+msgstr "del_light_source: 未找到 type=%d, id=%s"
+
+#: src/dig.c:583
+msgid "digactualhole: can't dig %s on this level."
+msgstr "digactualhole: 在这一层无法挖 %s。"
+
+#: src/steed.c:584
+msgid "Dismounting: can't place former steed on map."
+msgstr "下坐骑：无法将原坐骑放置到地图上。"
+
+#: src/display.c:420
+msgid "display_monster:  bad m_ap_type value [ = %d ]"
+msgstr "display_monster: 错误的 m_ap_type 值 [ = %d ]"
+
+#: src/display.c:527
+msgid "display_warning did not match warning type?"
+msgstr "display_warning 与警告类型不匹配？"
+
+#: src/mon.c:1630
+msgid "dmonsfree: %d removed doesn't match %d pending on %s"
+msgstr "dmonsfree: 移除的 %d 与待处理的 %d 不匹配，位于 %s"
+
+#: src/do_wear.c:2501
+msgid "do_takeoff: taking off %lx"
+msgstr "do_takeoff: 正在脱下 %lx"
+
+#: src/shk.c:3327
+msgid "doinvbill: no shopkeeper?"
+msgstr "doinvbill: 没有店主？"
+
+#: src/invent.c:1116
+msgid "don't have amulet?"
+msgstr "没有护身符？"
+
+#: src/invent.c:1120
+msgid "don't have candelabrum?"
+msgstr "没有大烛台？"
+
+#: src/invent.c:1133
+msgid "don't have quest artifact?"
+msgstr "没有任务神器？"
+
+#: src/invent.c:1124
+msgid "don't have silver bell?"
+msgstr "没有银铃？"
+
+#: src/invent.c:1128
+msgid "don't have the book?"
+msgstr "没有那本书？"
+
+#: src/mklev.c:1252
+msgid "DOORMAX exceeded?"
+msgstr "超过 DOORMAX？"
+
+#: src/shk.c:1428
+msgid "dopay: not to shopkeeper?"
+msgstr "dopay：不是给店主？"
+
+#: src/trap.c:1295
+msgid "dotrap: %ss cannot exist on this level."
+msgstr "dotrap：%s不能存在于这一层。"
+
+#: src/extralev.c:80
+msgid "down door from %d,%d going nowhere?"
+msgstr "从 %d,%d 往下的门通向无处？"
+
+#: src/extralev.c:116
+#: src/extralev.c:74
+msgid "down: no wall at %d,%d?"
+msgstr "down：%d,%d 处没有墙？"
+
+#: src/timeout.c:942
+msgid "egg hatched where? (%d)"
+msgstr "蛋在哪里孵化的？(%d)"
+
+#: src/timeout.c:1539
+msgid "end_burn: obj %s not lit"
+msgstr "end_burn：物品 %s 未点燃"
+
+#: src/timeout.c:1553
+msgid "end_burn: obj %s not timed!"
+msgstr "end_burn：物品 %s 未计时！"
+
+#: src/engrave.c:1260
+msgid "Error in del_engr?"
+msgstr "del_engr出错？"
+
+#: src/files.c:3880
+msgid "Error writing %s; recovery failed (player name size).\n"
+msgstr "写入 %s 出错；恢复失败（玩家名长度）。\\n"
+
+#: src/files.c:3890
+msgid "Error writing %s; recovery failed (player name).\n"
+msgstr "写入 %s 出错；恢复失败（玩家名）。\\n"
+
+#: src/vault.c:247
+msgid "escaping vault without guard?"
+msgstr "没有守卫就逃出金库？"
+
+#: src/cmd.c:588
+msgid "Exceeded %d extended commands in doextcmd() menu; 'extmenu' disabled."
+msgstr "doextcmd()菜单中扩展命令超过%d个；'extmenu'已禁用。"
+
+#: src/explode.c:62
+msgid "explode: wand has bad zap type (%d)."
+msgstr "explode：魔杖的施法类型无效（%d）。"
+
+#: src/explode.c:814
+msgid "exploding unlit oil"
+msgstr "爆炸的未点燃油"
+
+#: src/explode.c:158
+msgid "explosion base type %d?"
+msgstr "爆炸基础类型%d？"
+
+#: src/explode.c:202
+#: src/explode.c:243
+msgid "explosion type %d?"
+msgstr "爆炸类型%d？"
+
+#: src/mail.c:517
+msgid "fake mail #%d has undefined substitution"
+msgstr "假邮件#%d有未定义的替换"
+
+#: src/vision.c:1707
+msgid "far_shadow:  bad value"
+msgstr "far_shadow：无效值"
+
+#: src/apply.c:2197
+msgid "figurine came to life where? (%d)"
+msgstr "小雕像在哪里活了过来？（%d）"
+
+#: src/shk.c:1926
+msgid "finish_paybill: no location"
+msgstr "finish_paybill：无位置"
+
+#: src/pray.c:461
+msgid "fix_worst_trouble: couldn't cure hands."
+msgstr "fix_worst_trouble: 无法治愈双手。"
+
+#: src/pray.c:494
+msgid "fix_worst_trouble: nothing to uncurse."
+msgstr "fix_worst_trouble: 没有可解咒的东西。"
+
+#: src/read.c:846
+msgid "forget_levels: bad percent %d"
+msgstr "forget_levels: 错误的百分比 %d"
+
+#: src/read.c:774
+msgid "forget_objects: bad percent %d"
+msgstr "forget_objects: 错误的百分比 %d"
+
+#: src/files.c:399
+msgid "fqname too long: %s + %s"
+msgstr "fqname 太长: %s + %s"
+
+#: src/polyself.c:1335
+msgid "gaze attack %d?"
+msgstr "凝视攻击 %d？"
+
+#: src/mhitu.c:2341
+msgid "Gaze attack %d?"
+msgstr "凝视攻击 %d？"
+
+#: src/mon.c:75
+msgid "genocided %s in play (%s)"
+msgstr "已灭绝游戏中的%s（%s）"
+
+#: src/sp_lev.c:928
+msgid "get_location:  (%d,%d) out of bounds"
+msgstr "get_location:  (%d,%d) 越界"
+
+#: src/sp_lev.c:917
+msgid "get_location:  can't find a place!"
+msgstr "get_location:  找不到位置！"
+
+#: src/invent.c:1503
+msgid "getobj: inventory overflow"
+msgstr "getobj: 物品栏溢出"
+
+#: src/shk.c:4853
+msgid "globby_bill_fixup called for non-globby object"
+msgstr "对非黏团物体调用了 globby_bill_fixup"
+
+#: src/do.c:1445
+msgid "goto_level: returning to discarded level?"
+msgstr "goto_level:返回到已丢弃的层?"
+
+#: src/mon.c:82
+msgid "guard without egd (%s)"
+msgstr "没有 egd 的守卫(%s)"
+
+#: src/mhitu.c:520
+msgid "hiding under nothing?"
+msgstr "藏在虚无之下？"
+
+#: src/uhitm.c:541
+msgid "hitum_cleave: unknown target direction [%d,%d,%d]?"
+msgstr "hitum_cleave：未知的目标方向 [%d,%d,%d]？"
+
+#: src/botl.c:2873
+msgid "hl->behavior=absolute, rel error"
+msgstr "hl->behavior=absolute，rel 错误"
+
+#: src/botl.c:2885
+msgid "hl->behavior=condition, rel error"
+msgstr "hl->behavior=condition，rel 错误"
+
+#: src/botl.c:2857
+msgid "hl->behavior=percentage, rel error"
+msgstr "hl->behavior=percentage，rel 错误"
+
+#: src/botl.c:2879
+msgid "hl->behavior=textmatch, rel or textmatch error"
+msgstr "hl->behavior=textmatch，rel 或 textmatch 错误"
+
+#: src/botl.c:2867
+msgid "hl->behavior=updown, rel error"
+msgstr "hl->behavior=updown，rel 错误"
+
+#: src/files.c:1934
+msgid "I give up.  Sorry."
+msgstr "我放弃了。抱歉。"
+
+#: src/options.c:1234
+msgid "iflags.opt_booldup already on (memory leak)"
+msgstr "iflags.opt_booldup 已开启（内存泄漏）"
+
+#: src/options.c:1241
+msgid "iflags.opt_compdup already on (memory leak)"
+msgstr "iflags.opt_compdup 已开启（内存泄漏）"
+
+#: src/mon.c:55
+msgid "illegal mon data %s; mnum=%d (%s)"
+msgstr "非法的怪物数据 %s；mnum=%d (%s)"
+
+#: src/botl.c:1014
+msgid "init_blstats called more than once."
+msgstr "init_blstats 被调用了不止一次。"
+
+#: src/mkobj.c:704
+msgid "invalid alteration type (%d)"
+msgstr "无效的变更类型 (%d)"
+
+#: src/trap.c:188
+msgid "Invalid erosion type in erode_obj"
+msgstr "erode_obj 中的侵蚀类型无效"
+
+#: src/files.c:389
+msgid "Invalid fqn_filename_buffer specified: %d"
+msgstr "指定的 fqn_filename_buffer 无效：%d"
+
+#: src/shk.c:3304
+msgid "invalid sell response"
+msgstr "无效的出售回应"
+
+#: src/apply.c:773
+msgid "leash in use isn't attached to anything?"
+msgstr "使用中的牵绳没有拴着任何东西？"
+
+#: src/objnam.c:1221
+msgid "leashed monster not on this level"
+msgstr "被拴的怪物不在这一层"
+
+#: src/extralev.c:283
+msgid "left end of %d, %d never connected?"
+msgstr "%d的左端，%d从未连接？"
+
+#: src/extralev.c:138
+msgid "left: no wall at %d,%d?"
+msgstr "左边：%d,%d处没有墙？"
+
+#: src/do.c:1225
+msgid "level arrival collision: %s?"
+msgstr "关卡到达冲突：%s？"
+
+#: src/sp_lev.c:5359
+msgid "Level script is taking too much time, stopping."
+msgstr "关卡脚本耗时过长，正在停止。"
+
+#: src/questpgr.c:138
+msgid "load_qtlist: cannot load quest text."
+msgstr "load_qtlist：无法加载任务文本。"
+
+#: src/pager.c:390
+msgid "lookat: unknown method of seeing monster"
+msgstr "lookat：未知的看见怪物方式"
+
+#: src/lock.c:1053
+msgid "magic (%d) attempted on door."
+msgstr "对门尝试了魔法（%d）。"
+
+#: src/makemon.c:1141
+msgid "makemon trying to create a monster at <%d,%d>?"
+msgstr "makemon 试图在<%d,%d>创建怪物？"
+
+#: src/mkobj.c:1537
+msgid "making corpstat type %d"
+msgstr "正在创建 corpstat 类型 %d"
+
+#: src/mon.c:134
+msgid "map mon (%s) at <%d,%d> is found at <%d,%d>?"
+msgstr "地图怪物（%s）在<%d,%d>却在<%d,%d>被找到？"
+
+#: src/mon.c:127
+msgid "map mon (%s) at <%d,%d> not in fmon list!"
+msgstr "地图怪物（%s）在<%d,%d>不在 fmon 列表中！"
+
+#: src/light.c:462
+msgid "maybe_write_ls: bad type (%d) [range=%d]"
+msgstr "maybe_write_ls：错误的类型（%d）[range=%d]"
+
+#: src/light.c:450
+msgid "maybe_write_ls: no id! [range=%d]"
+msgstr "maybe_write_ls：没有 id！[range=%d]"
+
+#: src/mcastu.c:725
+msgid "mcastu: invalid clerical spell (%d)"
+msgstr "mcastu：无效的牧师法术（%d）"
+
+#: src/mcastu.c:513
+msgid "mcastu: invalid magic spell (%d)"
+msgstr "mcastu：无效的魔法法术（%d）"
+
+#: src/dig.c:1300
+msgid "mdig_tunnel:  %s at (%d,%d) is undiggable"
+msgstr "mdig_tunnel：%s 在 (%d,%d) 处无法挖掘"
+
+#: src/zap.c:4352
+msgid "melt_ice: no pool?"
+msgstr "melt_ice：没有水池？"
+
+#: src/invent.c:762
+msgid "merging strangely worn items (%lx)"
+msgstr "合并异常穿戴的物品（%lx）"
+
+#: src/mon.c:84
+msgid "minion without emin (%s)"
+msgstr "没有 emin 的爪牙（%s）"
+
+#: src/trap.c:2480
+msgid "mintrap: %ss cannot exist on this level."
+msgstr "mintrap：%s不能存在于本层。"
+
+#: src/dig.c:86
+msgid "mkcavepos called with dist %d"
+msgstr "mkcavepos 以 dist %d 被调用"
+
+#: src/makemon.c:1665
+msgid "mkclass called with bad class!"
+msgstr "mkclass 以错误的类别被调用！"
+
+#: src/makemon.c:1678
+msgid "mkclass found no class %d monsters"
+msgstr "mkclass 未找到类别 %d 的怪物"
+
+#: src/mklev.c:1831
+msgid "mkinvpos called with dist %d"
+msgstr "mkinvpos 以 dist %d 被调用"
+
+#: src/mklev.c:1540
+msgid "mkstairs:  bogus stair attempt at <%d,%d>"
+msgstr "mkstairs：在<%d,%d>的虚假楼梯尝试"
+
+#: src/teleport.c:1408
+msgid "mlevel_tele_trap: unexpected trap type (%d)"
+msgstr "mlevel_tele_trap：意外的陷阱类型（%d）"
+
+#: src/do.c:1244
+msgid "mnexto failed"
+msgstr "mnexto 失败"
+
+#: src/mon.c:113
+msgid "mon (%s) at <%d,%d> is not there!"
+msgstr "怪物（%s）不在<%d,%d>！"
+
+#: src/mon.c:104
+msgid "mon (%s) claims to be at <%d,%d>?"
+msgstr "怪物（%s）声称位于 <%d,%d>？"
+
+#: src/dog.c:413
+msgid "mon_arrive: no corresponding portal?"
+msgstr "mon_arrive：没有对应的传送门？"
+
+#: src/steal.c:494
+msgid "monster (%s) taking or picking up attached %s (%s)?"
+msgstr "怪物（%s）正在拿取或捡起附着的 %s（%s）？"
+
+#: src/steal.c:490
+msgid "monster (%s) taking or picking up nothing?"
+msgstr "怪物（%s）正在拿取或捡起空物？"
+
+#: src/mon.c:61
+msgid "monster mnum=%d, monsndx=%d (%s)"
+msgstr "怪物 mnum=%d，monsndx=%d（%s）"
+
+#: src/mcastu.c:863
+msgid "Monster spell %d cast"
+msgstr "施放了怪物法术 %d"
+
+#: src/mthrowu.c:598
+msgid "monster throwing egg type %d"
+msgstr "怪物投掷类型为 %d 的蛋"
+
+#: src/sp_lev.c:3087
+msgid "MONSTER with unknown variable param type!"
+msgstr "怪物具有未知的可变参数类型！"
+
+#: src/mkmaze.c:1427
+msgid "movebubbles: bad pos (%d,%d)"
+msgstr "movebubbles：错误的位置（%d,%d）"
+
+#: src/mkmaze.c:1930
+msgid "mv_bubble: unknown bubble contents"
+msgstr "mv_bubble：未知的气泡内容"
+
+#: src/mkobj.c:2323
+msgid "mydogs sanity [not empty]"
+msgstr "mydogs 完整性检查 [非空]"
+
+#: src/mkmaze.c:1761
+msgid "n too large (mk_bubble)"
+msgstr "n 太大（mk_bubble）"
+
+#: src/o_init.c:396
+msgid "named object not in disco"
+msgstr "命名的物品不在 disco 中"
+
+#: src/shk.c:2768
+msgid "Negative quantity on bill??"
+msgstr "账单上的数量为负？？"
+
+#: src/light.c:64
+msgid "new_light_source:  illegal range %d"
+msgstr "new_light_source：非法范围 %d"
+
+#: src/dungeon.c:1503
+msgid "No boundary for Wizard's Tower?"
+msgstr "巫师塔没有边界？"
+
+#: src/files.c:4281
+msgid "No end-of-game disclosure file (%s)."
+msgstr "无游戏结束披露文件（%s）。"
+
+#: src/muse.c:666
+msgid "No need for unicorn horn?"
+msgstr "不需要独角兽之角吗？"
+
+#: src/restore.c:521
+msgid "no old fruit?"
+msgstr "没有旧水果？"
+
+#: src/hacklib.c:467
+msgid "no output buf in stripchars"
+msgstr "stripchars 中没有输出缓冲区"
+
+#: src/pray.c:2200
+msgid "No random god name?"
+msgstr "没有随机的神名？"
+
+#: src/mcastu.c:668
+msgid "no reason for monster to cast blindness spell?"
+msgstr "怪物没有理由施放致盲法术？"
+
+#: src/mcastu.c:472
+msgid "no reason for monster to cast disappear spell?"
+msgstr "怪物没有理由施放隐身法术？"
+
+#: src/mkmap.c:325
+msgid "No start/end room loc in join_map."
+msgstr "join_map 中没有起始/结束房间位置。"
+
+#: src/files.c:4186
+msgid "No system configuration file."
+msgstr "无系统配置文件。"
+
+#: src/windows.c:279
+msgid "No window types supported?"
+msgstr "不支持任何窗口类型？"
+
+#: src/end.c:2267
+msgid "no words in list"
+msgstr "列表中没有词语"
+
+#: src/files.c:1877
+msgid "No write permission to lock %s!"
+msgstr "没有写权限来锁定 %s！"
+
+#: src/do.c:55
+msgid "Not a boulder?"
+msgstr "不是巨石？"
+
+#: src/vault.c:300
+msgid "Not a single corridor on this level?"
+msgstr "这一层竟然没有一条走廊？"
+
+#: src/o_init.c:63
+msgid "Not enough gems? - first=%d j=%d LAST_GEM=%d"
+msgstr "宝石不够？- first=%d j=%d LAST_GEM=%d"
+
+#: src/files.c:4181
+msgid "NOTE: The %s above is missing or inaccessible!"
+msgstr "注意：上面的 %s 缺失或无法访问！"
+
+#: src/shk.c:982
+msgid "obfree: deleting worn obj (%d: %ld)"
+msgstr "obfree：正在删除穿戴中的物品（%d：%ld）"
+
+#: src/shk.c:948
+msgid "obfree: not on bill, %s = (%d,%d,%ld,%d) (%d,%d,%ld,%d)??"
+msgstr "obfree：不在账单上，%s = (%d,%d,%ld,%d) (%d,%d,%ld,%d)？？"
+
+#: src/mkobj.c:2879
+msgid "obj_absorb: not called with two actual objects"
+msgstr "obj_absorb：调用时未传入两个实际物品"
+
+#: src/light.c:687
+msgid "obj_adjust_light_radius: can't find %s"
+msgstr "obj_adjust_light_radius：找不到%s"
+
+#: src/mkobj.c:2930
+msgid "obj_meld: not called with two actual objects"
+msgstr "obj_meld：调用时未传入两个实际物品"
+
+#: src/mkobj.c:2779
+msgid "obj_nexto: wasn't given an object to check"
+msgstr "obj_nexto：未给出要检查的物品"
+
+#: src/sp_lev.c:3239
+msgid "OBJECT with unknown variable param type!"
+msgstr "OBJECT 带有未知的变量参数类型！"
+
+#: src/detect.c:598
+msgid "object_detect:  illegal class %d"
+msgstr "object_detect：非法的类别 %d"
+
+#: src/options.c:4266
+msgid "oc_to_str:  illegal object class %d"
+msgstr "oc_to_str：非法的物品类别 %d"
+
+#: src/makemon.c:617
+msgid "odd mercenary %d?"
+msgstr "奇怪的雇佣兵 %d？"
+
+#: src/sp_lev.c:444
+msgid "opvar_free(), %s"
+msgstr "opvar_free()，%s"
+
+#: src/shk.c:1594
+msgid "Paid object on bill??"
+msgstr "已付款的物品在账单上？？"
+
+#: src/eat.c:3230
+msgid "partly eaten food (%ld) more nutritious than untouched food (%ld)"
+msgstr "吃了一部分的食物（%ld）比未动过的食物（%ld）更有营养"
+
+#: src/shk.c:112
+msgid "Paying without %s money?"
+msgstr "没有%s的钱就付款？"
+
+#: src/botl.c:1237
+msgid "percentage: bad istat pointer %s, %s"
+msgstr "percentage：错误的 istat 指针 %s，%s"
+
+#: src/files.c:1865
+msgid "Perhaps there is an old %s around?"
+msgstr "或许附近有一个旧的 %s？"
+
+#: src/mon.c:87
+msgid "pet without edog (%s)"
+msgstr "宠物没有 edog（%s）"
+
+#: src/lock.c:355
+msgid "picking lock with object %d?"
+msgstr "用物品%d撬锁？"
+
+#: src/pickup.c:1495
+msgid "pickup_object: count %ld > quan %ld?"
+msgstr "pickup_object：数量 %ld > 存量 %ld？"
+
+#: src/worm.c:657
+msgid "place_worm_tail_randomly: wormno is set without a tail!"
+msgstr "place_worm_tail_randomly：设置了 wormno 却没有尾巴！"
+
+#: src/ball.c:275
+msgid "Placebc collision at %s:%d, already placed by %s:%d"
+msgstr "Placebc 冲突于 %s:%d，已被 %s:%d 放置"
+
+#: src/steed.c:762
+msgid "placing %s onto map, mstate:%lx, on %s?"
+msgstr "正在把%s放到地图上，mstate:%lx，位于%s？"
+
+#: src/steed.c:771
+msgid "placing %s over %s at <%d,%d>, mstates:%lx %lx on %s?"
+msgstr "正在把%s放到%s之上，位置<%d,%d>，mstates:%lx %lx，位于%s？"
+
+#: src/worm.c:578
+msgid "placing worm seg <%i,%i> over another mon"
+msgstr "把蠕虫段<%i,%i>放到另一只怪物之上"
+
+#: src/topten.c:1139
+msgid "Player types are: [-p role] [-r race]"
+msgstr "玩家类型为：[-p 职业] [-r 种族]"
+
+#: src/objnam.c:2449
+msgid "plural of null?"
+msgstr "空值的复数？"
+
+#: src/files.c:4294
+msgid "portable_device_paths (set in sysconf):"
+msgstr "portable_device_paths（在 sysconf 中设置）："
+
+#: src/mkmaze.c:1338
+msgid "portal on top of portal??"
+msgstr "传送门叠在传送门上？？"
+
+#: src/objnam.c:73
+msgid "PREFIX too short (for %d)."
+msgstr "PREFIX 太短（对于 %d）。"
+
+#: src/mon.c:80
+msgid "priest without epri (%s)"
+msgstr "祭司没有 epri（%s）"
+
+#: src/topten.c:1022
+msgid "prscore: bad arguments (%d)"
+msgstr "prscore：参数错误（%d）"
+
+#: src/ball.c:1050
+msgid "Punished without %s%s%s?"
+msgstr "受罚却没有%s%s%s？"
+
+#: src/cmd.c:2417
+msgid "Punished without uball?"
+msgstr "受罚却没有 uball？"
+
+#: src/questpgr.c:643
+msgid "qt_pager: message %d not found."
+msgstr "qt_pager：未找到消息 %d。"
+
+#: src/pickup.c:1124
+msgid "query_category: too many categories"
+msgstr "query_category：类别过多"
+
+#: src/quest.c:208
+msgid "quest portal already gone?"
+msgstr "任务传送门已经消失了？"
+
+#: src/quest.c:418
+msgid "quest_chat: Unknown quest character %s."
+msgstr "quest_chat：未知的任务角色 %s。"
+
+#: src/questpgr.c:170
+msgid "quest_info(%d)"
+msgstr "quest_info(%d)"
+
+#: src/eat.c:290
+msgid "recalc_wt without piece"
+msgstr "recalc_wt 没有 piece"
+
+#: src/sp_lev.c:4679
+msgid "region as subroom"
+msgstr "作为子房间的区域"
+
+#: src/mkmap.c:404
+msgid "regular room in joined map"
+msgstr "连接地图中的普通房间"
+
+#: src/light.c:428
+msgid "relink_light_sources: bad type (%d)"
+msgstr "relink_light_sources：类型错误（%d）"
+
+#: src/light.c:425
+msgid "relink_light_sources: cant find %c_id %d"
+msgstr "relink_light_sources：找不到%c_id %d"
+
+#: src/light.c:414
+msgid "relink_light_sources: no id mapping"
+msgstr "relink_light_sources：无id映射"
+
+#: src/steal.c:195
+msgid "Removing embedded scales?"
+msgstr "要移除嵌入的鳞片吗？"
+
+#: src/do_wear.c:1495
+msgid "removing strange accessory?"
+msgstr "要移除奇怪的饰品吗？"
+
+#: src/objnam.c:402
+msgid "reorder_fruit: duplicate fruit index (%d)"
+msgstr "reorder_fruit：重复的水果索引（%d）"
+
+#: src/objnam.c:399
+msgid "reorder_fruit: fruit index (%d) out of range"
+msgstr "reorder_fruit：水果索引（%d）超出范围"
+
+#: src/mon.c:1646
+msgid "replmon: minvent inconsistency"
+msgstr "replmon：minvent不一致"
+
+#: src/end.c:615
+msgid "Report error to \"%s\"%s"
+msgstr "将错误报告给\\\"%s\\\"%s"
+
+#: src/end.c:598
+msgid "Report the following error to \"%s\" or at \"%s\"."
+msgstr "请将以下错误报告给\\\"%s\\\"或在\\\"%s\\\"处报告。"
+
+#: src/restore.c:918
+msgid "restgamestate: lost ball & chain"
+msgstr "restgamestate：丢失了铁球与锁链"
+
+#: src/restore.c:475
+msgid "Restmonchn: error reading monchn."
+msgstr "Restmonchn：读取monchn出错。"
+
+#: src/restore.c:342
+msgid "Restobjchn: error reading objchn."
+msgstr "Restobjchn：读取objchn出错。"
+
+#: src/mkmaze.c:1607
+msgid "restore_waterlevel: returning to %s?"
+msgstr "restore_waterlevel：返回到%s？"
+
+#: src/do.c:1858
+msgid "revive_corpse: lost corpse @ %d"
+msgstr "revive_corpse：丢失尸体 @ %d"
+
+#: src/extralev.c:122
+msgid "right door from %d,%d going nowhere?"
+msgstr "从%d,%d出来的右门通向何处？"
+
+#: src/mhitu.c:2551
+msgid "ring replacement"
+msgstr "戒指替换"
+
+#: src/teleport.c:1270
+msgid "rloc(): couldn't relocate monster"
+msgstr "rloc()：无法重新定位怪物"
+
+#: src/pray.c:2197
+msgid "rn2 broken in halu_gname?!?"
+msgstr "rn2在halu_gname中出错？！？"
+
+#: src/rnd.c:106
+msgid "rn2(%d) attempted"
+msgstr "尝试了rn2(%d)"
+
+#: src/rnd.c:168
+msgid "rnd(%d) attempted"
+msgstr "尝试了rnd(%d)"
+
+#: src/makemon.c:1597
+msgid "rndmonst: bad `mndx' [#%d]"
+msgstr "rndmonst：错误的`mndx' [#%d]"
+
+#: src/rnd.c:126
+msgid "rnl(%d) attempted"
+msgstr "尝试了rnl(%d)"
+
+#: src/role.c:1989
+msgid "role_menu_extra: bad arg (%d)"
+msgstr "role_menu_extra：错误的参数（%d）"
+
+#: src/objnam.c:4406
+msgid "safe_qbuf: filler too long (%u + %u + %u characters)."
+msgstr "safe_qbuf：填充内容过长（%u + %u + %u个字符）。"
+
+#: src/objnam.c:4401
+msgid "safe_qbuf: prefix too long (%u characters)."
+msgstr "safe_qbuf：前缀过长（%u个字符）。"
+
+#: src/objnam.c:4403
+msgid "safe_qbuf: suffix too long (%u + %u characters)."
+msgstr "safe_qbuf：后缀过长（%u + %u个字符）。"
+
+#: src/shk.c:740
+msgid "same_price: object wasn't on any bill!"
+msgstr "same_price：物品不在任何账单上！"
+
+#: src/light.c:346
+msgid "save_light_sources: bad type (%d) [range=%d]"
+msgstr "save_light_sources：类型错误（%d）[range=%d]"
+
+#: src/light.c:334
+msgid "save_light_sources: no id! [range=%d]"
+msgstr "save_light_sources：无id！[range=%d]"
+
+#: src/explode.c:620
+msgid "scattered object <%d,%d> not at scatter site <%d,%d>"
+msgstr "散落的物品<%d,%d>不在散落地点<%d,%d>"
+
+#: src/do_wear.c:2432
+msgid "select_off: %s???"
+msgstr "select_off: %s???"
+
+#: src/options.c:6663
+msgid "set_option_mod_status: status out of range %d."
+msgstr "set_option_mod_status: status out of range %d."
+
+#: src/options.c:6697
+msgid "set_wc_option_mod_status: status out of range %d."
+msgstr "set_wc_option_mod_status: status out of range %d."
+
+#: src/options.c:6755
+msgid "set_wc2_option_mod_status: status out of range %d."
+msgstr "set_wc2_option_mod_status: status out of range %d."
+
+#: src/mkmaze.c:1673
+msgid "set_wportal(): no portal!"
+msgstr "set_wportal(): no portal!"
+
+#: src/worn.c:66
+msgid "Setworn: mask = %ld."
+msgstr "Setworn: mask = %ld."
+
+#: src/mon.c:78
+msgid "shk without eshk (%s)"
+msgstr "shk without eshk (%s)"
+
+#: src/shknam.c:848
+msgid "shkname: \"%s\" is not a shopkeeper."
+msgstr "shkname: \\\"%s\\\" is not a shopkeeper."
+
+#: src/shk.c:1521
+msgid "Shopkeeper administration out of order."
+msgstr "店主管理失常。"
+
+#: src/end.c:692
+msgid "should_query_disclose_option: bad category %c"
+msgstr "should_query_disclose_option: bad category %c"
+
+#: src/end.c:665
+msgid "should_query_disclose_option: bad disclosure index %d %c"
+msgstr "should_query_disclose_option: bad disclosure index %d %c"
+
+#: src/display.c:1558
+msgid "show_glyph:  bad glyph %d [max %d] at (%d,%d)."
+msgstr "show_glyph:  bad glyph %d [max %d] at (%d,%d)."
+
+#: src/display.c:1552
+msgid "show_glyph:  bad pos %d %d with glyph %d [%s %d]."
+msgstr "show_glyph:  bad pos %d %d with glyph %d [%s %d]."
+
+#: src/pickup.c:82
+msgid "simple_look(null)"
+msgstr "simple_look(null)"
+
+#: src/objnam.c:2627
+msgid "singular of null?"
+msgstr "singular of null?"
+
+#: src/weapon.c:1649
+msgid "skill_init: curr > max: %s"
+msgstr "skill_init: curr > max: %s"
+
+#: src/o_init.c:280
+msgid "snow boots not found?"
+msgstr "找不到雪地靴？"
+
+#: src/trap.c:2738
+msgid "Some monster encountered a strange trap of type %d."
+msgstr "某个怪物遇到了一个类型为%d的奇怪陷阱。"
+
+#: src/files.c:1845
+msgid "Some other process has an unnatural grip on %s."
+msgstr "其他进程异常地占用着 %s。"
+
+#: src/spell.c:1888
+msgid "Spell %s already known."
+msgstr "已经学会了法术%s。"
+
+#: src/mcastu.c:220
+msgid "spellcasting monster found you and doesn't know it?"
+msgstr "施法的怪物找到了你却不知道？"
+
+#: src/sp_lev.c:317
+msgid "splev_stack_pop: empty stack?"
+msgstr "splev_stack_pop: 栈为空？"
+
+#: src/shk.c:2759
+msgid "splitbill: no resident shopkeeper??"
+msgstr "splitbill: 没有驻店店主？？"
+
+#: src/shk.c:2764
+msgid "splitbill: not on bill?"
+msgstr "splitbill: 不在账单上？"
+
+#: src/sp_lev.c:5623
+msgid "spo_cmp: no values in stack"
+msgstr "spo_cmp: 栈中没有值"
+
+#: src/sp_lev.c:5627
+msgid "spo_cmp: trying to compare differing datatypes"
+msgstr "spo_cmp: 试图比较不同的数据类型"
+
+#: src/sp_lev.c:5083
+msgid "spo_conditional_jump: illegal opcode"
+msgstr "spo_conditional_jump: 非法操作码"
+
+#: src/sp_lev.c:4327
+msgid "spo_feature called with wrong opcode %i."
+msgstr "spo_feature 被以错误的操作码 %i 调用。"
+
+#: src/sp_lev.c:4755
+msgid "spo_mazewalk: Bad MAZEWALK direction"
+msgstr "spo_mazewalk: 错误的 MAZEWALK 方向"
+
+#: src/options.c:908
+msgid "Status highlighting not supported for %s interface."
+msgstr "%s界面不支持状态高亮。"
+
+#: src/steal.c:310
+msgid "Steal fails!"
+msgstr "偷窃失败！"
+
+#: src/steal.c:157
+msgid "stealarm(): dead monster stealing"
+msgstr "stealarm(): 死亡怪物偷窃"
+
+#: src/mon.c:110
+msgid "steed (%s) claims to be at <%d,%d>?"
+msgstr "坐骑（%s）声称位于 <%d,%d>？"
+
+#: src/mon.c:130
+msgid "steed (%s) is on the map at <%d,%d>!"
+msgstr "坐骑（%s）在地图上的 <%d,%d>！"
+
+#: src/trap.c:1604
+msgid "steed hit by non-existent arrow?"
+msgstr "坐骑被不存在的箭击中？"
+
+#: src/trap.c:1612
+msgid "steed hit by non-existent dart?"
+msgstr "坐骑被不存在的飞镖击中？"
+
+#: src/dog.c:631
+msgid "steed left behind?"
+msgstr "坐骑被落下了？"
+
+#: src/uhitm.c:2696
+msgid "strange attack of yours (%d)"
+msgstr "你奇怪的攻击（%d）"
+
+#: src/display.c:1807
+msgid "Strange db-under: %d"
+msgstr "奇怪的 db-under: %d"
+
+#: src/rumors.c:136
+msgid "strange truth value for rumor"
+msgstr "传闻的真值奇怪"
+
+#: src/do_wear.c:1011
+msgid "Strange... I didn't know you had that ring."
+msgstr "奇怪……我不知道你有那枚戒指。"
+
+#: src/do_wear.c:2275
+msgid "stuck_ring: neither left nor right?"
+msgstr "stuck_ring: 既不是左也不是右？"
+
+#: src/shk.c:2824
+msgid "sub_one_frombill: unpaid object not on bill"
+msgstr "sub_one_frombill: 未付款物品不在账单上"
+
+#: src/display.c:1838
+msgid "swallow_to_glyph: bad swallow location"
+msgstr "swallow_to_glyph：吞噬位置错误"
+
+#: src/mhitu.c:233
+#: src/polyself.c:1206
+msgid "Swallower has no engulfing attack?"
+msgstr "吞噬者没有吞没攻击？"
+
+#: src/files.c:2236
+msgid "Syntax error in %s"
+msgstr "%s 中存在语法错误"
+
+#: src/do_wear.c:2582
+msgid "take_off: taking off %lx"
+msgstr "take_off：正在脱下%lx"
+
+#: src/do_wear.c:1613
+msgid "Taking off unknown armor (%d: %d), delay %d"
+msgstr "正在脱下未知护甲（%d：%d），延迟%d"
+
+#: src/do_wear.c:1653
+msgid "Taking off unknown armor (%d: %d), no delay"
+msgstr "正在脱下未知护甲（%d：%d），无延迟"
+
+#: src/files.c:4203
+msgid "The loadable symbols file%s:"
+msgstr "可加载的符号文件%s："
+
+#: src/sit.c:273
+msgid "throne effect"
+msgstr "王座效果"
+
+#: src/timeout.c:1852
+msgid "timer sanity: untimed obj %s, timer %ld"
+msgstr "计时器完整性检查：无计时的对象 %s，计时器 %ld"
+
+#: src/apply.c:1906
+msgid "Tinning failed."
+msgstr "装罐失败。"
+
+#: src/end.c:609
+msgid "To report this error, %s%s"
+msgstr "要报告此错误，%s%s"
+
+#: src/end.c:612
+msgid "To report this error, contact %s%s"
+msgstr "要报告此错误，请联系 %s%s"
+
+#: src/cmd.c:666
+msgid "Too many chars (%d) entered in extcmd_via_menu()"
+msgstr "在 extcmd_via_menu() 中输入了太多字符（%d）"
+
+#: src/sp_lev.c:4636
+msgid "Too many rooms on new level!"
+msgstr "新楼层的房间太多了！"
+
+#: src/spell.c:1885
+#: src/spell.c:381
+msgid "Too many spells memorized!"
+msgstr "记住的法术太多了！"
+
+#: src/spell.c:1298
+msgid "tport_spell: spellbook full"
+msgstr "tport_spell：法术书已满"
+
+#: src/light.c:234
+msgid "transient light %s %s is not %s?"
+msgstr "临时光源 %s %s 不是 %s？"
+
+#: src/hack.c:1330
+msgid "trapmove: stuck in unknown trap? (%d)"
+msgstr "trapmove：困在未知陷阱中？（%d）"
+
+#: src/mkroom.c:84
+msgid "Tried to make a room of type %d."
+msgstr "试图创建类型为 %d 的房间。"
+
+#: src/files.c:1801
+msgid "TRIED TO NEST LOCKS"
+msgstr "试图嵌套锁"
+
+#: src/steal.c:449
+msgid "Tried to steal a strange worn thing. [%d]"
+msgstr "试图偷取一件奇怪的穿戴物品。[%d]"
+
+#: src/mklev.c:876
+msgid "tryct overflow4"
+msgstr "tryct 溢出4"
+
+#: src/steed.c:754
+msgid "trying to place %s at <%d,%d> mstate:%lx on %s"
+msgstr "试图将 %s 放置在 <%d,%d> mstate:%lx 于 %s"
+
+#: src/dungeon.c:2034
+msgid "Two branches on the same level?"
+msgstr "同一楼层上有两个分支？"
+
+#: src/ball.c:1076
+msgid "uball: type %d (%s), where %d, wornmask=0x%08lx"
+msgstr "uball：类型 %d（%s），位置 %d，wornmask=0x%08lx"
+
+#: src/ball.c:1089
+msgid "uchain: type %d (%s), where %d, wornmask=0x%08lx"
+msgstr "uchain：类型 %d（%s），位置 %d，wornmask=0x%08lx"
+
+#: src/files.c:4017
+msgid "Unable to open SYSCF_FILE.\n"
+msgstr "无法打开 SYSCF_FILE。\\n"
+
+#: src/files.c:1514
+msgid "Unable to uncompress %s"
+msgstr "无法解压 %s"
+
+#: src/minion.c:183
+msgid "unaligned player?"
+msgstr "无阵营的玩家？"
+
+#: src/end.c:2029
+msgid "unique creature '%d: %s' genocided?"
+msgstr "独特生物'%d: %s'被灭绝了?"
+
+#: src/pray.c:2129
+msgid "unknown alignment."
+msgstr "未知阵营。"
+
+#: win/headless/winheadless.c:981
+msgid "Unknown extended command '%s'."
+msgstr "未知的扩展命令'%s'。"
+
+#: src/were.c:102
+msgid "unknown lycanthrope %s."
+msgstr "未知的兽人%s。"
+
+#: src/sp_lev.c:424
+msgid "Unknown opvar value type (%i)!"
+msgstr "未知的opvar值类型(%i)!"
+
+#: src/sp_lev.c:472
+msgid "Unknown push value type (%i)!"
+msgstr "未知的push值类型(%i)!"
+
+#: src/spell.c:1203
+msgid "Unknown spell %d attempted."
+msgstr "尝试了未知法术%d。"
+
+#: src/spell.c:750
+msgid "Unknown spell skill, %d;"
+msgstr "未知的法术技能,%d;"
+
+#: src/spell.c:520
+msgid "Unknown spellbook level %d, book %d;"
+msgstr "未知的法术书等级%d,书%d;"
+
+#: src/dothrow.c:1581
+msgid "Unknown type of gloves (%d)"
+msgstr "未知类型的手套(%d)"
+
+#: src/shk.c:2461
+msgid "unpaid_cost: object wasn't on any bill."
+msgstr "unpaid_cost: 物品不在任何账单上。"
+
+#: src/ball.c:213
+msgid "unplacebc denied, restriction in place"
+msgstr "unplacebc被拒绝,存在限制"
+
+#: src/ball.c:316
+msgid "Unplacebc_and_covet_placebc denied to %s:%d, restricted by %s:%d"
+msgstr "Unplacebc_and_covet_placebc对%s:%d被拒绝,被%s:%d限制"
+
+#: src/ball.c:225
+msgid "unplacebc_and_covet_placebc denied, already restricted"
+msgstr "unplacebc_and_covet_placebc被拒绝,已被限制"
+
+#: src/sp_lev.c:2774
+msgid "Unrecognized level init style."
+msgstr "无法识别的关卡初始化样式。"
+
+#: src/extralev.c:285
+msgid "up end of %d, %d never connected?"
+msgstr "%d的上端,%d从未连接?"
+
+#: src/extralev.c:96
+msgid "up: no wall at %d,%d?"
+msgstr "up: 在%d,%d处没有墙?"
+
+#: src/topten.c:1136
+msgid "Usage: %s -s [-v] <playertypes> [maxrank] [playernames]"
+msgstr "用法:%s -s [-v] <玩家类型> [最高排名] [玩家名]"
+
+#: src/polyself.c:1581
+msgid "uunstick: no ustuck?"
+msgstr "uunstick: 没有ustuck?"
+
+#: src/vault.c:670
+msgid "vault guard: no gold at hero's feet?"
+msgstr "金库守卫:主角脚下没有金币?"
+
+#: src/files.c:1856
+#: src/files.c:1928
+msgid "Waiting for access to %s.  (%d retries left)."
+msgstr "等待访问 %s。（剩余 %d 次重试）。"
+
+#: src/files.c:1839
+msgid "Waiting for release of fcntl lock on %s.  (%d retries left.)"
+msgstr "等待释放 %s 上的 fcntl 锁。（剩余 %d 次重试。）"
+
+#: src/display.c:2604
+msgid "wall_angle: bottom of crwall check"
+msgstr "wall_angle: crwall检查的底部"
+
+#: src/display.c:2642
+msgid "wall_angle: unexpected wall type %d"
+msgstr "wall_angle: 意外的墙类型%d"
+
+#: src/display.c:2518
+msgid "wall_angle: unknown %s mode %d"
+msgstr "wall_angle: 未知的%s模式%d"
+
+#: src/display.c:2635
+msgid "wall_angle: unknown crosswall mode"
+msgstr "wall_angle: 未知的crosswall模式"
+
+#: src/display.c:2499
+msgid "wall_angle: unknown hwall mode %d"
+msgstr "wall_angle: 未知的hwall模式%d"
+
+#: src/display.c:2455
+msgid "wall_angle: unknown T wall mode %d"
+msgstr "wall_angle: 未知的T墙模式%d"
+
+#: src/display.c:2479
+msgid "wall_angle: unknown vwall mode %d"
+msgstr "wall_angle: 未知的vwall模式%d"
+
+#: src/files.c:3689
+msgid "Warning: cannot write record '%s'"
+msgstr "警告：无法写入记录 '%s'"
+
+#: src/files.c:3632
+msgid "Warning: cannot write scoreboard file '%s'"
+msgstr "警告：无法写入记分板文件 '%s'"
+
+#: src/files.c:3618
+msgid "Warning: scoreboard file '%s' is not in stream_lf format"
+msgstr "警告：记分板文件 '%s' 不是 stream_lf 格式"
+
+#: src/weapon.c:789
+msgid "weapon_check %d for %s?"
+msgstr "weapon_check %d for %s?"
+
+#: src/weapon.c:1510
+msgid "weapon_dam_bonus: bad skill %d"
+msgstr "weapon_dam_bonus: 无效技能%d"
+
+#: src/polyself.c:1284
+msgid "Webbing over trap type %d?"
+msgstr "在陷阱类型%d上结网？"
+
+#: src/zap.c:3067
+msgid "weffects: unexpected spell or wand"
+msgstr "weffects：意外的法术或魔杖"
+
+#: src/artifact.c:830
+msgid "Weird weapon special attack."
+msgstr "奇怪的武器特殊攻击。"
+
+#: src/potion.c:1155
+msgid "What a funny potion! (%u)"
+msgstr "多有趣的药水！（%u）"
+
+#: src/music.c:672
+msgid "What a weird instrument (%d)!"
+msgstr "多奇怪的乐器（%d）！"
+
+#: src/zap.c:2078
+#: src/zap.c:456
+msgid "What an interesting effect (%d)"
+msgstr "多有趣的效果（%d）"
+
+#: src/read.c:1719
+msgid "What weird effect is this? (%u)"
+msgstr "这是什么奇怪的效果？（%u）"
+
+#: src/topten.c:1174
+msgid "What weird role is this? (%s)"
+msgstr "这是什么奇怪的角色？（%s）"
+
+#: src/ball.c:121
+msgid "Where are your ball and chain?"
+msgstr "你的铁球和锁链在哪里？"
+
+#: src/windows.c:346
+msgid "Window processor %s not recognized.  Choices are:"
+msgstr "无法识别窗口处理器%s。可选项为："
+
+#: src/worm.c:819
+msgid "worm_cross checking for non-adjacent location?"
+msgstr "worm_cross在检查非相邻位置？"
+
+#: src/light.c:541
+msgid "write_ls: bad type (%d)"
+msgstr "write_ls：错误的类型（%d）"
+
+#: src/light.c:532
+msgid "write_ls: can't find mon #%u!"
+msgstr "write_ls：找不到怪物 #%u！"
+
+#: src/light.c:525
+msgid "write_ls: can't find obj #%u!"
+msgstr "write_ls：找不到物品 #%u！"
+
+#: src/write.c:55
+msgid "You can't write such a weird scroll!"
+msgstr "你写不出这么古怪的卷轴！"
+
+#: src/trap.c:1561
+msgid "You hit a trap of type %u"
+msgstr "你触发了一个%u型陷阱"
+
+#: src/engrave.c:874
+msgid "You're engraving with an illegal object!"
+msgstr "你在用一件不合法的物品刻字！"
+
+#: src/files.c:4310
+msgid "Your personal configuration file%s:"
+msgstr "你的个人配置文件%s："
+
+#: src/display.c:1863
+msgid "zapdir_to_glyph:  illegal beam type"
+msgstr "zapdir_to_glyph：非法的光束类型"
+
+#: src/zap.c:2591
+msgid "zapyourself: object %d used?"
+msgstr "zapyourself：物品%d已使用？"
+
+#: src/shk.c:2771
+msgid "Zero quantity on bill??"
+msgstr "账单上数量为零？？"

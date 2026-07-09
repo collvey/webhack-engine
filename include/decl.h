@@ -308,15 +308,19 @@ E struct c_common_strings {
         *const c_Never_mind, *c_vision_clears, *const c_the_your[2],
         *const c_fakename[2];
 } c_common_strings;
-#define nothing_happens c_common_strings.c_nothing_happens
-#define thats_enough_tries c_common_strings.c_thats_enough_tries
-#define silly_thing_to c_common_strings.c_silly_thing_to
-#define shudder_for_moment c_common_strings.c_shudder_for_moment
-#define something c_common_strings.c_something
-#define Something c_common_strings.c_Something
-#define You_can_move_again c_common_strings.c_You_can_move_again
-#define Never_mind c_common_strings.c_Never_mind
-#define vision_clears c_common_strings.c_vision_clears
+/* zh (nhi18n): localize these common display strings at every use — the
+   literals live in decl.c's static initializer (untranslatable there), so wrap
+   the macro read in _() so callers like pline1(nothing_happens) get zh.
+   NOTE: the_your[]/fakename[] are grammar/article helpers, left un-wrapped. */
+#define nothing_happens _(c_common_strings.c_nothing_happens)
+#define thats_enough_tries _(c_common_strings.c_thats_enough_tries)
+#define silly_thing_to _(c_common_strings.c_silly_thing_to)
+#define shudder_for_moment _(c_common_strings.c_shudder_for_moment)
+#define something _(c_common_strings.c_something)
+#define Something _(c_common_strings.c_Something)
+#define You_can_move_again _(c_common_strings.c_You_can_move_again)
+#define Never_mind _(c_common_strings.c_Never_mind)
+#define vision_clears _(c_common_strings.c_vision_clears)
 #define the_your c_common_strings.c_the_your
 /* fakename[] used occasionally so vtense() won't be fooled by an assigned
    name ending in 's' */

@@ -1711,13 +1711,13 @@ mkinvokearea()
     register xchar i;
 
     /* slightly odd if levitating, but not wrong */
-    pline_The("floor shakes violently under you!");
+    pline_The(_("floor shakes violently under you!"));
     /*
      * TODO:
      *  Suppress this message if player has dug out all the walls
      *  that would otherwise be affected.
      */
-    pline_The("walls around you begin to bend and crumble!");
+    pline_The(_("walls around you begin to bend and crumble!"));
     display_nhwindow(WIN_MESSAGE, TRUE);
 
     /* any trap hero is stuck in will be going away now */
@@ -1752,7 +1752,7 @@ mkinvokearea()
         delay_output();
     }
 
-    You("are standing at the top of a stairwell leading down!");
+    You(_("are standing at the top of a stairwell leading down!"));
     mkstairs(u.ux, u.uy, 0, (struct mkroom *) 0); /* down */
     newsym(u.ux, u.uy);
     vision_full_recalc = 1; /* everything changed */

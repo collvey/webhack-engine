@@ -357,19 +357,19 @@ register struct obj *sobj;
             char buf[BUFSZ];
 
             if (youmonst.data == &mons[PM_GOLD_GOLEM])
-                Sprintf(buf, "You feel like a million %s!", currency(2L));
+                Sprintf(buf, _("You feel like a million %s!"), currency(2L));
             else if (money_cnt(invent) || hidden_gold())
                 Strcpy(buf,
-                   "You feel worried about your future financial situation.");
+                   _("You feel worried about your future financial situation."));
             else if (steedgold)
-                Sprintf(buf, "You feel interested in %s financial situation.",
+                Sprintf(buf, _("You feel interested in %s financial situation."),
                         s_suffix(x_monnam(u.usteed,
                                           u.usteed->mtame ? ARTICLE_YOUR
                                                           : ARTICLE_THE,
                                           (char *) 0,
                                           SUPPRESS_SADDLE, FALSE)));
             else
-                Strcpy(buf, "You feel materially poor.");
+                Strcpy(buf, _("You feel materially poor."));
 
             strange_feeling(sobj, buf);
         }
@@ -378,7 +378,7 @@ register struct obj *sobj;
     /* only under me - no separate display required */
     if (stale)
         docrt();
-    You("notice some gold between your %s.", makeplural(body_part(FOOT)));
+    You(_("notice some gold between your %s."), makeplural(body_part(FOOT)));
     return 0;
 
  outgoldmap:
@@ -436,7 +436,7 @@ register struct obj *sobj;
         newsym(u.ux, u.uy);
         ter_typ |= TER_MON; /* so autodescribe will recognize hero */
     }
-    You_feel("very greedy, and sense gold!");
+    You_feel(_("very greedy, and sense gold!"));
     exercise(A_WIS, TRUE);
 
     browse_map(ter_typ, "gold");
@@ -489,18 +489,18 @@ register struct obj *sobj;
         known = stale && !confused;
         if (stale) {
             docrt();
-            You("sense a lack of %s nearby.", what);
+            You(_("sense a lack of %s nearby."), what);
             if (sobj && sobj->blessed) {
                 if (!u.uedibility)
-                    Your("%s starts to tingle.", body_part(NOSE));
+                    Your(_("%s starts to tingle."), body_part(NOSE));
                 u.uedibility = 1;
             }
         } else if (sobj) {
             char buf[BUFSZ];
 
-            Sprintf(buf, "Your %s twitches%s.", body_part(NOSE),
+            Sprintf(buf, _("Your %s twitches%s."), body_part(NOSE),
                     (sobj->blessed && !u.uedibility)
-                        ? " then starts to tingle"
+                        ? _(" then starts to tingle")
                         : "");
             if (sobj->blessed && !u.uedibility) {
                 boolean savebeginner = flags.beginner;
@@ -515,10 +515,10 @@ register struct obj *sobj;
         return !stale;
     } else if (!ct) {
         known = TRUE;
-        You("%s %s nearby.", sobj ? "smell" : "sense", what);
+        You(_("%s %s nearby."), sobj ? _("smell") : _("sense"), what);
         if (sobj && sobj->blessed) {
             if (!u.uedibility)
-                pline("Your %s starts to tingle.", body_part(NOSE));
+                pline(_("Your %s starts to tingle."), body_part(NOSE));
             u.uedibility = 1;
         }
     } else {
@@ -551,13 +551,13 @@ register struct obj *sobj;
         }
         if (sobj) {
             if (sobj->blessed) {
-                Your("%s %s to tingle and you smell %s.", body_part(NOSE),
-                     u.uedibility ? "continues" : "starts", what);
+                Your(_("%s %s to tingle and you smell %s."), body_part(NOSE),
+                     u.uedibility ? _("continues") : _("starts"), what);
                 u.uedibility = 1;
             } else
-                Your("%s tingles and you smell %s.", body_part(NOSE), what);
+                Your(_("%s tingles and you smell %s."), body_part(NOSE), what);
         } else
-            You("sense %s.", what);
+            You(_("sense %s."), what);
         exercise(A_WIS, TRUE);
 
         browse_map(ter_typ, "food");
@@ -610,11 +610,11 @@ int class;            /* an object class, 0 for all */
         boulder = ROCK_CLASS;
 
     if (Hallucination || (Confusion && class == SCROLL_CLASS))
-        Strcpy(stuff, something);
+        Strcpy(stuff, _(something));
     else
-        Strcpy(stuff, class ? def_oc_syms[class].name : "objects");
+        Strcpy(stuff, _(class ? def_oc_syms[class].name : "objects"));
     if (boulder && class != ROCK_CLASS)
-        Strcat(stuff, " and/or large stones");
+        Strcat(stuff, _(" and/or large stones"));
 
     if (do_dknown)
         for (obj = invent; obj; obj = obj->nobj)
@@ -670,7 +670,7 @@ int class;            /* an object class, 0 for all */
             return 1;
         }
 
-        You("sense %s nearby.", stuff);
+        You(_("sense %s nearby."), stuff);
         return 0;
     }
 
@@ -757,7 +757,7 @@ int class;            /* an object class, 0 for all */
         newsym(u.ux, u.uy);
         ter_typ |= TER_MON;
     }
-    You("detect the %s of %s.", ct ? "presence" : "absence", stuff);
+    You(_("detect the %s of %s."), ct ? _("presence") : _("absence"), stuff);
 
     if (!ct)
         display_nhwindow(WIN_MAP, TRUE);
@@ -827,9 +827,9 @@ int mclass;                /* monster class, 0 for all */
         }
         if (!swallowed)
             display_self();
-        You("sense the presence of monsters.");
+        You(_("sense the presence of monsters."));
         if (woken)
-            pline("Monsters sense the presence of you.");
+            pline(_("Monsters sense the presence of you."));
 
         if ((otmp && otmp->blessed) && !unconstrained) {
             /* persistent detection--just show updated map */
@@ -987,12 +987,12 @@ struct obj *sobj; /* null if crystal ball, *scroll if gold detection scroll */
     if (!found) {
         char buf[BUFSZ];
 
-        Sprintf(buf, "Your %s stop itching.", makeplural(body_part(TOE)));
+        Sprintf(buf, _("Your %s stop itching."), makeplural(body_part(TOE)));
         strange_feeling(sobj, buf);
         return 1;
     }
     /* traps exist, but only under me - no separate display required */
-    Your("%s itch.", makeplural(body_part(TOE)));
+    Your(_("%s itch."), makeplural(body_part(TOE)));
     return 0;
 
  outtrapmap:
@@ -1025,7 +1025,7 @@ struct obj *sobj; /* null if crystal ball, *scroll if gold detection scroll */
         newsym(u.ux, u.uy);
         ter_typ |= TER_MON; /* for autodescribe at <u.ux,u.uy> */
     }
-    You_feel("%s.", cursed_src ? "very greedy" : "entrapped");
+    You_feel(cursed_src ? _("very greedy.") : _("entrapped."));
 
     browse_map(ter_typ, "trap of interest");
 
@@ -1048,37 +1048,37 @@ d_level *where;
     if (ll < 0) {
         if (ll < (-8 - rn2(3)))
             if (!indun)
-                return "far away";
+                return _("far away");
             else
-                return "far below";
+                return _("far below");
         else if (ll < -1)
             if (!indun)
-                return "away below you";
+                return _("away below you");
             else
-                return "below you";
+                return _("below you");
         else if (!indun)
-            return "in the distance";
+            return _("in the distance");
         else
-            return "just below";
+            return _("just below");
     } else if (ll > 0) {
         if (ll > (8 + rn2(3)))
             if (!indun)
-                return "far away";
+                return _("far away");
             else
-                return "far above";
+                return _("far above");
         else if (ll > 1)
             if (!indun)
-                return "away above you";
+                return _("away above you");
             else
-                return "above you";
+                return _("above you");
         else if (!indun)
-            return "in the distance";
+            return _("in the distance");
         else
-            return "just above";
+            return _("just above");
     } else if (!indun)
-        return "in the distance";
+        return _("in the distance");
     else
-        return "near you";
+        return _("near you");
 }
 
 static const struct {
@@ -1100,41 +1100,41 @@ struct obj **optr;
     struct obj *obj = *optr;
 
     if (Blind) {
-        pline("Too bad you can't see %s.", the(xname(obj)));
+        pline(_("Too bad you can't see %s."), the(xname(obj)));
         return;
     }
     oops = (rnd(20) > ACURR(A_INT) || obj->cursed);
     if (oops && (obj->spe > 0)) {
         switch (rnd(obj->oartifact ? 4 : 5)) {
         case 1:
-            pline("%s too much to comprehend!", Tobjnam(obj, "are"));
+            pline(_("%s too much to comprehend!"), Tobjnam(obj, _("are")));
             break;
         case 2:
-            pline("%s you!", Tobjnam(obj, "confuse"));
+            pline(_("%s you!"), Tobjnam(obj, _("confuse")));
             make_confused((HConfusion & TIMEOUT) + (long) rnd(100), FALSE);
             break;
         case 3:
             if (!resists_blnd(&youmonst)) {
-                pline("%s your vision!", Tobjnam(obj, "damage"));
+                pline(_("%s your vision!"), Tobjnam(obj, _("damage")));
                 make_blinded((Blinded & TIMEOUT) + (long) rnd(100), FALSE);
                 if (!Blind)
                     Your1(vision_clears);
             } else {
-                pline("%s your vision.", Tobjnam(obj, "assault"));
-                You("are unaffected!");
+                pline(_("%s your vision."), Tobjnam(obj, _("assault")));
+                You(_("are unaffected!"));
             }
             break;
         case 4:
-            pline("%s your mind!", Tobjnam(obj, "zap"));
+            pline(_("%s your mind!"), Tobjnam(obj, _("zap")));
             (void) make_hallucinated(
                 (HHallucination & TIMEOUT) + (long) rnd(100), FALSE, 0L);
             break;
         case 5:
-            pline("%s!", Tobjnam(obj, "explode"));
+            pline(_("%s!"), Tobjnam(obj, _("explode")));
             useup(obj);
             *optr = obj = 0; /* it's gone */
             /* physical damage cause by the shards and force */
-            losehp(Maybe_Half_Phys(rnd(30)), "exploding crystal ball",
+            losehp(Maybe_Half_Phys(rnd(30)), _("exploding crystal ball"),
                    KILLED_BY_AN);
             break;
         }
@@ -1145,29 +1145,29 @@ struct obj **optr;
 
     if (Hallucination) {
         if (!obj->spe) {
-            pline("All you see is funky %s haze.", hcolor((char *) 0));
+            pline(_("All you see is funky %s haze."), hcolor((char *) 0));
         } else {
             switch (rnd(6)) {
             case 1:
-                You("grok some groovy globs of incandescent lava.");
+                You(_("grok some groovy globs of incandescent lava."));
                 break;
             case 2:
-                pline("Whoa!  Psychedelic colors, %s!",
-                      poly_gender() == 1 ? "babe" : "dude");
+                pline(_("Whoa!  Psychedelic colors, %s!"),
+                      poly_gender() == 1 ? _("babe") : _("dude"));
                 break;
             case 3:
-                pline_The("crystal pulses with sinister %s light!",
+                pline_The(_("crystal pulses with sinister %s light!"),
                           hcolor((char *) 0));
                 break;
             case 4:
-                You_see("goldfish swimming above fluorescent rocks.");
+                You_see(_("goldfish swimming above fluorescent rocks."));
                 break;
             case 5:
                 You_see(
-                    "tiny snowflakes spinning around a miniature farmhouse.");
+                    _("tiny snowflakes spinning around a miniature farmhouse."));
                 break;
             default:
-                pline("Oh wow... like a kaleidoscope!");
+                pline(_("Oh wow... like a kaleidoscope!"));
                 break;
             }
             consume_obj_charge(obj, TRUE);
@@ -1177,20 +1177,20 @@ struct obj **optr;
 
     /* read a single character */
     if (flags.verbose)
-        You("may look for an object or monster symbol.");
-    ch = yn_function("What do you look for?", (char *) 0, '\0');
+        You(_("may look for an object or monster symbol."));
+    ch = yn_function(_("What do you look for?"), (char *) 0, '\0');
     /* Don't filter out ' ' here; it has a use */
     if ((ch != def_monsyms[S_GHOST].sym) && index(quitchars, ch)) {
         if (flags.verbose)
             pline1(Never_mind);
         return;
     }
-    You("peer into %s...", the(xname(obj)));
+    You(_("peer into %s..."), the(xname(obj)));
     nomul(-rnd(10));
     multi_reason = "gazing into a crystal ball";
     nomovemsg = "";
     if (obj->spe <= 0) {
-        pline_The("vision is unclear.");
+        pline_The(_("vision is unclear."));
     } else {
         int class, i;
         int ret = 0;
@@ -1218,7 +1218,7 @@ struct obj **optr;
                 break;
             default:
                 i = rn2(SIZE(level_detects));
-                You_see("%s, %s.", level_detects[i].what,
+                You_see(_("%s, %s."), _(level_detects[i].what),
                         level_distance(level_detects[i].where));
                 ret = 0;
                 break;
@@ -1226,9 +1226,9 @@ struct obj **optr;
 
         if (ret) {
             if (!rn2(100)) /* make them nervous */
-                You_see("the Wizard of Yendor gazing out at you.");
+                You_see(_("the Wizard of Yendor gazing out at you."));
             else
-                pline_The("vision is unclear.");
+                pline_The(_("vision is unclear."));
         }
     }
     return;
@@ -1398,7 +1398,7 @@ struct obj *sobj; /* scroll--actually fake spellbook--object */
         /* the getpos() prompt from browse_map() is only shown when
            flags.verbose is set, but make this unconditional so that
            not-verbose users become aware of the prompting situation */
-        You("sense your surroundings.");
+        You(_("sense your surroundings."));
         if (extended || glyph_is_monster(glyph_at(u.ux, u.uy)))
             ter_typ |= TER_MON;
         browse_map(ter_typ, "anything of interest");
@@ -1532,11 +1532,11 @@ genericptr_t num;
             cvt_sdoor_to_door(&levl[zx][zy]); /* .typ = DOOR */
         if (levl[zx][zy].doormask & D_TRAPPED) {
             if (distu(zx, zy) < 3)
-                b_trapped("door", 0);
+                b_trapped(_("door"), 0);
             else
-                Norep("You %s an explosion!",
-                      cansee(zx, zy) ? "see" : (!Deaf ? "hear"
-                                                      : "feel the shock of"));
+                Norep(_("You %s an explosion!"),
+                      cansee(zx, zy) ? _("see") : (!Deaf ? _("hear")
+                                                      : _("feel the shock of")));
             wake_nearto(zx, zy, 11 * 11);
             levl[zx][zy].doormask = D_NODOOR;
         } else
@@ -1590,9 +1590,9 @@ openit()
     if (u.uswallow) {
         if (is_animal(u.ustuck->data)) {
             if (Blind)
-                pline("Its mouth opens!");
+                pline(_("Its mouth opens!"));
             else
-                pline("%s opens its mouth!", Monnam(u.ustuck));
+                pline(_("%s opens its mouth!"), Monnam(u.ustuck));
         }
         expels(u.ustuck, u.ustuck->data, TRUE);
         return -1;
@@ -1634,7 +1634,7 @@ struct trap *trap;
         cleared = TRUE;
     }
 
-    You("find %s.", an(defsyms[trap_to_defsym(tt)].explanation));
+    You(_("find %s."), an(_(defsyms[trap_to_defsym(tt)].explanation)));
 
     if (cleared) {
         display_nhwindow(WIN_MAP, TRUE); /* wait */
@@ -1664,8 +1664,8 @@ boolean via_warning;
                                   || hides_under(mtmp->data)
                                   || mtmp->data->mlet == S_EEL)) {
             if (via_warning) {
-                Your("warning senses cause you to take a second %s.",
-                     Blind ? "to check nearby" : "look close by");
+                Your(_("warning senses cause you to take a second %s."),
+                     Blind ? _("to check nearby") : _("look close by"));
                 display_nhwindow(WIN_MESSAGE, FALSE); /* flush messages */
             }
             mtmp->mundetected = 0;
@@ -1683,9 +1683,9 @@ boolean via_warning;
         exercise(A_WIS, TRUE);
         if (!canspotmon(mtmp)) {
             map_invisible(x, y);
-            You_feel("an unseen monster!");
+            You_feel(_("an unseen monster!"));
         } else if (!sensemon(mtmp)) {
-            You("find %s.", mtmp->mtame ? y_monnam(mtmp) : a_monnam(mtmp));
+            You(_("find %s."), mtmp->mtame ? y_monnam(mtmp) : a_monnam(mtmp));
         }
         return 1;
     }
@@ -1711,7 +1711,7 @@ register int aflag; /* intrinsic autosearch vs explicit searching */
 
     if (u.uswallow) {
         if (!aflag)
-            pline("What are you looking for?  The exit?");
+            pline(_("What are you looking for?  The exit?"));
     } else {
         int fund = (uwep && uwep->oartifact
                     && spec_ability(uwep, SPFX_SEARCH)) ? uwep->spe : 0;
@@ -1736,7 +1736,7 @@ register int aflag; /* intrinsic autosearch vs explicit searching */
                     exercise(A_WIS, TRUE);
                     nomul(0);
                     feel_location(x, y); /* make sure it shows up */
-                    You("find a hidden door.");
+                    You(_("find a hidden door."));
                 } else if (levl[x][y].typ == SCORR) {
                     if (rnl(7 - fund))
                         continue;
@@ -1745,7 +1745,7 @@ register int aflag; /* intrinsic autosearch vs explicit searching */
                     exercise(A_WIS, TRUE);
                     nomul(0);
                     feel_newsym(x, y); /* make sure it shows up */
-                    You("find a hidden passage.");
+                    You(_("find a hidden passage."));
                 } else {
                     /* Be careful not to find anything in an SCORR or SDOOR */
                     if ((mtmp = m_at(x, y)) != 0 && !aflag) {
@@ -1973,7 +1973,7 @@ int full; /* wizard|explore modes allow player to request full map */
 int which_subset; /* when not full, whether to suppress objs and/or traps */
 {
     if ((Hallucination || Stunned || Confusion) && !full) {
-        You("are too disoriented for this.");
+        You(_("are too disoriented for this."));
     } else {
         int x, y, glyph, default_glyph;
         char buf[BUFSZ];
@@ -1998,21 +1998,21 @@ int which_subset; /* when not full, whether to suppress objs and/or traps */
            cursor there, and after moving it anywhere '@' moves it back */
         flush_screen(1);
         if (full) {
-            Strcpy(buf, "underlying terrain");
+            Strcpy(buf, _("underlying terrain"));
         } else {
-            Strcpy(buf, "known terrain");
+            Strcpy(buf, _("known terrain"));
             if (keep_traps)
-                Sprintf(eos(buf), "%s traps",
-                        (keep_objs || keep_mons) ? "," : " and");
+                Sprintf(eos(buf), _("%s traps"),
+                        (keep_objs || keep_mons) ? "," : _(" and"));
             if (keep_objs)
-                Sprintf(eos(buf), "%s%s objects",
+                Sprintf(eos(buf), _("%s%s objects"),
                         (keep_traps || keep_mons) ? "," : "",
-                        keep_mons ? "" : " and");
+                        keep_mons ? "" : _(" and"));
             if (keep_mons)
-                Sprintf(eos(buf), "%s and monsters",
+                Sprintf(eos(buf), _("%s and monsters"),
                         (keep_traps || keep_objs) ? "," : "");
         }
-        pline("Showing %s only...", buf);
+        pline(_("Showing %s only..."), buf);
 
         /* allow player to move cursor around and get autodescribe feedback
            based on what is visible now rather than what is on 'real' map */

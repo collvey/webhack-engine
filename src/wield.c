@@ -95,7 +95,7 @@ register struct obj *obj;
     if (uwep == obj && artifact_light(olduwep) && olduwep->lamplit) {
         end_burn(olduwep, FALSE);
         if (!Blind)
-            pline("%s shining.", Tobjnam(olduwep, "stop"));
+            pline(_("%s shining."), Tobjnam(olduwep, _("stop")));
     }
     if (uwep == obj
         && ((uwep && uwep->oartifact == ART_OGRESMASHER)
@@ -125,10 +125,10 @@ struct obj *obj;
         return FALSE;
 
     /* Prevent wielding cockatrice when not wearing gloves --KAA */
-    You("wield %s in your bare %s.",
+    You(_("wield %s in your bare %s."),
         corpse_xname(obj, (const char *) 0, CXN_PFX_THE),
         makeplural(body_part(HAND)));
-    Sprintf(kbuf, "wielding %s bare-handed", killer_xname(obj));
+    Sprintf(kbuf, _("wielding %s bare-handed"), killer_xname(obj));
     instapetrify(kbuf);
     return TRUE;
 }
@@ -143,18 +143,18 @@ struct obj *wep;
     if (!wep) {
         /* No weapon */
         if (uwep) {
-            You("are empty %s.", body_part(HANDED));
+            You(_("are empty %s."), body_part(HANDED));
             setuwep((struct obj *) 0);
             res++;
         } else
-            You("are already empty %s.", body_part(HANDED));
+            You(_("are already empty %s."), body_part(HANDED));
     } else if (wep->otyp == CORPSE && cant_wield_corpse(wep)) {
         /* hero must have been life-saved to get here; use a turn */
         res++; /* corpse won't be wielded */
     } else if (uarms && bimanual(wep)) {
-        You("cannot wield a two-handed %s while wearing a shield.",
-            is_sword(wep) ? "sword" : wep->otyp == BATTLE_AXE ? "axe"
-                                                              : "weapon");
+        You(_("cannot wield a two-handed %s while wearing a shield."),
+            is_sword(wep) ? _("sword") : wep->otyp == BATTLE_AXE ? _("axe")
+                                                              : _("weapon"));
     } else if (!retouch_object(&wep, FALSE)) {
         res++; /* takes a turn even though it doesn't get wielded */
     } else {
@@ -167,8 +167,8 @@ struct obj *wep;
                 tmp = thestr;
             else
                 tmp = "";
-            pline("%s%s %s to your %s!", tmp, aobjnam(wep, "weld"),
-                  (wep->quan == 1L) ? "itself" : "themselves", /* a3 */
+            pline(_("%s%s %s to your %s!"), tmp, aobjnam(wep, _("weld")),
+                  (wep->quan == 1L) ? _("itself") : _("themselves"), /* a3 */
                   bimanual(wep) ? (const char *) makeplural(body_part(HAND))
                                 : body_part(HAND));
             set_bknown(wep, 1);
@@ -187,7 +187,7 @@ struct obj *wep;
 
             wep->owornmask |= W_WEP;
             if (wep->otyp == AKLYS && (wep->owornmask & W_WEP) != 0)
-                You("secure the tether.");
+                You(_("secure the tether."));
             prinv((char *) 0, wep, 0L);
             wep->owornmask = dummy;
         }
@@ -199,7 +199,7 @@ struct obj *wep;
         if (artifact_light(wep) && !wep->lamplit) {
             begin_burn(wep, FALSE);
             if (!Blind)
-                pline("%s to shine %s!", Tobjnam(wep, "begin"),
+                pline(_("%s to shine %s!"), Tobjnam(wep, _("begin")),
                       arti_light_description(wep));
         }
 #if 0
@@ -207,7 +207,7 @@ struct obj *wep;
         if (Race_if(PM_ELF) && !wep->oartifact
             && objects[wep->otyp].oc_material == IRON) {
             /* Elves are averse to wielding cold iron */
-            You("have an uneasy feeling about wielding cold iron.");
+            You(_("have an uneasy feeling about wielding cold iron."));
             change_luck(-1);
         }
 #endif
@@ -216,7 +216,7 @@ struct obj *wep;
 
             if ((this_shkp = shop_keeper(inside_shop(u.ux, u.uy)))
                 != (struct monst *) 0) {
-                pline("%s says \"You be careful with my %s!\"",
+                pline(_("%s says \"You be careful with my %s!\""),
                       shkname(this_shkp), xname(wep));
             }
         }
@@ -264,7 +264,7 @@ dowield()
     /* May we attempt this? */
     multi = 0;
     if (cantwield(youmonst.data)) {
-        pline("Don't be ridiculous!");
+        pline(_("Don't be ridiculous!"));
         return 0;
     }
 
@@ -273,7 +273,7 @@ dowield()
         /* Cancelled */
         return 0;
     else if (wep == uwep) {
-        You("are already wielding that!");
+        You(_("are already wielding that!"));
         if (is_weptool(wep) || is_wet_towel(wep))
             unweapon = FALSE; /* [see setuwep()] */
         return 0;
@@ -292,7 +292,7 @@ dowield()
     else if (wep == uquiver)
         setuqwep((struct obj *) 0);
     else if (wep->owornmask & (W_ARMOR | W_ACCESSORY | W_SADDLE)) {
-        You("cannot wield that!");
+        You(_("cannot wield that!"));
         return 0;
     }
 
@@ -315,7 +315,7 @@ doswapweapon()
     /* May we attempt this? */
     multi = 0;
     if (cantwield(youmonst.data)) {
-        pline("Don't be ridiculous!");
+        pline(_("Don't be ridiculous!"));
         return 0;
     }
     if (welded(uwep)) {
@@ -340,7 +340,7 @@ doswapweapon()
         if (uswapwep)
             prinv((char *) 0, uswapwep, 0L);
         else
-            You("have no secondary weapon readied.");
+            You(_("have no secondary weapon readied."));
     }
 
     if (u.twoweap && !can_twoweapon())
@@ -381,11 +381,11 @@ dowieldquiver()
     } else if (newquiver == &zeroobj) { /* no object */
         /* Explicitly nothing */
         if (uquiver) {
-            You("now have no ammunition readied.");
+            You(_("now have no ammunition readied."));
             /* skip 'quivering: prinv()' */
             setuqwep((struct obj *) 0);
         } else {
-            You("already have no ammunition readied!");
+            You(_("already have no ammunition readied!"));
         }
         return 0;
     } else if (newquiver->o_id == context.objsplit.child_oid) {
@@ -399,10 +399,10 @@ dowieldquiver()
         finish_splitting = TRUE;
     } else if (newquiver == uquiver) {
     already_quivered:
-        pline("That ammunition is already readied!");
+        pline(_("That ammunition is already readied!"));
         return 0;
     } else if (newquiver->owornmask & (W_ARMOR | W_ACCESSORY | W_SADDLE)) {
-        You("cannot ready that!");
+        You(_("cannot ready that!"));
         return 0;
     } else if (newquiver == uwep) {
         int weld_res = !uwep->bknown;
@@ -414,7 +414,7 @@ dowieldquiver()
         }
         /* offer to split stack if wielding more than 1 */
         if (uwep->quan > 1L && inv_cnt(FALSE) < 52 && splittable(uwep)) {
-            Sprintf(qbuf, "You are wielding %ld %s.  Ready %ld of them?",
+            Sprintf(qbuf, _("You are wielding %ld %s.  Ready %ld of them?"),
                     uwep->quan, simpleonames(uwep), uwep->quan - 1L);
             switch (ynq(qbuf)) {
             case 'q':
@@ -427,19 +427,19 @@ dowieldquiver()
             default:
                 break;
             }
-            Strcpy(qbuf, "Ready all of them instead?");
+            Strcpy(qbuf, _("Ready all of them instead?"));
         } else {
             boolean use_plural = (is_plural(uwep) || pair_of(uwep));
 
-            Sprintf(qbuf, "You are wielding %s.  Ready %s instead?",
-                    !use_plural ? "that" : "those",
-                    !use_plural ? "it" : "them");
+            Sprintf(qbuf, _("You are wielding %s.  Ready %s instead?"),
+                    !use_plural ? _("that") : _("those"),
+                    !use_plural ? _("it") : _("them"));
         }
         /* require confirmation to ready the main weapon */
         if (ynq(qbuf) != 'y') {
             (void) Shk_Your(qbuf, uwep); /* replace qbuf[] contents */
-            pline("%s%s %s wielded.", qbuf,
-                  simpleonames(uwep), otense(uwep, "remain"));
+            pline(_("%s%s %s wielded."), qbuf,
+                  simpleonames(uwep), otense(uwep, _("remain")));
             return 0;
         }
         /* quivering main weapon, so no longer wielding it */
@@ -449,9 +449,9 @@ dowieldquiver()
     } else if (newquiver == uswapwep) {
         if (uswapwep->quan > 1L && inv_cnt(FALSE) < 52
             && splittable(uswapwep)) {
-            Sprintf(qbuf, "%s %ld %s.  Ready %ld of them?",
-                    u.twoweap ? "You are dual wielding"
-                              : "Your alternate weapon is",
+            Sprintf(qbuf, _("%s %ld %s.  Ready %ld of them?"),
+                    u.twoweap ? _("You are dual wielding")
+                              : _("Your alternate weapon is"),
                     uswapwep->quan, simpleonames(uswapwep),
                     uswapwep->quan - 1L);
             switch (ynq(qbuf)) {
@@ -465,21 +465,21 @@ dowieldquiver()
             default:
                 break;
             }
-            Strcpy(qbuf, "Ready all of them instead?");
+            Strcpy(qbuf, _("Ready all of them instead?"));
         } else {
             boolean use_plural = (is_plural(uswapwep) || pair_of(uswapwep));
 
-            Sprintf(qbuf, "%s your %s weapon.  Ready %s instead?",
-                    !use_plural ? "That is" : "Those are",
-                    u.twoweap ? "second" : "alternate",
-                    !use_plural ? "it" : "them");
+            Sprintf(qbuf, _("%s your %s weapon.  Ready %s instead?"),
+                    !use_plural ? _("That is") : _("Those are"),
+                    u.twoweap ? _("second") : _("alternate"),
+                    !use_plural ? _("it") : _("them"));
         }
         /* require confirmation to ready the alternate weapon */
         if (ynq(qbuf) != 'y') {
             (void) Shk_Your(qbuf, uswapwep); /* replace qbuf[] contents */
-            pline("%s%s %s %s.", qbuf,
-                  simpleonames(uswapwep), otense(uswapwep, "remain"),
-                  u.twoweap ? "wielded" : "as secondary weapon");
+            pline(_("%s%s %s %s."), qbuf,
+                  simpleonames(uswapwep), otense(uswapwep, _("remain")),
+                  u.twoweap ? _("wielded") : _("as secondary weapon"));
             return 0;
         }
         /* quivering alternate weapon, so no more uswapwep */
@@ -506,10 +506,10 @@ dowieldquiver()
        something we're wielding that's vulnerable to its damage) */
     res = 0;
     if (was_uwep) {
-        You("are now empty %s.", body_part(HANDED));
+        You(_("are now empty %s."), body_part(HANDED));
         res = 1;
     } else if (was_twoweap && !u.twoweap) {
-        You("are no longer wielding two weapons at once.");
+        You(_("are no longer wielding two weapons at once."));
         res = 1;
     }
     return res;
@@ -534,8 +534,8 @@ const char *verb; /* "rub",&c */
                    || strstri(what, "s of ") != 0);
 
     if (obj->owornmask & (W_ARMOR | W_ACCESSORY)) {
-        You_cant("%s %s while wearing %s.", verb, yname(obj),
-                 more_than_1 ? "them" : "it");
+        You_cant(_("%s %s while wearing %s."), verb, yname(obj),
+                 more_than_1 ? _("them") : _("it"));
         return FALSE;
     }
     if (welded(uwep)) {
@@ -547,21 +547,21 @@ const char *verb; /* "rub",&c */
             if (strstri(what, "pair of ") != 0)
                 more_than_1 = FALSE;
             pline(
-               "Since your weapon is welded to your %s, you cannot %s %s %s.",
-                  hand, verb, more_than_1 ? "those" : "that", xname(obj));
+               _("Since your weapon is welded to your %s, you cannot %s %s %s."),
+                  hand, verb, more_than_1 ? _("those") : _("that"), xname(obj));
         } else {
-            You_cant("do that.");
+            You_cant(_("do that."));
         }
         return FALSE;
     }
     if (cantwield(youmonst.data)) {
-        You_cant("hold %s strongly enough.", more_than_1 ? "them" : "it");
+        You_cant(_("hold %s strongly enough."), more_than_1 ? _("them") : _("it"));
         return FALSE;
     }
     /* check shield */
     if (uarms && bimanual(obj)) {
-        You("cannot %s a two-handed %s while wearing a shield.", verb,
-            (obj->oclass == WEAPON_CLASS) ? "weapon" : "tool");
+        You(_("cannot %s a two-handed %s while wearing a shield."), verb,
+            (obj->oclass == WEAPON_CLASS) ? _("weapon") : _("tool"));
         return FALSE;
     }
 
@@ -579,7 +579,7 @@ const char *verb; /* "rub",&c */
             /* hope none of ready_weapon()'s early returns apply here... */
             (void) ready_weapon(obj);
         } else {
-            You("now wield %s.", doname(obj));
+            You(_("now wield %s."), doname(obj));
             setuwep(obj);
         }
         if (flags.pushweapon && oldwep && uwep != oldwep)
@@ -603,26 +603,26 @@ can_twoweapon()
 #define NOT_WEAPON(obj) (!is_weptool(obj) && obj->oclass != WEAPON_CLASS)
     if (!could_twoweap(youmonst.data)) {
         if (Upolyd)
-            You_cant("use two weapons in your current form.");
+            You_cant(_("use two weapons in your current form."));
         else
-            pline("%s aren't able to use two weapons at once.",
+            pline(_("%s aren't able to use two weapons at once."),
                   makeplural((flags.female && urole.name.f) ? urole.name.f
                                                             : urole.name.m));
     } else if (!uwep || !uswapwep)
-        Your("%s%s%s empty.", uwep ? "left " : uswapwep ? "right " : "",
-             body_part(HAND), (!uwep && !uswapwep) ? "s are" : " is");
+        Your(_("%s%s%s empty."), uwep ? _("left ") : uswapwep ? _("right ") : "",
+             body_part(HAND), (!uwep && !uswapwep) ? _("s are") : _(" is"));
     else if (NOT_WEAPON(uwep) || NOT_WEAPON(uswapwep)) {
         otmp = NOT_WEAPON(uwep) ? uwep : uswapwep;
-        pline("%s %s.", Yname2(otmp),
-              is_plural(otmp) ? "aren't weapons" : "isn't a weapon");
+        pline(_("%s %s."), Yname2(otmp),
+              is_plural(otmp) ? _("aren't weapons") : _("isn't a weapon"));
     } else if (bimanual(uwep) || bimanual(uswapwep)) {
         otmp = bimanual(uwep) ? uwep : uswapwep;
-        pline("%s isn't one-handed.", Yname2(otmp));
+        pline(_("%s isn't one-handed."), Yname2(otmp));
     } else if (uarms)
-        You_cant("use two weapons while wearing a shield.");
+        You_cant(_("use two weapons while wearing a shield."));
     else if (uswapwep->oartifact)
-        pline("%s being held second to another weapon!",
-              Yobjnam2(uswapwep, "resist"));
+        pline(_("%s being held second to another weapon!"),
+              Yobjnam2(uswapwep, _("resist")));
     else if (uswapwep->otyp == CORPSE && cant_wield_corpse(uswapwep)) {
         /* [Note: NOT_WEAPON() check prevents ever getting here...] */
         ; /* must be life-saved to reach here; return FALSE */
@@ -643,7 +643,7 @@ drop_uswapwep()
 
     /* Avoid trashing makeplural's static buffer */
     Strcpy(str, makeplural(body_part(HAND)));
-    pline("%s from your %s!", Yobjnam2(obj, "slip"), str);
+    pline(_("%s from your %s!"), Yobjnam2(obj, _("slip")), str);
     dropx(obj);
 }
 
@@ -652,7 +652,7 @@ dotwoweapon()
 {
     /* You can always toggle it off */
     if (u.twoweap) {
-        You("switch to your primary weapon.");
+        You(_("switch to your primary weapon."));
         u.twoweap = 0;
         update_inventory();
         return 0;
@@ -661,7 +661,7 @@ dotwoweapon()
     /* May we use two weapons? */
     if (can_twoweapon()) {
         /* Success! */
-        You("begin two-weapon combat.");
+        You(_("begin two-weapon combat."));
         u.twoweap = 1;
         update_inventory();
         return (rnd(20) > ACURR(A_DEX));
@@ -682,7 +682,7 @@ uwepgone()
         if (artifact_light(uwep) && uwep->lamplit) {
             end_burn(uwep, FALSE);
             if (!Blind)
-                pline("%s shining.", Tobjnam(uwep, "stop"));
+                pline(_("%s shining."), Tobjnam(uwep, _("stop")));
         }
         setworn((struct obj *) 0, W_WEP);
         unweapon = TRUE;
@@ -712,7 +712,7 @@ void
 untwoweapon()
 {
     if (u.twoweap) {
-        You("can no longer use two weapons at once.");
+        You(_("can no longer use two weapons at once."));
         u.twoweap = FALSE;
         update_inventory();
     }
@@ -734,18 +734,18 @@ register int amount;
 
         if (amount >= 0 && uwep && will_weld(uwep)) { /* cursed tin opener */
             if (!Blind) {
-                Sprintf(buf, "%s with %s aura.",
-                        Yobjnam2(uwep, "glow"), an(hcolor(NH_AMBER)));
+                Sprintf(buf, _("%s with %s aura."),
+                        Yobjnam2(uwep, _("glow")), an(hcolor(NH_AMBER)));
                 uwep->bknown = !Hallucination; /* ok to bypass set_bknown() */
             } else {
                 /* cursed tin opener is wielded in right hand */
-                Sprintf(buf, "Your right %s tingles.", body_part(HAND));
+                Sprintf(buf, _("Your right %s tingles."), body_part(HAND));
             }
             uncurse(uwep);
             update_inventory();
         } else {
-            Sprintf(buf, "Your %s %s.", makeplural(body_part(HAND)),
-                    (amount >= 0) ? "twitch" : "itch");
+            Sprintf(buf, _("Your %s %s."), makeplural(body_part(HAND)),
+                    (amount >= 0) ? _("twitch") : _("itch"));
         }
         strange_feeling(otmp, buf); /* pline()+docall()+useup() */
         exercise(A_DEX, (boolean) (amount >= 0));
@@ -758,8 +758,8 @@ register int amount;
     if (uwep->otyp == WORM_TOOTH && amount >= 0) {
         multiple = (uwep->quan > 1L);
         /* order: message, transformation, shop handling */
-        Your("%s %s much sharper now.", simpleonames(uwep),
-             multiple ? "fuse, and become" : "is");
+        Your(_("%s %s much sharper now."), simpleonames(uwep),
+             multiple ? _("fuse, and become") : _("is"));
         uwep->otyp = CRYSKNIFE;
         uwep->oerodeproof = 0;
         if (multiple) {
@@ -779,8 +779,8 @@ register int amount;
     } else if (uwep->otyp == CRYSKNIFE && amount < 0) {
         multiple = (uwep->quan > 1L);
         /* order matters: message, shop handling, transformation */
-        Your("%s %s much duller now.", simpleonames(uwep),
-             multiple ? "fuse, and become" : "is");
+        Your(_("%s %s much duller now."), simpleonames(uwep),
+             multiple ? _("fuse, and become") : _("is"));
         costly_alteration(uwep, COST_DEGRD); /* DECHNT? other? */
         uwep->otyp = WORM_TOOTH;
         uwep->oerodeproof = 0;
@@ -799,26 +799,26 @@ register int amount;
         wepname = ONAME(uwep);
     if (amount < 0 && uwep->oartifact && restrict_name(uwep, wepname)) {
         if (!Blind)
-            pline("%s %s.", Yobjnam2(uwep, "faintly glow"), color);
+            pline(_("%s %s."), Yobjnam2(uwep, _("faintly glow")), color);
         return 1;
     }
     /* there is a (soft) upper and lower limit to uwep->spe */
     if (((uwep->spe > 5 && amount >= 0) || (uwep->spe < -5 && amount < 0))
         && rn2(3)) {
         if (!Blind)
-            pline("%s %s for a while and then %s.",
-                  Yobjnam2(uwep, "violently glow"), color,
-                  otense(uwep, "evaporate"));
+            pline(_("%s %s for a while and then %s."),
+                  Yobjnam2(uwep, _("violently glow")), color,
+                  otense(uwep, _("evaporate")));
         else
-            pline("%s.", Yobjnam2(uwep, "evaporate"));
+            pline(_("%s."), Yobjnam2(uwep, _("evaporate")));
 
         useupall(uwep); /* let all of them disappear */
         return 1;
     }
     if (!Blind) {
-        xtime = (amount * amount == 1) ? "moment" : "while";
-        pline("%s %s for a %s.",
-              Yobjnam2(uwep, amount == 0 ? "violently glow" : "glow"), color,
+        xtime = (amount * amount == 1) ? _("moment") : _("while");
+        pline(_("%s %s for a %s."),
+              Yobjnam2(uwep, amount == 0 ? _("violently glow") : _("glow")), color,
               xtime);
         if (otyp != STRANGE_OBJECT && uwep->known
             && (amount > 0 || (amount < 0 && otmp->bknown)))
@@ -841,15 +841,15 @@ register int amount;
      * spe dependent.  Give an obscure clue here.
      */
     if (uwep->oartifact == ART_MAGICBANE && uwep->spe >= 0) {
-        Your("right %s %sches!", body_part(HAND),
-             (((amount > 1) && (uwep->spe > 1)) ? "flin" : "it"));
+        Your(_("right %s %sches!"), body_part(HAND),
+             (((amount > 1) && (uwep->spe > 1)) ? _("flin") : _("it")));
     }
 
     /* an elven magic clue, cookie@keebler */
     /* elven weapons vibrate warningly when enchanted beyond a limit */
     if ((uwep->spe > 5)
         && (is_elven_weapon(uwep) || uwep->oartifact || !rn2(7)))
-        pline("%s unexpectedly.", Yobjnam2(uwep, "suddenly vibrate"));
+        pline(_("%s unexpectedly."), Yobjnam2(uwep, _("suddenly vibrate")));
 
     return 1;
 }
@@ -872,7 +872,7 @@ register struct obj *obj;
     long savewornmask;
 
     savewornmask = obj->owornmask;
-    pline("%s welded to your %s!", Yobjnam2(obj, "are"),
+    pline(_("%s welded to your %s!"), Yobjnam2(obj, _("are")),
           bimanual(obj) ? (const char *) makeplural(body_part(HAND))
                         : body_part(HAND));
     obj->owornmask = savewornmask;

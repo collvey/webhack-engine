@@ -170,10 +170,10 @@ cant_reach_floor(x, y, up, check_pit)
 int x, y;
 boolean up, check_pit;
 {
-    You("can't reach the %s.",
+    You(_("can't reach the %s."),
         up ? ceiling(x, y)
            : (check_pit && can_reach_floor(FALSE))
-               ? "bottom of the pit"
+               ? _("bottom of the pit")
                : surface(x, y));
 }
 
@@ -184,29 +184,29 @@ register int x, y;
     register struct rm *lev = &levl[x][y];
 
     if (x == u.ux && y == u.uy && u.uswallow && is_animal(u.ustuck->data))
-        return "maw";
+        return _("maw");
     else if (IS_AIR(lev->typ) && Is_airlevel(&u.uz))
-        return "air";
+        return _("air");
     else if (is_pool(x, y))
         return (Underwater && !Is_waterlevel(&u.uz))
-            ? "bottom" : hliquid("water");
+            ? _("bottom") : hliquid("water");
     else if (is_ice(x, y))
-        return "ice";
+        return _("ice");
     else if (is_lava(x, y))
         return hliquid("lava");
     else if (lev->typ == DRAWBRIDGE_DOWN)
-        return "bridge";
+        return _("bridge");
     else if (IS_ALTAR(levl[x][y].typ))
-        return "altar";
+        return _("altar");
     else if (IS_GRAVE(levl[x][y].typ))
-        return "headstone";
+        return _("headstone");
     else if (IS_FOUNTAIN(levl[x][y].typ))
-        return "fountain";
+        return _("fountain");
     else if ((IS_ROOM(lev->typ) && !Is_earthlevel(&u.uz))
              || IS_WALL(lev->typ) || IS_DOOR(lev->typ) || lev->typ == SDOOR)
-        return "floor";
+        return _("floor");
     else
-        return "ground";
+        return _("ground");
 }
 
 const char *
@@ -220,23 +220,23 @@ register int x, y;
      * see check_special_room()
      */
     if (*in_rooms(x, y, VAULT))
-        what = "vault's ceiling";
+        what = _("vault's ceiling");
     else if (*in_rooms(x, y, TEMPLE))
-        what = "temple's ceiling";
+        what = _("temple's ceiling");
     else if (*in_rooms(x, y, SHOPBASE))
-        what = "shop's ceiling";
+        what = _("shop's ceiling");
     else if (Is_waterlevel(&u.uz))
         /* water plane has no surface; its air bubbles aren't below sky */
-        what = "water above";
+        what = _("water above");
     else if (IS_AIR(lev->typ))
-        what = "sky";
+        what = _("sky");
     else if (Underwater)
-        what = "water's surface";
+        what = _("water's surface");
     else if ((IS_ROOM(lev->typ) && !Is_earthlevel(&u.uz))
              || IS_WALL(lev->typ) || IS_DOOR(lev->typ) || lev->typ == SDOOR)
-        what = "ceiling";
+        what = _("ceiling");
     else
-        what = "rock cavern";
+        what = _("rock cavern");
 
     return what;
 }
@@ -325,29 +325,29 @@ int x, y;
         case DUST:
             if (!Blind) {
                 sensed = 1;
-                pline("%s is written here in the %s.", Something,
-                      is_ice(x, y) ? "frost" : "dust");
+                pline(_("%s is written here in the %s."), Something,
+                      is_ice(x, y) ? _("frost") : _("dust"));
             }
             break;
         case ENGRAVE:
         case HEADSTONE:
             if (!Blind || can_reach_floor(TRUE)) {
                 sensed = 1;
-                pline("%s is engraved here on the %s.", Something,
+                pline(_("%s is engraved here on the %s."), Something,
                       surface(x, y));
             }
             break;
         case BURN:
             if (!Blind || can_reach_floor(TRUE)) {
                 sensed = 1;
-                pline("Some text has been %s into the %s here.",
-                      is_ice(x, y) ? "melted" : "burned", surface(x, y));
+                pline(_("Some text has been %s into the %s here."),
+                      is_ice(x, y) ? _("melted") : _("burned"), surface(x, y));
             }
             break;
         case MARK:
             if (!Blind) {
                 sensed = 1;
-                pline("There's some graffiti on the %s here.", surface(x, y));
+                pline(_("There's some graffiti on the %s here."), surface(x, y));
             }
             break;
         case ENGR_BLOOD:
@@ -357,7 +357,7 @@ int x, y;
              */
             if (!Blind) {
                 sensed = 1;
-                You_see("a message scrawled in blood here.");
+                You_see(_("a message scrawled in blood here."));
             }
             break;
         default:
@@ -378,7 +378,7 @@ int x, y;
             } else {
                 et = ep->engr_txt;
             }
-            You("%s: \"%s\".", (Blind) ? "feel the words" : "read", et);
+            You(_("%s: \"%s\"."), (Blind) ? _("feel the words") : _("read"), et);
             if (context.run > 0)
                 nomul(0);
         }
@@ -511,7 +511,7 @@ doengrave()
 
     if (u.uswallow) {
         if (is_animal(u.ustuck->data)) {
-            pline("What would you write?  \"Jonah was here\"?");
+            pline(_("What would you write?  \"Jonah was here\"?"));
             return 0;
         } else if (is_whirly(u.ustuck->data)) {
             cant_reach_floor(u.ux, u.uy, FALSE, FALSE);
@@ -519,22 +519,22 @@ doengrave()
         } else
             jello = TRUE;
     } else if (is_lava(u.ux, u.uy)) {
-        You_cant("write on the %s!", surface(u.ux, u.uy));
+        You_cant(_("write on the %s!"), surface(u.ux, u.uy));
         return 0;
     } else if (is_pool(u.ux, u.uy) || IS_FOUNTAIN(levl[u.ux][u.uy].typ)) {
-        You_cant("write on the %s!", surface(u.ux, u.uy));
+        You_cant(_("write on the %s!"), surface(u.ux, u.uy));
         return 0;
     }
     if (Is_airlevel(&u.uz) || Is_waterlevel(&u.uz) /* in bubble */) {
-        You_cant("write in thin air!");
+        You_cant(_("write in thin air!"));
         return 0;
     } else if (!accessible(u.ux, u.uy)) {
         /* stone, tree, wall, secret corridor, pool, lava, bars */
-        You_cant("write here.");
+        You_cant(_("write here."));
         return 0;
     }
     if (cantwield(youmonst.data)) {
-        You_cant("even hold anything!");
+        You_cant(_("even hold anything!"));
         return 0;
     }
     if (check_capacity((char *) 0))
@@ -549,7 +549,7 @@ doengrave()
         return 0;
 
     if (otmp == &zeroobj) {
-        Strcat(strcpy(fbuf, "your "), body_part(FINGERTIP));
+        Strcat(strcpy(fbuf, _("your ")), body_part(FINGERTIP));
         writer = fbuf;
     } else
         writer = yname(otmp);
@@ -558,13 +558,13 @@ doengrave()
      * while both your hands are tied up.
      */
     if (!freehand() && otmp != uwep && !otmp->owornmask) {
-        You("have no free %s to write with!", body_part(HAND));
+        You(_("have no free %s to write with!"), body_part(HAND));
         return 0;
     }
 
     if (jello) {
-        You("tickle %s with %s.", mon_nam(u.ustuck), writer);
-        Your("message dissolves...");
+        You(_("tickle %s with %s."), mon_nam(u.ustuck), writer);
+        Your(_("message dissolves..."));
         return 0;
     }
     if (otmp->oclass != WAND_CLASS && !can_reach_floor(TRUE)) {
@@ -572,17 +572,17 @@ doengrave()
         return 0;
     }
     if (IS_ALTAR(levl[u.ux][u.uy].typ)) {
-        You("make a motion towards the altar with %s.", writer);
+        You(_("make a motion towards the altar with %s."), writer);
         altar_wrath(u.ux, u.uy);
         return 0;
     }
     if (IS_GRAVE(levl[u.ux][u.uy].typ)) {
         if (otmp == &zeroobj) { /* using only finger */
-            You("would only make a small smudge on the %s.",
+            You(_("would only make a small smudge on the %s."),
                 surface(u.ux, u.uy));
             return 0;
         } else if (!levl[u.ux][u.uy].disturbed) {
-            You("disturb the undead!");
+            You(_("disturb the undead!"));
             levl[u.ux][u.uy].disturbed = 1;
             (void) makemon(&mons[PM_GHOUL], u.ux, u.uy, NO_MM_FLAGS);
             exercise(A_WIS, FALSE);
@@ -617,15 +617,15 @@ doengrave()
     /* Objects too large to engrave with */
     case BALL_CLASS:
     case ROCK_CLASS:
-        You_cant("engrave with such a large object!");
+        You_cant(_("engrave with such a large object!"));
         ptext = FALSE;
         break;
     /* Objects too silly to engrave with */
     case FOOD_CLASS:
     case SCROLL_CLASS:
     case SPBOOK_CLASS:
-        pline("%s would get %s.", Yname2(otmp),
-              is_ice(u.ux, u.uy) ? "all frosty" : "too dirty");
+        pline(_("%s would get %s."), Yname2(otmp),
+              is_ice(u.ux, u.uy) ? _("all frosty") : _("too dirty"));
         ptext = FALSE;
         break;
     case RANDOM_CLASS: /* This should mean fingers */
@@ -667,17 +667,17 @@ doengrave()
              */
             case WAN_STRIKING:
                 Strcpy(post_engr_text,
-                    "The wand unsuccessfully fights your attempt to write!");
+                    _("The wand unsuccessfully fights your attempt to write!"));
                 break;
             case WAN_SLOW_MONSTER:
                 if (!Blind) {
-                    Sprintf(post_engr_text, "The bugs on the %s slow down!",
+                    Sprintf(post_engr_text, _("The bugs on the %s slow down!"),
                             surface(u.ux, u.uy));
                 }
                 break;
             case WAN_SPEED_MONSTER:
                 if (!Blind) {
-                    Sprintf(post_engr_text, "The bugs on the %s speed up!",
+                    Sprintf(post_engr_text, _("The bugs on the %s speed up!"),
                             surface(u.ux, u.uy));
                 }
                 break;
@@ -709,7 +709,7 @@ doengrave()
                 ptext = TRUE;
                 if (!Blind) {
                     Sprintf(post_engr_text,
-                            "The %s is riddled by bullet holes!",
+                            _("The %s is riddled by bullet holes!"),
                             surface(u.ux, u.uy));
                 }
                 break;
@@ -717,14 +717,14 @@ doengrave()
             case WAN_SLEEP:
             case WAN_DEATH:
                 if (!Blind) {
-                    Sprintf(post_engr_text, "The bugs on the %s stop moving!",
+                    Sprintf(post_engr_text, _("The bugs on the %s stop moving!"),
                             surface(u.ux, u.uy));
                 }
                 break;
             case WAN_COLD:
                 if (!Blind)
                     Strcpy(post_engr_text,
-                           "A few ice cubes drop from the wand.");
+                           _("A few ice cubes drop from the wand."));
                 if (!oep || (oep->engr_type != BURN))
                     break;
                 /*FALLTHRU*/
@@ -732,7 +732,7 @@ doengrave()
             case WAN_MAKE_INVISIBLE:
                 if (oep && oep->engr_type != HEADSTONE) {
                     if (!Blind)
-                        pline_The("engraving on the %s vanishes!",
+                        pline_The(_("engraving on the %s vanishes!"),
                                   surface(u.ux, u.uy));
                     dengr = TRUE;
                 }
@@ -740,7 +740,7 @@ doengrave()
             case WAN_TELEPORTATION:
                 if (oep && oep->engr_type != HEADSTONE) {
                     if (!Blind)
-                        pline_The("engraving on the %s vanishes!",
+                        pline_The(_("engraving on the %s vanishes!"),
                                   surface(u.ux, u.uy));
                     teleengr = TRUE;
                 }
@@ -751,22 +751,22 @@ doengrave()
                 type = ENGRAVE;
                 if (!objects[otmp->otyp].oc_name_known) {
                     if (flags.verbose)
-                        pline("This %s is a wand of digging!", xname(otmp));
+                        pline(_("This %s is a wand of digging!"), xname(otmp));
                     doknown = TRUE;
                 }
                 Strcpy(post_engr_text,
                        (Blind && !Deaf)
-                          ? "You hear drilling!"    /* Deaf-aware */
+                          ? _("You hear drilling!")    /* Deaf-aware */
                           : Blind
-                             ? "You feel tremors."
+                             ? _("You feel tremors.")
                              : IS_GRAVE(levl[u.ux][u.uy].typ)
-                                 ? "Chips fly out from the headstone."
+                                 ? _("Chips fly out from the headstone.")
                                  : is_ice(u.ux, u.uy)
-                                    ? "Ice chips fly up from the ice surface!"
+                                    ? _("Ice chips fly up from the ice surface!")
                                     : (level.locations[u.ux][u.uy].typ
                                        == DRAWBRIDGE_DOWN)
-                                       ? "Splinters fly up from the bridge."
-                                       : "Gravel flies up from the floor.");
+                                       ? _("Splinters fly up from the bridge.")
+                                       : _("Gravel flies up from the floor."));
                 break;
             /* type = BURN wands */
             case WAN_FIRE:
@@ -774,27 +774,27 @@ doengrave()
                 type = BURN;
                 if (!objects[otmp->otyp].oc_name_known) {
                     if (flags.verbose)
-                        pline("This %s is a wand of fire!", xname(otmp));
+                        pline(_("This %s is a wand of fire!"), xname(otmp));
                     doknown = TRUE;
                 }
-                Strcpy(post_engr_text, Blind ? "You feel the wand heat up."
-                                             : "Flames fly from the wand.");
+                Strcpy(post_engr_text, Blind ? _("You feel the wand heat up.")
+                                             : _("Flames fly from the wand."));
                 break;
             case WAN_LIGHTNING:
                 ptext = TRUE;
                 type = BURN;
                 if (!objects[otmp->otyp].oc_name_known) {
                     if (flags.verbose)
-                        pline("This %s is a wand of lightning!", xname(otmp));
+                        pline(_("This %s is a wand of lightning!"), xname(otmp));
                     doknown = TRUE;
                 }
                 if (!Blind) {
-                    Strcpy(post_engr_text, "Lightning arcs from the wand.");
+                    Strcpy(post_engr_text, _("Lightning arcs from the wand."));
                     doblind = TRUE;
                 } else
                     Strcpy(post_engr_text, !Deaf
-                                ? "You hear crackling!"  /* Deaf-aware */
-                                : "Your hair stands up!");
+                                ? _("You hear crackling!")  /* Deaf-aware */
+                                : _("Your hair stands up!"));
                 break;
 
             /* type = MARK wands */
@@ -811,7 +811,7 @@ doengrave()
                     zapwand = TRUE;
                 /* empty wand just doesn't write */
                 else
-                    pline_The("wand is too worn out to engrave.");
+                    pline_The(_("wand is too worn out to engrave."));
             }
         }
         break;
@@ -821,20 +821,20 @@ doengrave()
             if ((int) otmp->spe > -3)
                 type = ENGRAVE;
             else
-                pline("%s too dull for engraving.", Yobjnam2(otmp, "are"));
+                pline(_("%s too dull for engraving."), Yobjnam2(otmp, _("are")));
         }
         break;
 
     case TOOL_CLASS:
         if (otmp == ublindf) {
             pline(
-                "That is a bit difficult to engrave with, don't you think?");
+                _("That is a bit difficult to engrave with, don't you think?"));
             return 0;
         }
         switch (otmp->otyp) {
         case MAGIC_MARKER:
             if (otmp->spe <= 0)
-                Your("marker has dried out.");
+                Your(_("marker has dried out."));
             else
                 type = MARK;
             break;
@@ -848,16 +848,16 @@ doengrave()
                     if (is_wet_towel(otmp))
                         dry_a_towel(otmp, -1, TRUE);
                     if (!Blind)
-                        You("wipe out the message here.");
+                        You(_("wipe out the message here."));
                     else
-                        pline("%s %s.", Yobjnam2(otmp, "get"),
-                              is_ice(u.ux, u.uy) ? "frosty" : "dusty");
+                        pline(_("%s %s."), Yobjnam2(otmp, _("get")),
+                              is_ice(u.ux, u.uy) ? _("frosty") : _("dusty"));
                     dengr = TRUE;
                 } else
-                    pline("%s can't wipe out this engraving.", Yname2(otmp));
+                    pline(_("%s can't wipe out this engraving."), Yname2(otmp));
             else
-                pline("%s %s.", Yobjnam2(otmp, "get"),
-                      is_ice(u.ux, u.uy) ? "frosty" : "dusty");
+                pline(_("%s %s."), Yobjnam2(otmp, _("get")),
+                      is_ice(u.ux, u.uy) ? _("frosty") : _("dusty"));
             break;
         default:
             break;
@@ -866,7 +866,7 @@ doengrave()
 
     case VENOM_CLASS:
         if (wizard) {
-            pline("Writing a poison pen letter??");
+            pline(_("Writing a poison pen letter??"));
             break;
         }
         /*FALLTHRU*/
@@ -909,16 +909,16 @@ doengrave()
     if (*buf) {
         make_engr_at(u.ux, u.uy, buf, moves, type);
         if (!Blind)
-            pline_The("engraving now reads: \"%s\".", buf);
+            pline_The(_("engraving now reads: \"%s\"."), buf);
         ptext = FALSE;
     }
     if (zapwand && (otmp->spe < 0)) {
-        pline("%s %sturns to dust.", The(xname(otmp)),
-              Blind ? "" : "glows violently, then ");
+        pline(_("%s %sturns to dust."), The(xname(otmp)),
+              Blind ? "" : _("glows violently, then "));
         if (!IS_GRAVE(levl[u.ux][u.uy].typ))
             You(
-    "are not going to get anywhere trying to write in the %s with your dust.",
-                is_ice(u.ux, u.uy) ? "frost" : "dust");
+    _("are not going to get anywhere trying to write in the %s with your dust."),
+                is_ice(u.ux, u.uy) ? _("frost") : _("dust"));
         useup(otmp);
         otmp = 0; /* wand is now gone */
         ptext = FALSE;
@@ -943,7 +943,7 @@ doengrave()
         } else if (type == oep->engr_type
                    && (!Blind || oep->engr_type == BURN
                        || oep->engr_type == ENGRAVE)) {
-            c = yn_function("Do you want to add to the current engraving?",
+            c = yn_function(_("Do you want to add to the current engraving?"),
                             ynqchars, 'y');
             if (c == 'q') {
                 pline1(Never_mind);
@@ -956,12 +956,12 @@ doengrave()
                 || oep->engr_type == ENGR_BLOOD
                 || oep->engr_type == MARK) {
                 if (!Blind) {
-                    You("wipe out the message that was %s here.",
+                    You(_("wipe out the message that was %s here."),
                         (oep->engr_type == DUST)
-                            ? "written in the dust"
+                            ? _("written in the dust")
                             : (oep->engr_type == ENGR_BLOOD)
-                                ? "scrawled in blood"
-                                : "written");
+                                ? _("scrawled in blood")
+                                : _("written"));
                     del_engr(oep);
                     oep = (struct engr *) 0;
                 } else
@@ -969,15 +969,15 @@ doengrave()
                      */
                     eow = TRUE;
             } else if (type == DUST || type == MARK || type == ENGR_BLOOD) {
-                You("cannot wipe out the message that is %s the %s here.",
+                You(_("cannot wipe out the message that is %s the %s here."),
                     oep->engr_type == BURN
-                        ? (is_ice(u.ux, u.uy) ? "melted into" : "burned into")
-                        : "engraved in",
+                        ? (is_ice(u.ux, u.uy) ? _("melted into") : _("burned into"))
+                        : _("engraved in"),
                     surface(u.ux, u.uy));
                 return 1;
             } else if (type != oep->engr_type || c == 'n') {
                 if (!Blind || can_reach_floor(TRUE))
-                    You("will overwrite the current message.");
+                    You(_("will overwrite the current message."));
                 eow = TRUE;
             }
         }
@@ -986,41 +986,41 @@ doengrave()
     eloc = surface(u.ux, u.uy);
     switch (type) {
     default:
-        everb = (oep && !eow ? "add to the weird writing on"
-                             : "write strangely on");
+        everb = (oep && !eow ? _("add to the weird writing on")
+                             : _("write strangely on"));
         break;
     case DUST:
-        everb = (oep && !eow ? "add to the writing in" : "write in");
-        eloc = is_ice(u.ux, u.uy) ? "frost" : "dust";
+        everb = (oep && !eow ? _("add to the writing in") : _("write in"));
+        eloc = is_ice(u.ux, u.uy) ? _("frost") : _("dust");
         break;
     case HEADSTONE:
-        everb = (oep && !eow ? "add to the epitaph on" : "engrave on");
+        everb = (oep && !eow ? _("add to the epitaph on") : _("engrave on"));
         break;
     case ENGRAVE:
-        everb = (oep && !eow ? "add to the engraving in" : "engrave in");
+        everb = (oep && !eow ? _("add to the engraving in") : _("engrave in"));
         break;
     case BURN:
         everb = (oep && !eow
-                     ? (is_ice(u.ux, u.uy) ? "add to the text melted into"
-                                           : "add to the text burned into")
-                     : (is_ice(u.ux, u.uy) ? "melt into" : "burn into"));
+                     ? (is_ice(u.ux, u.uy) ? _("add to the text melted into")
+                                           : _("add to the text burned into"))
+                     : (is_ice(u.ux, u.uy) ? _("melt into") : _("burn into")));
         break;
     case MARK:
-        everb = (oep && !eow ? "add to the graffiti on" : "scribble on");
+        everb = (oep && !eow ? _("add to the graffiti on") : _("scribble on"));
         break;
     case ENGR_BLOOD:
-        everb = (oep && !eow ? "add to the scrawl on" : "scrawl on");
+        everb = (oep && !eow ? _("add to the scrawl on") : _("scrawl on"));
         break;
     }
 
     /* Tell adventurer what is going on */
     if (otmp != &zeroobj)
-        You("%s the %s with %s.", everb, eloc, doname(otmp));
+        You(_("%s the %s with %s."), everb, eloc, doname(otmp));
     else
-        You("%s the %s with your %s.", everb, eloc, body_part(FINGERTIP));
+        You(_("%s the %s with your %s."), everb, eloc, body_part(FINGERTIP));
 
     /* Prompt for engraving! */
-    Sprintf(qbuf, "What do you want to %s the %s here?", everb, eloc);
+    Sprintf(qbuf, _("What do you want to %s the %s here?"), _(everb), _(eloc));
     getlin(qbuf, ebuf);
     /* convert tabs to spaces and condense consecutive spaces to one */
     mungspaces(ebuf);
@@ -1034,8 +1034,8 @@ doengrave()
     if (len == 0 || index(ebuf, '\033')) {
         if (zapwand) {
             if (!Blind)
-                pline("%s, then %s.", Tobjnam(otmp, "glow"),
-                      otense(otmp, "fade"));
+                pline(_("%s, then %s."), Tobjnam(otmp, _("glow")),
+                      otense(otmp, _("fade")));
             return 1;
         } else {
             pline1(Never_mind);
@@ -1072,12 +1072,12 @@ doengrave()
     default:
         multi = -(len / 10);
         if (multi)
-            nomovemsg = "You finish your weird engraving.";
+            nomovemsg = _("You finish your weird engraving.");
         break;
     case DUST:
         multi = -(len / 10);
         if (multi)
-            nomovemsg = "You finish writing in the dust.";
+            nomovemsg = _("You finish writing in the dust.");
         break;
     case HEADSTONE:
     case ENGRAVE:
@@ -1091,7 +1091,7 @@ doengrave()
              * to engrave "Elbereth" all at once.
              * However, you can engrave "Elb", then "ere", then "th".
              */
-            pline("%s dull.", Yobjnam2(otmp, "get"));
+            pline(_("%s dull."), Yobjnam2(otmp, _("get")));
             costly_alteration(otmp, COST_DEGRD);
             if (len > maxelen) {
                 multi = -maxelen;
@@ -1104,21 +1104,21 @@ doengrave()
             multi = -len;
         }
         if (multi)
-            nomovemsg = "You finish engraving.";
+            nomovemsg = _("You finish engraving.");
         break;
     case BURN:
         multi = -(len / 10);
         if (multi)
             nomovemsg = is_ice(u.ux, u.uy)
-                          ? "You finish melting your message into the ice."
-                          : "You finish burning your message into the floor.";
+                          ? _("You finish melting your message into the ice.")
+                          : _("You finish burning your message into the floor.");
         break;
     case MARK:
         multi = -(len / 10);
         if (otmp->otyp == MAGIC_MARKER) {
             maxelen = otmp->spe * 2; /* one charge / 2 letters */
             if (len > maxelen) {
-                Your("marker dries out.");
+                Your(_("marker dries out."));
                 otmp->spe = 0;
                 multi = -(maxelen / 10);
             } else if (len > 1)
@@ -1127,12 +1127,12 @@ doengrave()
                 otmp->spe -= 1; /* Prevent infinite graffiti */
         }
         if (multi)
-            nomovemsg = "You finish defacing the dungeon.";
+            nomovemsg = _("You finish defacing the dungeon.");
         break;
     case ENGR_BLOOD:
         multi = -(len / 10);
         if (multi)
-            nomovemsg = "You finish scrawling.";
+            nomovemsg = _("You finish scrawling.");
         break;
     }
 
@@ -1144,8 +1144,8 @@ doengrave()
         if (!maxelen && *sp) {
             *sp = '\0';
             if (multi)
-                nomovemsg = "You cannot write any more.";
-            You("are only able to write \"%s\".", ebuf);
+                nomovemsg = _("You cannot write any more.");
+            You(_("are only able to write \"%s\"."), ebuf);
         }
     }
 
@@ -1156,9 +1156,9 @@ doengrave()
     make_engr_at(u.ux, u.uy, buf, moves - multi, type);
 
     if (post_engr_text[0])
-        pline("%s", post_engr_text);
+        pline(_("%s"), post_engr_text);
     if (doblind && !resists_blnd(&youmonst)) {
-        You("are blinded by the flash!");
+        You(_("are blinded by the flash!"));
         make_blinded((long) rnd(50), FALSE);
         if (!Blind)
             Your1(vision_clears);

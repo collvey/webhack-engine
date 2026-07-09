@@ -757,15 +757,15 @@ struct obj *obj;
 {
     switch (arti_light_radius(obj)) {
     case 3:
-        return "brilliantly"; /* blessed */
+        return _("brilliantly"); /* blessed */
     case 2:
-        return "brightly"; /* uncursed */
+        return _("brightly"); /* uncursed */
     case 1:
-        return "dimly"; /* cursed */
+        return _("dimly"); /* cursed */
     default:
         break;
     }
-    return "strangely";
+    return _("strangely");
 }
 
 int

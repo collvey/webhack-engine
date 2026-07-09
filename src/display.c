@@ -1983,7 +1983,7 @@ static void
 error4(x, y, a, b, c, dd)
 int x, y, a, b, c, dd;
 {
-    pline("set_wall_state: %s @ (%d,%d) %s%s%s%s",
+    pline(_("set_wall_state: %s @ (%d,%d) %s%s%s%s"),
           type_to_name(levl[x][y].typ), x, y,
           a ? "1" : "", b ? "2" : "", c ? "3" : "", dd ? "4" : "");
     bad_count[levl[x][y].typ]++;
@@ -2212,9 +2212,9 @@ set_wall_state()
         if (bad_count[x]) {
             if (y == 0) {
                 y = 1; /* only print once */
-                pline("set_wall_type: wall mode problems with: ");
+                pline(_("set_wall_type: wall mode problems with: "));
             }
-            pline("%s %d;", type_names[x], bad_count[x]);
+            pline(_("%s %d;"), type_names[x], bad_count[x]);
         }
 #endif /* WA_VERBOSE */
 }

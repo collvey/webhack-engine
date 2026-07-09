@@ -156,7 +156,7 @@ gottype:
         if (sroom->hx < 0)
             return;
         if (sroom - rooms >= nroom) {
-            pline("rooms not closed by -1?");
+            pline(_("rooms not closed by -1?"));
             return;
         }
         if (sroom->rtype != OROOM)

@@ -729,9 +729,9 @@ int alter_type;
     }
 
     if (obj->quan == 1L)
-        those = "that", them = "it";
+        those = _("that"), them = _("it");
     else
-        those = "those", them = "them";
+        those = _("those"), them = _("them");
 
     /* when shopkeeper describes the object as being uncursed or unblessed
        hero will know that it is now uncursed; will also make the feedback
@@ -743,8 +743,8 @@ int alter_type;
     case OBJ_INVENT:
         if (learn_bknown)
             set_bknown(obj, 1);
-        verbalize("You %s %s %s, you pay for %s!",
-                  alteration_verbs[alter_type], those, simpleonames(obj),
+        verbalize(_("You %s %s %s, you pay for %s!"),
+                  _(alteration_verbs[alter_type]), those, simpleonames(obj),
                   them);
         bill_dummy_object(obj);
         break;
@@ -752,8 +752,8 @@ int alter_type;
         if (learn_bknown)
             obj->bknown = 1; /* ok to bypass set_bknown() here */
         if (costly_spot(u.ux, u.uy) && objroom == *u.ushops) {
-            verbalize("You %s %s, you pay for %s!",
-                      alteration_verbs[alter_type], those, them);
+            verbalize(_("You %s %s, you pay for %s!"),
+                      _(alteration_verbs[alter_type]), those, them);
             bill_dummy_object(obj);
         } else {
             (void) stolen_value(obj, ox, oy, FALSE, FALSE);
@@ -1254,9 +1254,9 @@ int old_range;
                    when changing intensity, using "less brightly" is
                    straightforward for dimming, but we need "brighter"
                    rather than "more brightly" for brightening; ugh */
-                pline("%s %s %s%s.", buf, otense(obj, "shine"),
-                      (abs(delta) > 1) ? "much " : "",
-                      (delta > 0) ? "brighter" : "less brightly");
+                pline(_("%s %s %s%s."), _(buf), otense(obj, _("shine")),
+                      (abs(delta) > 1) ? _("much ") : "",
+                      (delta > 0) ? _("brighter") : _("less brightly"));
             }
         }
     }
@@ -2216,15 +2216,15 @@ boolean tipping; /* caller emptying entire contents; affects shop handling */
                 do {
                     obj->otyp = rnd_class(POT_BOOZE, POT_WATER);
                 } while (obj->otyp == POT_SICKNESS);
-            what = (obj->quan > 1L) ? "Some potions" : "A potion";
+            what = (obj->quan > 1L) ? _("Some potions") : _("A potion");
         } else {
             obj = mkobj(FOOD_CLASS, FALSE);
             if (obj->otyp == FOOD_RATION && !rn2(7))
                 obj->otyp = LUMP_OF_ROYAL_JELLY;
-            what = "Some food";
+            what = _("Some food");
         }
         ++objcount;
-        pline("%s %s out.", what, vtense(what, "spill"));
+        pline(_("%s %s out."), what, vtense(what, _("spill")));
         obj->blessed = horn->blessed;
         obj->cursed = horn->cursed;
         obj->owt = weight(obj);
@@ -2238,14 +2238,14 @@ boolean tipping; /* caller emptying entire contents; affects shop handling */
         if (!tipping) {
             obj = hold_another_object(obj,
                                       u.uswallow
-                                        ? "Oops!  %s out of your reach!"
+                                        ? _("Oops!  %s out of your reach!")
                                         : (Is_airlevel(&u.uz)
                                            || Is_waterlevel(&u.uz)
                                            || levl[u.ux][u.uy].typ < IRONBARS
                                            || levl[u.ux][u.uy].typ >= ICE)
-                                          ? "Oops!  %s away from you!"
-                                          : "Oops!  %s to the floor!",
-                                      The(aobjnam(obj, "slip")), (char *) 0);
+                                          ? _("Oops!  %s away from you!")
+                                          : _("Oops!  %s to the floor!"),
+                                      The(aobjnam(obj, _("slip"))), (char *) 0);
             nhUse(obj);
         } else {
             /* assumes this is taking place at hero's location */
@@ -2255,8 +2255,8 @@ boolean tipping; /* caller emptying entire contents; affects shop handling */
                 if (IS_ALTAR(levl[u.ux][u.uy].typ))
                     doaltarobj(obj); /* does its own drop message */
                 else
-                    pline("%s %s to the %s.", Doname2(obj),
-                          otense(obj, "drop"), surface(u.ux, u.uy));
+                    pline(_("%s %s to the %s."), Doname2(obj),
+                          otense(obj, _("drop")), surface(u.ux, u.uy));
                 dropy(obj);
             }
         }
@@ -2947,9 +2947,9 @@ struct obj *otmp2;
     if ((!Blind && visible) || inpack) {
         if (Hallucination) {
             if (onfloor) {
-                You_see("parts of the floor melting!");
+                You_see(_("parts of the floor melting!"));
             } else if (inpack) {
-                Your("pack reaches out and grabs something!");
+                Your(_("pack reaches out and grabs something!"));
             }
             /* even though we can see where they should be,
              * they'll be out of our view (minvent or container)
@@ -2958,13 +2958,13 @@ struct obj *otmp2;
             boolean adj = ((otmp->ox != u.ux || otmp->oy != u.uy)
                            && (otmp2->ox != u.ux || otmp2->oy != u.uy));
 
-            pline("The %s%s coalesce%s.",
-                  (onfloor && adj) ? "adjacent " : "",
+            pline(_("The %s%s coalesce%s."),
+                  (onfloor && adj) ? _("adjacent ") : "",
                   makeplural(obj_typename(otmp->otyp)),
-                  inpack ? " inside your pack" : "");
+                  inpack ? _(" inside your pack") : "");
         }
     } else {
-        You_hear("a faint sloshing sound.");
+        You_hear(_("a faint sloshing sound."));
     }
 }
 

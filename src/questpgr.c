@@ -178,8 +178,9 @@ ldrname()
 {
     int i = urole.ldrnum;
 
-    Sprintf(nambuf, "%s%s", type_is_pname(&mons[i]) ? "" : "the ",
-            mons[i].mname);
+    Sprintf(nambuf, "%s%s",
+            (type_is_pname(&mons[i]) || !nhi18n_uses_articles()) ? "" : "the ",
+            nhi18n_monname(i) ? nhi18n_monname(i) : mons[i].mname);
     return nambuf;
 }
 
@@ -255,8 +256,9 @@ neminame()
 {
     int i = urole.neminum;
 
-    Sprintf(nambuf, "%s%s", type_is_pname(&mons[i]) ? "" : "the ",
-            mons[i].mname);
+    Sprintf(nambuf, "%s%s",
+            (type_is_pname(&mons[i]) || !nhi18n_uses_articles()) ? "" : "the ",
+            nhi18n_monname(i) ? nhi18n_monname(i) : mons[i].mname);
     return nambuf;
 }
 
@@ -265,7 +267,7 @@ guardname() /* return your role leader's guard monster name */
 {
     int i = urole.guardnum;
 
-    return mons[i].mname;
+    return nhi18n_monname(i) ? nhi18n_monname(i) : mons[i].mname;
 }
 
 STATIC_OVL const char *
@@ -306,8 +308,8 @@ char who,  /* 'd' => deity, 'l' => leader, 'n' => nemesis, 'o' => artifact */
                 : (lwhich == 'i') ? genders[g].him
                 : (lwhich == 'j') ? genders[g].his : "?";
     }
-    Strcpy(cvt_buf, pnoun);
-    /* capitalize for H,I,J */
+    Strcpy(cvt_buf, _(pnoun));
+    /* capitalize for H,I,J (no-op on zh: a multibyte first byte isn't a-z) */
     if (lwhich != which)
         cvt_buf[0] = highc(cvt_buf[0]);
     return;
@@ -395,16 +397,16 @@ char c;
         str = align_gname(A_LAWFUL);
         break;
     case 'C':
-        str = "chaotic";
+        str = _("chaotic");
         break;
     case 'N':
-        str = "neutral";
+        str = _("neutral");
         break;
     case 'L':
-        str = "lawful";
+        str = _("lawful");
         break;
     case 'x':
-        str = Blind ? "sense" : "see";
+        str = Blind ? _("sense") : _("see");
         break;
     case 'Z':
         str = dungeons[0].dname;
@@ -524,7 +526,7 @@ struct qtmsg *qt_msg;
     for (size = 0; size < qt_msg->size; size += (long) strlen(in_line)) {
         (void) dlb_fgets(in_line, sizeof in_line, msg_file);
         convert_line(in_line, out_line);
-        pline("%s", out_line);
+        pline(_("%s"), out_line);
     }
 }
 
@@ -686,7 +688,7 @@ deliver_splev_message()
             /* convert_line() expects encrypted input */
             (void) xcrypt(in_line, in_line);
             convert_line(in_line, out_line);
-            pline("%s", out_line);
+            pline(_("%s"), out_line);
 
             if ((nl = index(str, '\n')) == 0)
                 break; /* done if no newline */

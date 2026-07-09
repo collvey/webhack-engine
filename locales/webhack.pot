@@ -1,0 +1,1841 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WebHack\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/allmain.c:840
+msgid "-%sversion can only be extended with -%sversion:paste.\n"
+msgstr ""
+
+#: src/pager.c:817
+msgid "'data' file in wrong format or corrupted"
+msgstr ""
+
+#: src/files.c:1892
+msgid "(Perhaps you are running NetHack from inside the distribution package?)."
+msgstr ""
+
+#: src/files.c:3844
+msgid "\nCannot recover savefile %s.\n"
+msgstr ""
+
+#: src/files.c:3814
+msgid "\nCheckpointing was not in effect for %s -- recovery impossible.\n"
+msgstr ""
+
+#: src/files.c:3828
+msgid "\nError reading %s -- can't recover.\n"
+msgstr ""
+
+#: src/files.c:3869
+msgid "\nError writing %s; recovery failed (savefile_info).\n"
+msgstr ""
+
+#: src/files.c:3860
+msgid "\nError writing %s; recovery failed."
+msgstr ""
+
+#: src/mhitu.c:214
+msgid "%s attacks you without knowing your location?"
+msgstr ""
+
+#: src/mcastu.c:283
+msgid "%s casting non-hand-to-hand version of hand-to-hand spell %d?"
+msgstr ""
+
+#: src/teleport.c:459
+msgid "%s is leashed, without a leash."
+msgstr ""
+
+#: src/engrave.c:364
+msgid "%s is written in a very strange way."
+msgstr ""
+
+#: src/mkobj.c:2529
+msgid "%s obj %s in container %s, not %s"
+msgstr ""
+
+#: src/shk.c:143
+msgid "%s paying without %s money?"
+msgstr ""
+
+#: src/shk.c:108
+msgid "%s payment in money2mon!"
+msgstr ""
+
+#: src/shk.c:139
+msgid "%s payment in money2u!"
+msgstr ""
+
+#: src/muse.c:1006
+#: src/muse.c:1565
+#: src/muse.c:1979
+msgid "%s wanted to perform action %d?"
+msgstr ""
+
+#: src/shk.c:829
+msgid "%s? (rmno=%d, rtype=%d, mnum=%d, \"%s\")"
+msgstr ""
+
+#: src/pickup.c:2136
+msgid "<in> no current_container?"
+msgstr ""
+
+#: src/pickup.c:2303
+msgid "<out> no current_container?"
+msgstr ""
+
+#: src/botl.c:950
+msgid "2nd status_initialize with full init."
+msgstr ""
+
+#: src/mon.c:1508
+msgid "A monster looked at a very strange trap of type %d."
+msgstr ""
+
+#: src/files.c:2075
+#: src/files.c:3042
+msgid "Access to %s denied (%d)."
+msgstr ""
+
+#: src/sp_lev.c:5562
+msgid "adding different types"
+msgstr ""
+
+#: src/sp_lev.c:5557
+msgid "adding weird types"
+msgstr ""
+
+#: src/objnam.c:1805
+msgid "Alphabet soup: 'an(%s)'."
+msgstr ""
+
+#: src/objnam.c:1836
+msgid "Alphabet soup: 'the(%s)'."
+msgstr ""
+
+#: src/invent.c:814
+msgid "already have amulet?"
+msgstr ""
+
+#: src/invent.c:819
+msgid "already have candelabrum?"
+msgstr ""
+
+#: src/invent.c:835
+msgid "already have quest artifact?"
+msgstr ""
+
+#: src/invent.c:824
+msgid "already have silver bell?"
+msgstr ""
+
+#: src/invent.c:829
+msgid "already have the book?"
+msgstr ""
+
+#: src/mon.c:3266
+msgid "animal_list already exists"
+msgstr ""
+
+#: src/pager.c:69
+msgid "append_str: 'buf' contains %lu characters."
+msgstr ""
+
+#: src/artifact.c:1447
+msgid "arti_invoke without obj"
+msgstr ""
+
+#: src/ball.c:1055
+msgid "Attached %s%s%s without being Punished?"
+msgstr ""
+
+#: src/artifact.c:1202
+msgid "attacking yourself with weapon?"
+msgstr ""
+
+#: src/timeout.c:1913
+msgid "Attempted to start duplicate %s, aborted."
+msgstr ""
+
+#: src/priest.c:527
+msgid "attempting to manipulate shrine data for non-priest?"
+msgstr ""
+
+#: src/zap.c:729
+msgid "Attempting to revive %s?"
+msgstr ""
+
+#: src/ball.c:1107
+msgid "b&c distance: you@<%d,%d>, chain@<%d,%d>, ball@<%d,%d>"
+msgstr ""
+
+#: src/display.c:1817
+msgid "back_to_glyph:  unknown level type [ = %d ]"
+msgstr ""
+
+#: src/polyself.c:1155
+msgid "bad attack type in dospit"
+msgstr ""
+
+#: src/mthrowu.c:774
+#: src/mthrowu.c:975
+msgid "bad attack type in spitmu"
+msgstr ""
+
+#: src/cmd.c:4473
+msgid "Bad autocomplete: invalid extended command '%s'."
+msgstr ""
+
+#: src/makemon.c:2283
+msgid "bad bag o' tricks"
+msgstr ""
+
+#: src/polyself.c:1128
+msgid "bad breath attack?"
+msgstr ""
+
+#: src/ball.c:777
+msgid "bad chain movement"
+msgstr ""
+
+#: src/trap.c:4974
+msgid "bad chest trap"
+msgstr ""
+
+#: src/dbridge.c:258
+msgid "bad direction in create_drawbridge"
+msgstr ""
+
+#: src/options.c:3229
+msgid "bad disclosure index %d %c"
+msgstr ""
+
+#: src/pager.c:581
+msgid "bad do_look buffer passed (%s)!"
+msgstr ""
+
+#: src/worn.c:674
+msgid "bad flag in which_armor"
+msgstr ""
+
+#: src/objnam.c:603
+msgid "Bad fruit #%d?"
+msgstr ""
+
+#: src/shk.c:2117
+msgid "bad glass gem %d?"
+msgstr ""
+
+#: src/mkobj.c:2205
+msgid "bad horn o' plenty"
+msgstr ""
+
+#: src/topten.c:111
+msgid "bad killer format? (%d)"
+msgstr ""
+
+#: src/restore.c:459
+msgid "bad monster weapon restore"
+msgstr ""
+
+#: src/mplayer.c:258
+msgid "bad mplayer monster"
+msgstr ""
+
+#: src/uhitm.c:1672
+msgid "bad shade attack function flow?"
+msgstr ""
+
+#: src/shk.c:3354
+msgid "Bad shopkeeper administration."
+msgstr ""
+
+#: src/polyself.c:1147
+msgid "bad spit attack?"
+msgstr ""
+
+#: src/mcastu.c:403
+msgid "bad wizard cloning?"
+msgstr ""
+
+#: src/files.c:4236
+msgid "Basic data files%s are collected inside:"
+msgstr ""
+
+#: src/files.c:4252
+msgid "Basic data files%s are in many separate files."
+msgstr ""
+
+#: src/ball.c:203
+#: src/ball.c:249
+#: src/ball.c:350
+msgid "bc already placed?"
+msgstr ""
+
+#: src/ball.c:377
+msgid "bc_order:  ball&chain not in same location!"
+msgstr ""
+
+#: src/timeout.c:1499
+msgid "begin burn: unexpected %s"
+msgstr ""
+
+#: src/timeout.c:1525
+msgid "begin_burn: can't get obj position"
+msgstr ""
+
+#: src/zap.c:1878
+msgid "bhito: obj is not floor or Stone To Flesh spell"
+msgstr ""
+
+#: src/do_wear.c:1169
+msgid "Blindf_off without otmp"
+msgstr ""
+
+#: src/dothrow.c:2087
+msgid "breaking odd object?"
+msgstr ""
+
+#: src/mthrowu.c:1032
+#: src/mthrowu.c:845
+msgid "Breath weapon %d used"
+msgstr ""
+
+#: src/timeout.c:1401
+msgid "burn_object: unexpected obj %s"
+msgstr ""
+
+#: src/shk.c:4793
+msgid "cad: unknown gender"
+msgstr ""
+
+#: src/files.c:1873
+msgid "Can't find file %s to lock!"
+msgstr ""
+
+#: src/rumors.c:155
+msgid "Can't find non-cookie rumor?"
+msgstr ""
+
+#: src/pager.c:720
+msgid "can't get to start of 'data' file"
+msgstr ""
+
+#: src/windows.c:374
+msgid "Can't locate processor '-chainin'"
+msgstr ""
+
+#: src/windows.c:382
+msgid "Can't locate processor '-chainout'"
+msgstr ""
+
+#: src/files.c:1883
+msgid "Can't lock %s due to directory protection."
+msgstr ""
+
+#: src/dungeon.c:2037
+msgid "Can't note branch for unseen level (%d, %d)"
+msgstr ""
+
+#: src/rumors.c:569
+msgid "Can't open '%s' file."
+msgstr ""
+
+#: src/mklev.c:1123
+msgid "Can't place branch!"
+msgstr ""
+
+#: src/mon.c:2537
+msgid "Can't polystone %s!"
+msgstr ""
+
+#: src/pager.c:725
+msgid "can't read 'data' file"
+msgstr ""
+
+#: src/files.c:1964
+msgid "Can't remove fcntl lock on %s."
+msgstr ""
+
+#: src/files.c:1975
+msgid "Can't unlink %s."
+msgstr ""
+
+#: src/light.c:725
+msgid "candlelight for %d?"
+msgstr ""
+
+#: src/sp_lev.c:4709
+msgid "Cannot create drawbridge."
+msgstr ""
+
+#: src/files.c:1898
+msgid "Cannot lock %s for unknown reason (%d)."
+msgstr ""
+
+#: src/files.c:1891
+msgid "Cannot lock %s."
+msgstr ""
+
+#: src/files.c:1815
+msgid "Cannot open file %s.  Is NetHack installed correctly?"
+msgstr ""
+
+#: src/topten.c:1191
+msgid "Cannot open record file!"
+msgstr ""
+
+#: src/mcastu.c:530
+msgid "cast directed cleric spell (%d) with dmg=0?"
+msgstr ""
+
+#: src/mcastu.c:373
+msgid "cast directed wizard spell (%d) with dmg=0?"
+msgstr ""
+
+#: src/dog.c:550
+msgid "catching up for leashed monster?"
+msgstr ""
+
+#: src/dog.c:478
+msgid "catchup from now?"
+msgstr ""
+
+#: src/trap.c:4841
+msgid "chest disarm bug"
+msgstr ""
+
+#: src/options.c:6535
+msgid "choose_classes_menu: invalid category %d"
+msgstr ""
+
+#: src/timeout.c:1566
+msgid "cleanup_burn: obj %s not lit"
+msgstr ""
+
+#: src/makemon.c:824
+msgid "clone_mon trying to create a monster at <%d,%d>?"
+msgstr ""
+
+#: src/vision.c:1667
+msgid "close_shadow:  bad value"
+msgstr ""
+
+#: src/pager.c:1891
+msgid "cmdhelp: mismatched &? &: &. conditionals."
+msgstr ""
+
+#: src/pager.c:1768
+msgid "cmdhelp: unrecognized &%c conditional at line %d: \"%.20s\""
+msgstr ""
+
+#: src/questpgr.c:608
+msgid "com_pager: message %d not found."
+msgstr ""
+
+#: src/pray.c:1216
+msgid "Confused deity!"
+msgstr ""
+
+#: src/dungeon.c:425
+msgid "correct_branch_type: unknown branch type"
+msgstr ""
+
+#: src/extralev.c:146
+msgid "corridor in direction %d?"
+msgstr ""
+
+#: src/sp_lev.c:1493
+msgid "couldn't create secret door on any walls 0x%x"
+msgstr ""
+
+#: src/artifact.c:905
+msgid "couldn't discover artifact (%d)"
+msgstr ""
+
+#: src/mkmaze.c:1019
+msgid "Couldn't load \"%s\" - making a maze."
+msgstr ""
+
+#: src/files.c:2169
+msgid "Couldn't open default config file %s %s(%d)."
+msgstr ""
+
+#: src/files.c:3081
+msgid "Couldn't open default wizkit file %s (%d)."
+msgstr ""
+
+#: src/files.c:2085
+#: src/files.c:3052
+msgid "Couldn't open requested config file %s (%d)."
+msgstr ""
+
+#: src/mkmaze.c:318
+msgid "Couldn't place lregion type %d!"
+msgstr ""
+
+#: src/sp_lev.c:1441
+msgid "create_door: Can't find a proper place!"
+msgstr ""
+
+#: src/sp_lev.c:1681
+msgid "create_monster: can't find feature \"%s\""
+msgstr ""
+
+#: src/sp_lev.c:1695
+msgid "create_monster: can't find object \"%s\""
+msgstr ""
+
+#: src/sp_lev.c:1733
+msgid "create_monster: invalid %s (\"%s\")"
+msgstr ""
+
+#: src/sp_lev.c:1671
+msgid "create_monster: mon has an appearance, \"%s\", but no type"
+msgstr ""
+
+#: src/sp_lev.c:1774
+msgid "create_monster: unimplemented mon appear type [%d,\"%s\"]"
+msgstr ""
+
+#: src/sp_lev.c:1944
+msgid "create_object: no container"
+msgstr ""
+
+#: src/sp_lev.c:1978
+msgid "create_object: too deeply nested containers."
+msgstr ""
+
+#: src/do_wear.c:1553
+msgid "cursed without otmp"
+msgstr ""
+
+#: src/worm.c:347
+msgid "cutworm: no segment at (%d,%d)"
+msgstr ""
+
+#: src/rnd.c:185
+msgid "d(%d,%d) attempted"
+msgstr ""
+
+#: src/mon.c:69
+msgid "dead monster on %s; %s at <%d,%d>"
+msgstr ""
+
+#: src/cmd.c:3036
+msgid "dead without dying?"
+msgstr ""
+
+#: src/end.c:2177
+msgid "dealloc_killer (#%d) not on list"
+msgstr ""
+
+#: src/light.c:125
+msgid "del_light_source: not found type=%d, id=%s"
+msgstr ""
+
+#: src/dig.c:583
+msgid "digactualhole: can't dig %s on this level."
+msgstr ""
+
+#: src/steed.c:584
+msgid "Dismounting: can't place former steed on map."
+msgstr ""
+
+#: src/display.c:420
+msgid "display_monster:  bad m_ap_type value [ = %d ]"
+msgstr ""
+
+#: src/display.c:527
+msgid "display_warning did not match warning type?"
+msgstr ""
+
+#: src/mon.c:1630
+msgid "dmonsfree: %d removed doesn't match %d pending on %s"
+msgstr ""
+
+#: src/do_wear.c:2501
+msgid "do_takeoff: taking off %lx"
+msgstr ""
+
+#: src/shk.c:3327
+msgid "doinvbill: no shopkeeper?"
+msgstr ""
+
+#: src/invent.c:1116
+msgid "don't have amulet?"
+msgstr ""
+
+#: src/invent.c:1120
+msgid "don't have candelabrum?"
+msgstr ""
+
+#: src/invent.c:1133
+msgid "don't have quest artifact?"
+msgstr ""
+
+#: src/invent.c:1124
+msgid "don't have silver bell?"
+msgstr ""
+
+#: src/invent.c:1128
+msgid "don't have the book?"
+msgstr ""
+
+#: src/mklev.c:1252
+msgid "DOORMAX exceeded?"
+msgstr ""
+
+#: src/shk.c:1428
+msgid "dopay: not to shopkeeper?"
+msgstr ""
+
+#: src/trap.c:1295
+msgid "dotrap: %ss cannot exist on this level."
+msgstr ""
+
+#: src/extralev.c:80
+msgid "down door from %d,%d going nowhere?"
+msgstr ""
+
+#: src/extralev.c:116
+#: src/extralev.c:74
+msgid "down: no wall at %d,%d?"
+msgstr ""
+
+#: src/timeout.c:942
+msgid "egg hatched where? (%d)"
+msgstr ""
+
+#: src/timeout.c:1539
+msgid "end_burn: obj %s not lit"
+msgstr ""
+
+#: src/timeout.c:1553
+msgid "end_burn: obj %s not timed!"
+msgstr ""
+
+#: src/engrave.c:1260
+msgid "Error in del_engr?"
+msgstr ""
+
+#: src/files.c:3880
+msgid "Error writing %s; recovery failed (player name size).\n"
+msgstr ""
+
+#: src/files.c:3890
+msgid "Error writing %s; recovery failed (player name).\n"
+msgstr ""
+
+#: src/vault.c:247
+msgid "escaping vault without guard?"
+msgstr ""
+
+#: src/cmd.c:588
+msgid "Exceeded %d extended commands in doextcmd() menu; 'extmenu' disabled."
+msgstr ""
+
+#: src/explode.c:62
+msgid "explode: wand has bad zap type (%d)."
+msgstr ""
+
+#: src/explode.c:814
+msgid "exploding unlit oil"
+msgstr ""
+
+#: src/explode.c:158
+msgid "explosion base type %d?"
+msgstr ""
+
+#: src/explode.c:202
+#: src/explode.c:243
+msgid "explosion type %d?"
+msgstr ""
+
+#: src/mail.c:517
+msgid "fake mail #%d has undefined substitution"
+msgstr ""
+
+#: src/vision.c:1707
+msgid "far_shadow:  bad value"
+msgstr ""
+
+#: src/apply.c:2197
+msgid "figurine came to life where? (%d)"
+msgstr ""
+
+#: src/shk.c:1926
+msgid "finish_paybill: no location"
+msgstr ""
+
+#: src/pray.c:461
+msgid "fix_worst_trouble: couldn't cure hands."
+msgstr ""
+
+#: src/pray.c:494
+msgid "fix_worst_trouble: nothing to uncurse."
+msgstr ""
+
+#: src/read.c:846
+msgid "forget_levels: bad percent %d"
+msgstr ""
+
+#: src/read.c:774
+msgid "forget_objects: bad percent %d"
+msgstr ""
+
+#: src/files.c:399
+msgid "fqname too long: %s + %s"
+msgstr ""
+
+#: src/polyself.c:1335
+msgid "gaze attack %d?"
+msgstr ""
+
+#: src/mhitu.c:2341
+msgid "Gaze attack %d?"
+msgstr ""
+
+#: src/mon.c:75
+msgid "genocided %s in play (%s)"
+msgstr ""
+
+#: src/sp_lev.c:928
+msgid "get_location:  (%d,%d) out of bounds"
+msgstr ""
+
+#: src/sp_lev.c:917
+msgid "get_location:  can't find a place!"
+msgstr ""
+
+#: src/invent.c:1503
+msgid "getobj: inventory overflow"
+msgstr ""
+
+#: src/shk.c:4853
+msgid "globby_bill_fixup called for non-globby object"
+msgstr ""
+
+#: src/do.c:1445
+msgid "goto_level: returning to discarded level?"
+msgstr ""
+
+#: src/mon.c:82
+msgid "guard without egd (%s)"
+msgstr ""
+
+#: src/mhitu.c:520
+msgid "hiding under nothing?"
+msgstr ""
+
+#: src/uhitm.c:541
+msgid "hitum_cleave: unknown target direction [%d,%d,%d]?"
+msgstr ""
+
+#: src/botl.c:2873
+msgid "hl->behavior=absolute, rel error"
+msgstr ""
+
+#: src/botl.c:2885
+msgid "hl->behavior=condition, rel error"
+msgstr ""
+
+#: src/botl.c:2857
+msgid "hl->behavior=percentage, rel error"
+msgstr ""
+
+#: src/botl.c:2879
+msgid "hl->behavior=textmatch, rel or textmatch error"
+msgstr ""
+
+#: src/botl.c:2867
+msgid "hl->behavior=updown, rel error"
+msgstr ""
+
+#: src/files.c:1934
+msgid "I give up.  Sorry."
+msgstr ""
+
+#: src/options.c:1234
+msgid "iflags.opt_booldup already on (memory leak)"
+msgstr ""
+
+#: src/options.c:1241
+msgid "iflags.opt_compdup already on (memory leak)"
+msgstr ""
+
+#: src/mon.c:55
+msgid "illegal mon data %s; mnum=%d (%s)"
+msgstr ""
+
+#: src/botl.c:1014
+msgid "init_blstats called more than once."
+msgstr ""
+
+#: src/mkobj.c:704
+msgid "invalid alteration type (%d)"
+msgstr ""
+
+#: src/trap.c:188
+msgid "Invalid erosion type in erode_obj"
+msgstr ""
+
+#: src/files.c:389
+msgid "Invalid fqn_filename_buffer specified: %d"
+msgstr ""
+
+#: src/shk.c:3304
+msgid "invalid sell response"
+msgstr ""
+
+#: src/apply.c:773
+msgid "leash in use isn't attached to anything?"
+msgstr ""
+
+#: src/objnam.c:1221
+msgid "leashed monster not on this level"
+msgstr ""
+
+#: src/extralev.c:283
+msgid "left end of %d, %d never connected?"
+msgstr ""
+
+#: src/extralev.c:138
+msgid "left: no wall at %d,%d?"
+msgstr ""
+
+#: src/do.c:1225
+msgid "level arrival collision: %s?"
+msgstr ""
+
+#: src/sp_lev.c:5359
+msgid "Level script is taking too much time, stopping."
+msgstr ""
+
+#: src/questpgr.c:138
+msgid "load_qtlist: cannot load quest text."
+msgstr ""
+
+#: src/pager.c:390
+msgid "lookat: unknown method of seeing monster"
+msgstr ""
+
+#: src/lock.c:1053
+msgid "magic (%d) attempted on door."
+msgstr ""
+
+#: src/makemon.c:1141
+msgid "makemon trying to create a monster at <%d,%d>?"
+msgstr ""
+
+#: src/mkobj.c:1537
+msgid "making corpstat type %d"
+msgstr ""
+
+#: src/mon.c:134
+msgid "map mon (%s) at <%d,%d> is found at <%d,%d>?"
+msgstr ""
+
+#: src/mon.c:127
+msgid "map mon (%s) at <%d,%d> not in fmon list!"
+msgstr ""
+
+#: src/light.c:462
+msgid "maybe_write_ls: bad type (%d) [range=%d]"
+msgstr ""
+
+#: src/light.c:450
+msgid "maybe_write_ls: no id! [range=%d]"
+msgstr ""
+
+#: src/mcastu.c:725
+msgid "mcastu: invalid clerical spell (%d)"
+msgstr ""
+
+#: src/mcastu.c:513
+msgid "mcastu: invalid magic spell (%d)"
+msgstr ""
+
+#: src/dig.c:1300
+msgid "mdig_tunnel:  %s at (%d,%d) is undiggable"
+msgstr ""
+
+#: src/zap.c:4352
+msgid "melt_ice: no pool?"
+msgstr ""
+
+#: src/invent.c:762
+msgid "merging strangely worn items (%lx)"
+msgstr ""
+
+#: src/mon.c:84
+msgid "minion without emin (%s)"
+msgstr ""
+
+#: src/trap.c:2480
+msgid "mintrap: %ss cannot exist on this level."
+msgstr ""
+
+#: src/dig.c:86
+msgid "mkcavepos called with dist %d"
+msgstr ""
+
+#: src/makemon.c:1665
+msgid "mkclass called with bad class!"
+msgstr ""
+
+#: src/makemon.c:1678
+msgid "mkclass found no class %d monsters"
+msgstr ""
+
+#: src/mklev.c:1831
+msgid "mkinvpos called with dist %d"
+msgstr ""
+
+#: src/mklev.c:1540
+msgid "mkstairs:  bogus stair attempt at <%d,%d>"
+msgstr ""
+
+#: src/teleport.c:1408
+msgid "mlevel_tele_trap: unexpected trap type (%d)"
+msgstr ""
+
+#: src/do.c:1244
+msgid "mnexto failed"
+msgstr ""
+
+#: src/mon.c:113
+msgid "mon (%s) at <%d,%d> is not there!"
+msgstr ""
+
+#: src/mon.c:104
+msgid "mon (%s) claims to be at <%d,%d>?"
+msgstr ""
+
+#: src/dog.c:413
+msgid "mon_arrive: no corresponding portal?"
+msgstr ""
+
+#: src/steal.c:494
+msgid "monster (%s) taking or picking up attached %s (%s)?"
+msgstr ""
+
+#: src/steal.c:490
+msgid "monster (%s) taking or picking up nothing?"
+msgstr ""
+
+#: src/mon.c:61
+msgid "monster mnum=%d, monsndx=%d (%s)"
+msgstr ""
+
+#: src/mcastu.c:863
+msgid "Monster spell %d cast"
+msgstr ""
+
+#: src/mthrowu.c:598
+msgid "monster throwing egg type %d"
+msgstr ""
+
+#: src/sp_lev.c:3087
+msgid "MONSTER with unknown variable param type!"
+msgstr ""
+
+#: src/mkmaze.c:1427
+msgid "movebubbles: bad pos (%d,%d)"
+msgstr ""
+
+#: src/mkmaze.c:1930
+msgid "mv_bubble: unknown bubble contents"
+msgstr ""
+
+#: src/mkobj.c:2323
+msgid "mydogs sanity [not empty]"
+msgstr ""
+
+#: src/mkmaze.c:1761
+msgid "n too large (mk_bubble)"
+msgstr ""
+
+#: src/o_init.c:396
+msgid "named object not in disco"
+msgstr ""
+
+#: src/shk.c:2768
+msgid "Negative quantity on bill??"
+msgstr ""
+
+#: src/light.c:64
+msgid "new_light_source:  illegal range %d"
+msgstr ""
+
+#: src/dungeon.c:1503
+msgid "No boundary for Wizard's Tower?"
+msgstr ""
+
+#: src/files.c:4281
+msgid "No end-of-game disclosure file (%s)."
+msgstr ""
+
+#: src/muse.c:666
+msgid "No need for unicorn horn?"
+msgstr ""
+
+#: src/restore.c:521
+msgid "no old fruit?"
+msgstr ""
+
+#: src/hacklib.c:467
+msgid "no output buf in stripchars"
+msgstr ""
+
+#: src/pray.c:2200
+msgid "No random god name?"
+msgstr ""
+
+#: src/mcastu.c:668
+msgid "no reason for monster to cast blindness spell?"
+msgstr ""
+
+#: src/mcastu.c:472
+msgid "no reason for monster to cast disappear spell?"
+msgstr ""
+
+#: src/mkmap.c:325
+msgid "No start/end room loc in join_map."
+msgstr ""
+
+#: src/files.c:4186
+msgid "No system configuration file."
+msgstr ""
+
+#: src/windows.c:279
+msgid "No window types supported?"
+msgstr ""
+
+#: src/end.c:2267
+msgid "no words in list"
+msgstr ""
+
+#: src/files.c:1877
+msgid "No write permission to lock %s!"
+msgstr ""
+
+#: src/do.c:55
+msgid "Not a boulder?"
+msgstr ""
+
+#: src/vault.c:300
+msgid "Not a single corridor on this level?"
+msgstr ""
+
+#: src/o_init.c:63
+msgid "Not enough gems? - first=%d j=%d LAST_GEM=%d"
+msgstr ""
+
+#: src/files.c:4181
+msgid "NOTE: The %s above is missing or inaccessible!"
+msgstr ""
+
+#: src/shk.c:982
+msgid "obfree: deleting worn obj (%d: %ld)"
+msgstr ""
+
+#: src/shk.c:948
+msgid "obfree: not on bill, %s = (%d,%d,%ld,%d) (%d,%d,%ld,%d)??"
+msgstr ""
+
+#: src/mkobj.c:2879
+msgid "obj_absorb: not called with two actual objects"
+msgstr ""
+
+#: src/light.c:687
+msgid "obj_adjust_light_radius: can't find %s"
+msgstr ""
+
+#: src/mkobj.c:2930
+msgid "obj_meld: not called with two actual objects"
+msgstr ""
+
+#: src/mkobj.c:2779
+msgid "obj_nexto: wasn't given an object to check"
+msgstr ""
+
+#: src/sp_lev.c:3239
+msgid "OBJECT with unknown variable param type!"
+msgstr ""
+
+#: src/detect.c:598
+msgid "object_detect:  illegal class %d"
+msgstr ""
+
+#: src/options.c:4266
+msgid "oc_to_str:  illegal object class %d"
+msgstr ""
+
+#: src/makemon.c:617
+msgid "odd mercenary %d?"
+msgstr ""
+
+#: src/sp_lev.c:444
+msgid "opvar_free(), %s"
+msgstr ""
+
+#: src/shk.c:1594
+msgid "Paid object on bill??"
+msgstr ""
+
+#: src/eat.c:3230
+msgid "partly eaten food (%ld) more nutritious than untouched food (%ld)"
+msgstr ""
+
+#: src/shk.c:112
+msgid "Paying without %s money?"
+msgstr ""
+
+#: src/botl.c:1237
+msgid "percentage: bad istat pointer %s, %s"
+msgstr ""
+
+#: src/files.c:1865
+msgid "Perhaps there is an old %s around?"
+msgstr ""
+
+#: src/mon.c:87
+msgid "pet without edog (%s)"
+msgstr ""
+
+#: src/lock.c:355
+msgid "picking lock with object %d?"
+msgstr ""
+
+#: src/pickup.c:1495
+msgid "pickup_object: count %ld > quan %ld?"
+msgstr ""
+
+#: src/worm.c:657
+msgid "place_worm_tail_randomly: wormno is set without a tail!"
+msgstr ""
+
+#: src/ball.c:275
+msgid "Placebc collision at %s:%d, already placed by %s:%d"
+msgstr ""
+
+#: src/steed.c:762
+msgid "placing %s onto map, mstate:%lx, on %s?"
+msgstr ""
+
+#: src/steed.c:771
+msgid "placing %s over %s at <%d,%d>, mstates:%lx %lx on %s?"
+msgstr ""
+
+#: src/worm.c:578
+msgid "placing worm seg <%i,%i> over another mon"
+msgstr ""
+
+#: src/topten.c:1139
+msgid "Player types are: [-p role] [-r race]"
+msgstr ""
+
+#: src/objnam.c:2449
+msgid "plural of null?"
+msgstr ""
+
+#: src/files.c:4294
+msgid "portable_device_paths (set in sysconf):"
+msgstr ""
+
+#: src/mkmaze.c:1338
+msgid "portal on top of portal??"
+msgstr ""
+
+#: src/objnam.c:73
+msgid "PREFIX too short (for %d)."
+msgstr ""
+
+#: src/mon.c:80
+msgid "priest without epri (%s)"
+msgstr ""
+
+#: src/topten.c:1022
+msgid "prscore: bad arguments (%d)"
+msgstr ""
+
+#: src/ball.c:1050
+msgid "Punished without %s%s%s?"
+msgstr ""
+
+#: src/cmd.c:2417
+msgid "Punished without uball?"
+msgstr ""
+
+#: src/questpgr.c:643
+msgid "qt_pager: message %d not found."
+msgstr ""
+
+#: src/pickup.c:1124
+msgid "query_category: too many categories"
+msgstr ""
+
+#: src/quest.c:208
+msgid "quest portal already gone?"
+msgstr ""
+
+#: src/quest.c:418
+msgid "quest_chat: Unknown quest character %s."
+msgstr ""
+
+#: src/questpgr.c:170
+msgid "quest_info(%d)"
+msgstr ""
+
+#: src/eat.c:290
+msgid "recalc_wt without piece"
+msgstr ""
+
+#: src/sp_lev.c:4679
+msgid "region as subroom"
+msgstr ""
+
+#: src/mkmap.c:404
+msgid "regular room in joined map"
+msgstr ""
+
+#: src/light.c:428
+msgid "relink_light_sources: bad type (%d)"
+msgstr ""
+
+#: src/light.c:425
+msgid "relink_light_sources: cant find %c_id %d"
+msgstr ""
+
+#: src/light.c:414
+msgid "relink_light_sources: no id mapping"
+msgstr ""
+
+#: src/steal.c:195
+msgid "Removing embedded scales?"
+msgstr ""
+
+#: src/do_wear.c:1495
+msgid "removing strange accessory?"
+msgstr ""
+
+#: src/objnam.c:402
+msgid "reorder_fruit: duplicate fruit index (%d)"
+msgstr ""
+
+#: src/objnam.c:399
+msgid "reorder_fruit: fruit index (%d) out of range"
+msgstr ""
+
+#: src/mon.c:1646
+msgid "replmon: minvent inconsistency"
+msgstr ""
+
+#: src/end.c:615
+msgid "Report error to \"%s\"%s"
+msgstr ""
+
+#: src/end.c:598
+msgid "Report the following error to \"%s\" or at \"%s\"."
+msgstr ""
+
+#: src/restore.c:918
+msgid "restgamestate: lost ball & chain"
+msgstr ""
+
+#: src/restore.c:475
+msgid "Restmonchn: error reading monchn."
+msgstr ""
+
+#: src/restore.c:342
+msgid "Restobjchn: error reading objchn."
+msgstr ""
+
+#: src/mkmaze.c:1607
+msgid "restore_waterlevel: returning to %s?"
+msgstr ""
+
+#: src/do.c:1858
+msgid "revive_corpse: lost corpse @ %d"
+msgstr ""
+
+#: src/extralev.c:122
+msgid "right door from %d,%d going nowhere?"
+msgstr ""
+
+#: src/mhitu.c:2551
+msgid "ring replacement"
+msgstr ""
+
+#: src/teleport.c:1270
+msgid "rloc(): couldn't relocate monster"
+msgstr ""
+
+#: src/pray.c:2197
+msgid "rn2 broken in halu_gname?!?"
+msgstr ""
+
+#: src/rnd.c:106
+msgid "rn2(%d) attempted"
+msgstr ""
+
+#: src/rnd.c:168
+msgid "rnd(%d) attempted"
+msgstr ""
+
+#: src/makemon.c:1597
+msgid "rndmonst: bad `mndx' [#%d]"
+msgstr ""
+
+#: src/rnd.c:126
+msgid "rnl(%d) attempted"
+msgstr ""
+
+#: src/role.c:1989
+msgid "role_menu_extra: bad arg (%d)"
+msgstr ""
+
+#: src/objnam.c:4406
+msgid "safe_qbuf: filler too long (%u + %u + %u characters)."
+msgstr ""
+
+#: src/objnam.c:4401
+msgid "safe_qbuf: prefix too long (%u characters)."
+msgstr ""
+
+#: src/objnam.c:4403
+msgid "safe_qbuf: suffix too long (%u + %u characters)."
+msgstr ""
+
+#: src/shk.c:740
+msgid "same_price: object wasn't on any bill!"
+msgstr ""
+
+#: src/light.c:346
+msgid "save_light_sources: bad type (%d) [range=%d]"
+msgstr ""
+
+#: src/light.c:334
+msgid "save_light_sources: no id! [range=%d]"
+msgstr ""
+
+#: src/explode.c:620
+msgid "scattered object <%d,%d> not at scatter site <%d,%d>"
+msgstr ""
+
+#: src/do_wear.c:2432
+msgid "select_off: %s???"
+msgstr ""
+
+#: src/options.c:6663
+msgid "set_option_mod_status: status out of range %d."
+msgstr ""
+
+#: src/options.c:6697
+msgid "set_wc_option_mod_status: status out of range %d."
+msgstr ""
+
+#: src/options.c:6755
+msgid "set_wc2_option_mod_status: status out of range %d."
+msgstr ""
+
+#: src/mkmaze.c:1673
+msgid "set_wportal(): no portal!"
+msgstr ""
+
+#: src/worn.c:66
+msgid "Setworn: mask = %ld."
+msgstr ""
+
+#: src/mon.c:78
+msgid "shk without eshk (%s)"
+msgstr ""
+
+#: src/shknam.c:848
+msgid "shkname: \"%s\" is not a shopkeeper."
+msgstr ""
+
+#: src/shk.c:1521
+msgid "Shopkeeper administration out of order."
+msgstr ""
+
+#: src/end.c:692
+msgid "should_query_disclose_option: bad category %c"
+msgstr ""
+
+#: src/end.c:665
+msgid "should_query_disclose_option: bad disclosure index %d %c"
+msgstr ""
+
+#: src/display.c:1558
+msgid "show_glyph:  bad glyph %d [max %d] at (%d,%d)."
+msgstr ""
+
+#: src/display.c:1552
+msgid "show_glyph:  bad pos %d %d with glyph %d [%s %d]."
+msgstr ""
+
+#: src/pickup.c:82
+msgid "simple_look(null)"
+msgstr ""
+
+#: src/objnam.c:2627
+msgid "singular of null?"
+msgstr ""
+
+#: src/weapon.c:1649
+msgid "skill_init: curr > max: %s"
+msgstr ""
+
+#: src/o_init.c:280
+msgid "snow boots not found?"
+msgstr ""
+
+#: src/trap.c:2738
+msgid "Some monster encountered a strange trap of type %d."
+msgstr ""
+
+#: src/files.c:1845
+msgid "Some other process has an unnatural grip on %s."
+msgstr ""
+
+#: src/spell.c:1888
+msgid "Spell %s already known."
+msgstr ""
+
+#: src/mcastu.c:220
+msgid "spellcasting monster found you and doesn't know it?"
+msgstr ""
+
+#: src/sp_lev.c:317
+msgid "splev_stack_pop: empty stack?"
+msgstr ""
+
+#: src/shk.c:2759
+msgid "splitbill: no resident shopkeeper??"
+msgstr ""
+
+#: src/shk.c:2764
+msgid "splitbill: not on bill?"
+msgstr ""
+
+#: src/sp_lev.c:5623
+msgid "spo_cmp: no values in stack"
+msgstr ""
+
+#: src/sp_lev.c:5627
+msgid "spo_cmp: trying to compare differing datatypes"
+msgstr ""
+
+#: src/sp_lev.c:5083
+msgid "spo_conditional_jump: illegal opcode"
+msgstr ""
+
+#: src/sp_lev.c:4327
+msgid "spo_feature called with wrong opcode %i."
+msgstr ""
+
+#: src/sp_lev.c:4755
+msgid "spo_mazewalk: Bad MAZEWALK direction"
+msgstr ""
+
+#: src/options.c:908
+msgid "Status highlighting not supported for %s interface."
+msgstr ""
+
+#: src/steal.c:310
+msgid "Steal fails!"
+msgstr ""
+
+#: src/steal.c:157
+msgid "stealarm(): dead monster stealing"
+msgstr ""
+
+#: src/mon.c:110
+msgid "steed (%s) claims to be at <%d,%d>?"
+msgstr ""
+
+#: src/mon.c:130
+msgid "steed (%s) is on the map at <%d,%d>!"
+msgstr ""
+
+#: src/trap.c:1604
+msgid "steed hit by non-existent arrow?"
+msgstr ""
+
+#: src/trap.c:1612
+msgid "steed hit by non-existent dart?"
+msgstr ""
+
+#: src/dog.c:631
+msgid "steed left behind?"
+msgstr ""
+
+#: src/uhitm.c:2696
+msgid "strange attack of yours (%d)"
+msgstr ""
+
+#: src/display.c:1807
+msgid "Strange db-under: %d"
+msgstr ""
+
+#: src/rumors.c:136
+msgid "strange truth value for rumor"
+msgstr ""
+
+#: src/do_wear.c:1011
+msgid "Strange... I didn't know you had that ring."
+msgstr ""
+
+#: src/do_wear.c:2275
+msgid "stuck_ring: neither left nor right?"
+msgstr ""
+
+#: src/shk.c:2824
+msgid "sub_one_frombill: unpaid object not on bill"
+msgstr ""
+
+#: src/display.c:1838
+msgid "swallow_to_glyph: bad swallow location"
+msgstr ""
+
+#: src/mhitu.c:233
+#: src/polyself.c:1206
+msgid "Swallower has no engulfing attack?"
+msgstr ""
+
+#: src/files.c:2236
+msgid "Syntax error in %s"
+msgstr ""
+
+#: src/do_wear.c:2582
+msgid "take_off: taking off %lx"
+msgstr ""
+
+#: src/do_wear.c:1613
+msgid "Taking off unknown armor (%d: %d), delay %d"
+msgstr ""
+
+#: src/do_wear.c:1653
+msgid "Taking off unknown armor (%d: %d), no delay"
+msgstr ""
+
+#: src/files.c:4203
+msgid "The loadable symbols file%s:"
+msgstr ""
+
+#: src/sit.c:273
+msgid "throne effect"
+msgstr ""
+
+#: src/timeout.c:1852
+msgid "timer sanity: untimed obj %s, timer %ld"
+msgstr ""
+
+#: src/apply.c:1906
+msgid "Tinning failed."
+msgstr ""
+
+#: src/end.c:609
+msgid "To report this error, %s%s"
+msgstr ""
+
+#: src/end.c:612
+msgid "To report this error, contact %s%s"
+msgstr ""
+
+#: src/cmd.c:666
+msgid "Too many chars (%d) entered in extcmd_via_menu()"
+msgstr ""
+
+#: src/sp_lev.c:4636
+msgid "Too many rooms on new level!"
+msgstr ""
+
+#: src/spell.c:1885
+#: src/spell.c:381
+msgid "Too many spells memorized!"
+msgstr ""
+
+#: src/spell.c:1298
+msgid "tport_spell: spellbook full"
+msgstr ""
+
+#: src/light.c:234
+msgid "transient light %s %s is not %s?"
+msgstr ""
+
+#: src/hack.c:1330
+msgid "trapmove: stuck in unknown trap? (%d)"
+msgstr ""
+
+#: src/mkroom.c:84
+msgid "Tried to make a room of type %d."
+msgstr ""
+
+#: src/files.c:1801
+msgid "TRIED TO NEST LOCKS"
+msgstr ""
+
+#: src/steal.c:449
+msgid "Tried to steal a strange worn thing. [%d]"
+msgstr ""
+
+#: src/mklev.c:876
+msgid "tryct overflow4"
+msgstr ""
+
+#: src/steed.c:754
+msgid "trying to place %s at <%d,%d> mstate:%lx on %s"
+msgstr ""
+
+#: src/dungeon.c:2034
+msgid "Two branches on the same level?"
+msgstr ""
+
+#: src/ball.c:1076
+msgid "uball: type %d (%s), where %d, wornmask=0x%08lx"
+msgstr ""
+
+#: src/ball.c:1089
+msgid "uchain: type %d (%s), where %d, wornmask=0x%08lx"
+msgstr ""
+
+#: src/files.c:4017
+msgid "Unable to open SYSCF_FILE.\n"
+msgstr ""
+
+#: src/files.c:1514
+msgid "Unable to uncompress %s"
+msgstr ""
+
+#: src/minion.c:183
+msgid "unaligned player?"
+msgstr ""
+
+#: src/end.c:2029
+msgid "unique creature '%d: %s' genocided?"
+msgstr ""
+
+#: src/pray.c:2129
+msgid "unknown alignment."
+msgstr ""
+
+#: win/headless/winheadless.c:981
+msgid "Unknown extended command '%s'."
+msgstr ""
+
+#: src/were.c:102
+msgid "unknown lycanthrope %s."
+msgstr ""
+
+#: src/sp_lev.c:424
+msgid "Unknown opvar value type (%i)!"
+msgstr ""
+
+#: src/sp_lev.c:472
+msgid "Unknown push value type (%i)!"
+msgstr ""
+
+#: src/spell.c:1203
+msgid "Unknown spell %d attempted."
+msgstr ""
+
+#: src/spell.c:750
+msgid "Unknown spell skill, %d;"
+msgstr ""
+
+#: src/spell.c:520
+msgid "Unknown spellbook level %d, book %d;"
+msgstr ""
+
+#: src/dothrow.c:1581
+msgid "Unknown type of gloves (%d)"
+msgstr ""
+
+#: src/shk.c:2461
+msgid "unpaid_cost: object wasn't on any bill."
+msgstr ""
+
+#: src/ball.c:213
+msgid "unplacebc denied, restriction in place"
+msgstr ""
+
+#: src/ball.c:316
+msgid "Unplacebc_and_covet_placebc denied to %s:%d, restricted by %s:%d"
+msgstr ""
+
+#: src/ball.c:225
+msgid "unplacebc_and_covet_placebc denied, already restricted"
+msgstr ""
+
+#: src/sp_lev.c:2774
+msgid "Unrecognized level init style."
+msgstr ""
+
+#: src/extralev.c:285
+msgid "up end of %d, %d never connected?"
+msgstr ""
+
+#: src/extralev.c:96
+msgid "up: no wall at %d,%d?"
+msgstr ""
+
+#: src/topten.c:1136
+msgid "Usage: %s -s [-v] <playertypes> [maxrank] [playernames]"
+msgstr ""
+
+#: src/polyself.c:1581
+msgid "uunstick: no ustuck?"
+msgstr ""
+
+#: src/vault.c:670
+msgid "vault guard: no gold at hero's feet?"
+msgstr ""
+
+#: src/files.c:1856
+#: src/files.c:1928
+msgid "Waiting for access to %s.  (%d retries left)."
+msgstr ""
+
+#: src/files.c:1839
+msgid "Waiting for release of fcntl lock on %s.  (%d retries left.)"
+msgstr ""
+
+#: src/display.c:2604
+msgid "wall_angle: bottom of crwall check"
+msgstr ""
+
+#: src/display.c:2642
+msgid "wall_angle: unexpected wall type %d"
+msgstr ""
+
+#: src/display.c:2518
+msgid "wall_angle: unknown %s mode %d"
+msgstr ""
+
+#: src/display.c:2635
+msgid "wall_angle: unknown crosswall mode"
+msgstr ""
+
+#: src/display.c:2499
+msgid "wall_angle: unknown hwall mode %d"
+msgstr ""
+
+#: src/display.c:2455
+msgid "wall_angle: unknown T wall mode %d"
+msgstr ""
+
+#: src/display.c:2479
+msgid "wall_angle: unknown vwall mode %d"
+msgstr ""
+
+#: src/files.c:3689
+msgid "Warning: cannot write record '%s'"
+msgstr ""
+
+#: src/files.c:3632
+msgid "Warning: cannot write scoreboard file '%s'"
+msgstr ""
+
+#: src/files.c:3618
+msgid "Warning: scoreboard file '%s' is not in stream_lf format"
+msgstr ""
+
+#: src/weapon.c:789
+msgid "weapon_check %d for %s?"
+msgstr ""
+
+#: src/weapon.c:1510
+msgid "weapon_dam_bonus: bad skill %d"
+msgstr ""
+
+#: src/polyself.c:1284
+msgid "Webbing over trap type %d?"
+msgstr ""
+
+#: src/zap.c:3067
+msgid "weffects: unexpected spell or wand"
+msgstr ""
+
+#: src/artifact.c:830
+msgid "Weird weapon special attack."
+msgstr ""
+
+#: src/potion.c:1155
+msgid "What a funny potion! (%u)"
+msgstr ""
+
+#: src/music.c:672
+msgid "What a weird instrument (%d)!"
+msgstr ""
+
+#: src/zap.c:2078
+#: src/zap.c:456
+msgid "What an interesting effect (%d)"
+msgstr ""
+
+#: src/read.c:1719
+msgid "What weird effect is this? (%u)"
+msgstr ""
+
+#: src/topten.c:1174
+msgid "What weird role is this? (%s)"
+msgstr ""
+
+#: src/ball.c:121
+msgid "Where are your ball and chain?"
+msgstr ""
+
+#: src/windows.c:346
+msgid "Window processor %s not recognized.  Choices are:"
+msgstr ""
+
+#: src/worm.c:819
+msgid "worm_cross checking for non-adjacent location?"
+msgstr ""
+
+#: src/light.c:541
+msgid "write_ls: bad type (%d)"
+msgstr ""
+
+#: src/light.c:532
+msgid "write_ls: can't find mon #%u!"
+msgstr ""
+
+#: src/light.c:525
+msgid "write_ls: can't find obj #%u!"
+msgstr ""
+
+#: src/write.c:55
+msgid "You can't write such a weird scroll!"
+msgstr ""
+
+#: src/trap.c:1561
+msgid "You hit a trap of type %u"
+msgstr ""
+
+#: src/engrave.c:874
+msgid "You're engraving with an illegal object!"
+msgstr ""
+
+#: src/files.c:4310
+msgid "Your personal configuration file%s:"
+msgstr ""
+
+#: src/display.c:1863
+msgid "zapdir_to_glyph:  illegal beam type"
+msgstr ""
+
+#: src/zap.c:2591
+msgid "zapyourself: object %d used?"
+msgstr ""
+
+#: src/shk.c:2771
+msgid "Zero quantity on bill??"
+msgstr ""

@@ -374,11 +374,11 @@ struct obj *corpse;
     if (fd >= 0) {
         (void) nhclose(fd);
         if (wizard) {
-            if (yn("Bones file already exists.  Replace it?") == 'y') {
+            if (yn(_("Bones file already exists.  Replace it?")) == 'y') {
                 if (delete_bonesfile(&u.uz))
                     goto make_bones;
                 else
-                    pline("Cannot unlink old bones.");
+                    pline(_("Cannot unlink old bones."));
             }
         }
         /* compression can change the file's name, so must
@@ -553,7 +553,7 @@ struct obj *corpse;
         bflush(fd);
         if (bytes_counted > freediskspace(bones)) { /* not enough room */
             if (wizard)
-                pline("Insufficient space to create bones file.");
+                pline(_("Insufficient space to create bones file."));
             (void) nhclose(fd);
             cancel_bonesfile();
             return;
@@ -598,12 +598,12 @@ getbones()
 
     if (validate(fd, bones) != 0) {
         if (!wizard)
-            pline("Discarding unusable bones; no need to panic...");
+            pline(_("Discarding unusable bones; no need to panic..."));
         ok = FALSE;
     } else {
         ok = TRUE;
         if (wizard) {
-            if (yn("Get bones?") == 'n') {
+            if (yn(_("Get bones?")) == 'n') {
                 (void) nhclose(fd);
                 compress_bonesfile();
                 return 0;
@@ -663,7 +663,7 @@ getbones()
     u.uroleplay.numbones++;
 
     if (wizard) {
-        if (yn("Unlink bones?") == 'n') {
+        if (yn(_("Unlink bones?")) == 'n') {
             compress_bonesfile();
             return ok;
         }
@@ -675,7 +675,7 @@ getbones()
          * So no point in a mysterious message for a normal event
          * -- just generate a new level for those N-1 games.
          */
-        /* pline("Cannot unlink bones."); */
+        /* pline(_("Cannot unlink bones.")); */
         return 0;
     }
     return ok;

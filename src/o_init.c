@@ -453,7 +453,7 @@ dodiscovered() /* free after Robert Viduya */
     winid tmpwin;
 
     tmpwin = create_nhwindow(NHW_MENU);
-    putstr(tmpwin, 0, "Discoveries");
+    putstr(tmpwin, 0, _("Discoveries"));
     putstr(tmpwin, 0, "");
 
     /* gather "unique objects" into a pseudo-class; note that they'll
@@ -461,7 +461,7 @@ dodiscovered() /* free after Robert Viduya */
     for (i = dis = 0; i < SIZE(uniq_objs); i++)
         if (objects[uniq_objs[i]].oc_name_known) {
             if (!dis++)
-                putstr(tmpwin, iflags.menu_headings, "Unique items");
+                putstr(tmpwin, iflags.menu_headings, _("Unique items"));
             Sprintf(buf, "  %s", OBJ_NAME(objects[uniq_objs[i]]));
             putstr(tmpwin, 0, buf);
             ++ct;
@@ -493,7 +493,7 @@ dodiscovered() /* free after Robert Viduya */
         }
     }
     if (ct == 0) {
-        You("haven't discovered anything yet...");
+        You(_("haven't discovered anything yet..."));
     } else
         display_nhwindow(tmpwin, TRUE);
     destroy_nhwindow(tmpwin);
@@ -590,7 +590,7 @@ doclassdisco()
 
     /* there might not be anything for us to do... */
     if (!discosyms[0]) {
-        You(havent_discovered_any, "items");
+        You(_(havent_discovered_any), _("items"));
         if (tmpwin != WIN_ERR)
             destroy_nhwindow(tmpwin);
         return 0;
@@ -611,7 +611,7 @@ doclassdisco()
             }
         }
         /* get the class (via its symbol character) */
-        c = yn_function(prompt, discosyms, '\0');
+        c = yn_function(_(prompt), discosyms, '\0');
         savech(c);
         if (!c)
             clear_nhwindow(WIN_MESSAGE);
@@ -624,7 +624,7 @@ doclassdisco()
         } else {
             /* more than one choice, or menustyle:full which normally has
                an intermediate class selection menu before the final menu */
-            end_menu(tmpwin, prompt);
+            end_menu(tmpwin, _(prompt));
             i = select_menu(tmpwin, PICK_ONE, &pick_list);
             if (i > 0) {
                 c = pick_list[0].item.a_int;
@@ -652,17 +652,17 @@ doclassdisco()
                 ++ct;
             }
         if (!ct)
-            You(havent_discovered_any, unique_items);
+            You(_(havent_discovered_any), _(unique_items));
         break;
     case 'a':
         /* disp_artifact_discoveries() includes a header */
         ct = disp_artifact_discoveries(tmpwin);
         if (!ct)
-            You(havent_discovered_any, artifact_items);
+            You(_(havent_discovered_any), _(artifact_items));
         break;
     default:
         oclass = def_char_to_objclass(c);
-        Sprintf(buf, "Discovered %s", let_to_name(oclass, FALSE, FALSE));
+        Sprintf(buf, _("Discovered %s"), let_to_name(oclass, FALSE, FALSE));
         putstr(tmpwin, iflags.menu_headings, buf);
         for (i = bases[(int) oclass];
              i < NUM_OBJECTS && objects[i].oc_class == oclass; ++i) {
@@ -674,7 +674,7 @@ doclassdisco()
             }
         }
         if (!ct)
-            You(havent_discovered_any, oclass_to_name(oclass, buf));
+            You(_(havent_discovered_any), oclass_to_name(oclass, buf));
         break;
     }
     if (ct)
@@ -732,11 +732,11 @@ rename_disco()
         }
     }
     if (ct == 0) {
-        You("haven't discovered anything yet...");
+        You(_("haven't discovered anything yet..."));
     } else if (mn == 0) {
-        pline("None of your discoveries can be assigned names...");
+        pline(_("None of your discoveries can be assigned names..."));
     } else {
-        end_menu(tmpwin, "Pick an object type to name");
+        end_menu(tmpwin, _("Pick an object type to name"));
         dis = STRANGE_OBJECT;
         sl = select_menu(tmpwin, PICK_ONE, &selected);
         if (sl > 0) {

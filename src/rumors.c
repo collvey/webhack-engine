@@ -134,7 +134,7 @@ boolean exclude_cookie;
                 break;
             default:
                 impossible("strange truth value for rumor");
-                return strcpy(rumor_buf, "Oops...");
+                return strcpy(rumor_buf, _("Oops..."));
             }
             (void) dlb_fseek(rumors, beginning + tidbit, SEEK_SET);
             (void) dlb_fgets(line, sizeof line, rumors);
@@ -190,7 +190,7 @@ rumor_check()
 
     if (true_rumor_size < 0L) { /* we couldn't open RUMORFILE */
  no_rumors:
-        pline("rumors not accessible.");
+        pline(_("rumors not accessible."));
         return;
     }
 
@@ -343,8 +343,8 @@ int mechanism;
             return;
         else if (Blind) {
             if (mechanism == BY_COOKIE)
-                pline(fortune_msg);
-            pline("What a pity that you cannot read it!");
+                pline(_(fortune_msg));
+            pline(_("What a pity that you cannot read it!"));
             return;
         }
     }
@@ -354,21 +354,21 @@ int mechanism;
     switch (mechanism) {
     case BY_ORACLE:
         /* Oracle delivers the rumor */
-        pline("True to her word, the Oracle %ssays: ",
-              (!rn2(4) ? "offhandedly "
-                       : (!rn2(3) ? "casually "
-                                  : (rn2(2) ? "nonchalantly " : ""))));
+        pline(_("True to her word, the Oracle %ssays: "),
+              (!rn2(4) ? _("offhandedly ")
+                       : (!rn2(3) ? _("casually ")
+                                  : (rn2(2) ? _("nonchalantly ") : ""))));
         verbalize1(line);
         /* [WIS exercized by getrumor()] */
         return;
     case BY_COOKIE:
-        pline(fortune_msg);
+        pline(_(fortune_msg));
     /* FALLTHRU */
     case BY_PAPER:
-        pline("It reads:");
+        pline(_("It reads:"));
         break;
     }
-    pline1(line);
+    pline1(_(line));
 }
 
 STATIC_OVL void
@@ -460,10 +460,10 @@ boolean delphi;
         if (delphi)
             putstr(tmpwin, 0,
                    special
-                     ? "The Oracle scornfully takes all your money and says:"
-                     : "The Oracle meditates for a moment and then intones:");
+                     ? _("The Oracle scornfully takes all your money and says:")
+                     : _("The Oracle meditates for a moment and then intones:"));
         else
-            putstr(tmpwin, 0, "The message reads:");
+            putstr(tmpwin, 0, _("The message reads:"));
         putstr(tmpwin, 0, "");
 
         while (dlb_fgets(line, COLNO, oracles) && strcmp(line, "---\n")) {
@@ -494,17 +494,17 @@ struct monst *oracl;
     umoney = money_cnt(invent);
 
     if (!oracl) {
-        There("is no one here to consult.");
+        There(_("is no one here to consult."));
         return 0;
     } else if (!oracl->mpeaceful) {
-        pline("%s is in no mood for consultations.", Monnam(oracl));
+        pline(_("%s is in no mood for consultations."), Monnam(oracl));
         return 0;
     } else if (!umoney) {
-        You("have no money.");
+        You(_("have no money."));
         return 0;
     }
 
-    Sprintf(qbuf, "\"Wilt thou settle for a minor consultation?\" (%d %s)",
+    Sprintf(qbuf, _("\"Wilt thou settle for a minor consultation?\" (%d %s)"),
             minor_cost, currency((long) minor_cost));
     switch (ynq(qbuf)) {
     default:
@@ -512,7 +512,7 @@ struct monst *oracl;
         return 0;
     case 'y':
         if (umoney < (long) minor_cost) {
-            You("don't even have enough money for that!");
+            You(_("don't even have enough money for that!"));
             return 0;
         }
         u_pay = minor_cost;
@@ -521,7 +521,7 @@ struct monst *oracl;
         if (umoney <= (long) minor_cost /* don't even ask */
             || (oracle_cnt == 1 || oracle_flg < 0))
             return 0;
-        Sprintf(qbuf, "\"Then dost thou desire a major one?\" (%d %s)",
+        Sprintf(qbuf, _("\"Then dost thou desire a major one?\" (%d %s)"),
                 major_cost, currency((long) major_cost));
         if (yn(qbuf) != 'y')
             return 0;

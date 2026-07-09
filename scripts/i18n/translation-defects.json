@@ -1,0 +1,62 @@
+{
+  "_doc": "Curated PRESENT-BUT-WRONG / awkward zh translations the coverage surfaces structurally CANNOT see: the format string AND every fragment are translated, so the literal scanner marks the line green/done — but the assembled sentence reads wrong in Chinese (word order, or an outright mistranslation of a connector). This is a THIRD failure mode, distinct from English leaks (scripts/i18n/runtime-leaks.json) and catalog gaps. Merged inline into coverage-core.mjs reshapeCFile() keyed by src file -> [{line, fixed, msgid, text, reason}]. status 'zh-defect' (open, orange, COUNTS AS A GAP — honestly lowers the surface %) vs 'zh-defect-fixed' (fixed:true, green, resolved-for-the-record). Set fixed:true once the zh reads correctly AND the wasm is rebuilt; delete the entry after the user confirms in playtest. Root-cause family + why the catalog alone can't fully fix it: see memory composed-message-word-order.",
+  "src/read.c": [
+    {
+      "line": 439,
+      "fixed": true,
+      "msgid": "%s%s%s for a moment.",
+      "text": "p_glow2：色词后置于动词（「发光 蓝色」）——组合语序缺陷",
+      "reason": "✅已修复（C 侧重排+目录+构建）：改为完整句式格式串（动词入字面量、Yname2 只取名词、色词作独立 %s），中文改「闪着<色>光/发出…」使色词不再后置；英文输出不变。原始诊断：WO-1（游玩发现·独角兽之角充能「你的独角兽之角 发光 蓝色…片刻」）：p_glow2 拼 Yobjnam2(obj,glow)=「你的X 发光」+ hcolor 色词 + 时长。已把黏连的「蓝色片刻」改为「蓝色，持续片刻」（catalog 已修 trailing），但色词仍排在动词之后（中文应「发出蓝光」/「蓝光闪烁」）。★catalog 无法修★：pline 按序消费 %s、Blind 时色词/分隔实参为空串，无法安全重排 %s 顺序。需 C 侧重排该组合点（同 tin_details RL-11 / priestname RL-18「语序需重排」硬类）。"
+    },
+    {
+      "line": 1091,
+      "fixed": true,
+      "msgid": "%s violently %s%s%s for a while, then %s.",
+      "text": "护甲过度附魔蒸发：色词后置于动词——组合语序缺陷",
+      "reason": "✅已修复（C 侧重排+目录+构建）：改为完整句式格式串（动词入字面量、Yname2 只取名词、色词作独立 %s），中文改「闪着<色>光/发出…」使色词不再后置；英文输出不变。原始诊断：WO-2：同 WO-1 家族（read.c:439）。已修「银了一会儿」→「银，持续了一会儿」，但残留色词后置。C 侧重排方能根治。"
+    },
+    {
+      "line": 1125,
+      "fixed": true,
+      "msgid": "%s %s%s%s%s for a %s.",
+      "text": "护甲附魔发光：「for a」曾误译为「换取一个」（已修）；残留色词后置",
+      "reason": "✅已修复（C 侧重排+目录+构建）：改为完整句式格式串（动词入字面量、Yname2 只取名词、色词作独立 %s），中文改「闪着<色>光/发出…」使色词不再后置；英文输出不变。原始诊断：WO-3（游玩发现·issue #2「你的抗魔斗篷 发光 银换取一个片刻」）：★两层缺陷★。(1) 连接词误译：「for a %s」被逐字译成「换取一个%s」（换取=in exchange for）——已在 catalog 修为「，持续%s」，纯数据修复、已构建。(2) 残留：色词（银）仍后置于动词（发光），同 WO-1 组合语序限制，catalog 不可解，待 C 侧重排。"
+    }
+  ],
+  "src/do_wear.c": [
+    {
+      "line": 427,
+      "fixed": true,
+      "msgid": "%s %s for a moment.",
+      "text": "头盔（智力/不敏）发光：色词后置于动词——组合语序缺陷",
+      "reason": "✅已修复（C 侧重排+目录+构建）：改为完整句式格式串（动词入字面量、Yname2 只取名词、色词作独立 %s），中文改「闪着<色>光/发出…」使色词不再后置；英文输出不变。原始诊断：WO-4：同 WO-1 家族。Tobjnam(uarmh,glow)+hcolor。已修 trailing「片刻」→「，持续片刻」，残留色词后置，待 C 侧重排。注：同格式串亦供 mhitm.c:1001/uhitm.c:1680 的怪物眩晕（Monnam+踉跄，无色词）——那两处修复后语法正确，不在此列。"
+    }
+  ],
+  "src/worn.c": [
+    {
+      "line": 625,
+      "fixed": true,
+      "msgid": "%s %s %s %s for a moment.",
+      "text": "怪物自动诅咒穿戴发光：色词后置于动词——组合语序缺陷",
+      "reason": "✅已修复（C 侧重排+目录+构建）：改为完整句式格式串（动词入字面量、Yname2 只取名词、色词作独立 %s），中文改「闪着<色>光/发出…」使色词不再后置；英文输出不变。原始诊断：WO-5：同 WO-1 家族（唯一调用点）。s_suffix(Monnam)+护甲名+glow+hcolor。已修 trailing，残留色词后置，待 C 侧重排。"
+    }
+  ],
+  "src/apply.c": [
+    {
+      "line": 3670,
+      "fixed": true,
+      "msgid": "%s %s.",
+      "text": "油灯等发光棕色：走通用「%s %s.」catch-all，色词后置且无法单独修",
+      "reason": "✅已修复（C 侧重排+目录+构建）：改为完整句式格式串（动词入字面量、Yname2 只取名词、色词作独立 %s），中文改「闪着<色>光/发出…」使色词不再后置；英文输出不变。原始诊断：WO-6：Yobjnam2(obj,glow)+hcolor(brown) 经通用格式串「%s %s.」→「%s%s。」→「你的X 发光棕色」。★catalog 完全不可解★：「%s %s.」是全库共享的 catch-all（attrib/dig/dog/dokick/dothrow… 十余个语义无关调用点），改它会破坏其他处。只能在本调用点 C 侧改用专用格式或预组合 zh 语序。低频、低优先。"
+    }
+  ],
+  "src/wield.c": [
+    {
+      "line": 852,
+      "fixed": true,
+      "msgid": "%s unexpectedly.",
+      "text": "武器过度附魔震动：副词曾后置于动词（「突然震动出乎意料地」）——已修",
+      "reason": "WO-7（游玩发现·issue #3b「你的独角兽之角 突然震动出乎意料地」）：Yobjnam2(uwep,\"suddenly vibrate\")=「你的X 突然震动」+ 格式串「%s unexpectedly.」曾译「%s出乎意料地。」——副词「出乎意料地/-地」后置于动词，中文不合语法（副词应前置）。★catalog 可修★：改为「%s，出乎意料。」使其成为后置的评述小句而非状语。已构建。此条无色词残留，故标 fixed:true（待游玩确认后删除）。"
+    }
+  ]
+}

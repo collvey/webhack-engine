@@ -25,7 +25,7 @@ boolean showmsg;
 {
     if (carried(uball)) {
         if (showmsg)
-            pline("Startled, you drop the iron ball.");
+            pline(_("Startled, you drop the iron ball."));
         if (uwep == uball)
             setuwep((struct obj *) 0);
         if (uswapwep == uball)
@@ -51,15 +51,15 @@ ballfall()
     if (gets_hit) {
         int dmg = rn1(7, 25);
 
-        pline_The("iron ball falls on your %s.", body_part(HEAD));
+        pline_The(_("iron ball falls on your %s."), body_part(HEAD));
         if (uarmh) {
             if (is_metallic(uarmh)) {
-                pline("Fortunately, you are wearing a hard helmet.");
+                pline(_("Fortunately, you are wearing a hard helmet."));
                 dmg = 3;
             } else if (flags.verbose)
-                pline("%s does not protect you.", Yname2(uarmh));
+                pline(_("%s does not protect you."), Yname2(uarmh));
         }
-        losehp(Maybe_Half_Phys(dmg), "crunched in the head by an iron ball",
+        losehp(Maybe_Half_Phys(dmg), _("crunched in the head by an iron ball"),
                NO_KILLER_PREFIX);
     }
 }
@@ -785,8 +785,8 @@ boolean allow_drag;
  drag:
 
     if (near_capacity() > SLT_ENCUMBER && dist2(x, y, u.ux, u.uy) <= 2) {
-        You("cannot %sdrag the heavy iron ball.",
-            invent ? "carry all that and also " : "");
+        You(_("cannot %sdrag the heavy iron ball."),
+            invent ? _("carry all that and also ") : "");
         nomul(0);
         return FALSE;
     }
@@ -799,13 +799,13 @@ boolean allow_drag;
         || ((t = t_at(uchain->ox, uchain->oy))
             && (is_pit(t->ttyp) || is_hole(t->ttyp)))) {
         if (Levitation) {
-            You_feel("a tug from the iron ball.");
+            You_feel(_("a tug from the iron ball."));
             if (t)
                 t->tseen = 1;
         } else {
             struct monst *victim;
 
-            You("are jerked back by the iron ball!");
+            You(_("are jerked back by the iron ball!"));
             if ((victim = m_at(uchain->ox, uchain->oy)) != 0) {
                 int tmp;
                 int dieroll = rnd(20);
@@ -909,26 +909,26 @@ xchar x, y;
             && u.utraptype != TT_INFLOOR && u.utraptype != TT_BURIEDBALL) {
             switch (u.utraptype) {
             case TT_PIT:
-                pline(pullmsg, "pit");
+                pline(_(pullmsg), _("pit"));
                 break;
             case TT_WEB:
-                pline(pullmsg, "web");
-                pline_The("web is destroyed!");
+                pline(_(pullmsg), _("web"));
+                pline_The(_("web is destroyed!"));
                 deltrap(t_at(u.ux, u.uy));
                 break;
             case TT_LAVA:
-                pline(pullmsg, hliquid("lava"));
+                pline(_(pullmsg), hliquid(_("lava")));
                 break;
             case TT_BEARTRAP:
                 side = rn2(3) ? LEFT_SIDE : RIGHT_SIDE;
-                pline(pullmsg, "bear trap");
+                pline(_(pullmsg), _("bear trap"));
                 set_wounded_legs(side, rn1(1000, 500));
                 if (!u.usteed) {
-                    Your("%s %s is severely damaged.",
-                         (side == LEFT_SIDE) ? "left" : "right",
+                    Your(_("%s %s is severely damaged."),
+                         (side == LEFT_SIDE) ? _("left") : _("right"),
                          body_part(LEG));
                     losehp(Maybe_Half_Phys(2),
-                           "leg damage from being pulled out of a bear trap",
+                           _("leg damage from being pulled out of a bear trap"),
                            KILLED_BY);
                 }
                 break;
@@ -983,9 +983,9 @@ litter()
         nextobj = otmp->nobj;
         if ((otmp != uball) && (rnd(capacity) <= (int) otmp->owt)) {
             if (canletgo(otmp, "")) {
-                You("drop %s and %s %s down the stairs with you.",
-                    yname(otmp), (otmp->quan == 1L) ? "it" : "they",
-                    otense(otmp, "fall"));
+                You(_("drop %s and %s %s down the stairs with you."),
+                    yname(otmp), (otmp->quan == 1L) ? _("it") : _("they"),
+                    otense(otmp, _("fall")));
                 dropx(otmp);
                 encumber_msg(); /* drop[xyz]() probably ought to to this... */
             }
@@ -1010,30 +1010,30 @@ drag_down()
     forward = carried(uball) && (uwep == uball || !uwep || !rn2(3));
 
     if (carried(uball))
-        You("lose your grip on the iron ball.");
+        You(_("lose your grip on the iron ball."));
 
     cls();  /* previous level is still displayed although you
                went down the stairs. Avoids bug C343-20 */
 
     if (forward) {
         if (rn2(6)) {
-            pline_The("iron ball drags you downstairs!");
+            pline_The(_("iron ball drags you downstairs!"));
             losehp(Maybe_Half_Phys(rnd(6)),
-                   "dragged downstairs by an iron ball", NO_KILLER_PREFIX);
+                   _("dragged downstairs by an iron ball"), NO_KILLER_PREFIX);
             litter();
         }
     } else {
         if (rn2(2)) {
-            pline_The("iron ball smacks into you!");
-            losehp(Maybe_Half_Phys(rnd(20)), "iron ball collision",
+            pline_The(_("iron ball smacks into you!"));
+            losehp(Maybe_Half_Phys(rnd(20)), _("iron ball collision"),
                    KILLED_BY_AN);
             exercise(A_STR, FALSE);
             dragchance -= 2;
         }
         if ((int) dragchance >= rnd(6)) {
-            pline_The("iron ball drags you downstairs!");
+            pline_The(_("iron ball drags you downstairs!"));
             losehp(Maybe_Half_Phys(rnd(3)),
-                   "dragged downstairs by an iron ball", NO_KILLER_PREFIX);
+                   _("dragged downstairs by an iron ball"), NO_KILLER_PREFIX);
             exercise(A_STR, FALSE);
             litter();
         }

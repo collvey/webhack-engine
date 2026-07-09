@@ -62,7 +62,8 @@ do_statusline1()
         char mbot[BUFSZ];
         int k = 0;
 
-        Strcpy(mbot, mons[u.umonnum].mname);
+        Strcpy(mbot, nhi18n_monname(u.umonnum) ? nhi18n_monname(u.umonnum)
+                                               : mons[u.umonnum].mname);
         while (mbot[k] != 0) {
             if ((k == 0 || (k > 0 && mbot[k - 1] == ' ')) && 'a' <= mbot[k]
                 && mbot[k] <= 'z')
@@ -297,17 +298,17 @@ boolean female;
     /* Find the rank */
     for (i = xlev_to_rank((int) lev); i >= 0; i--) {
         if (female && role->rank[i].f)
-            return role->rank[i].f;
+            return _(role->rank[i].f);
         if (role->rank[i].m)
-            return role->rank[i].m;
+            return _(role->rank[i].m);
     }
 
     /* Try the role name, instead */
     if (female && role->name.f)
-        return role->name.f;
+        return _(role->name.f);
     else if (role->name.m)
-        return role->name.m;
-    return "Player";
+        return _(role->name.m);
+    return _("Player");
 }
 
 STATIC_OVL const char *
@@ -390,7 +391,7 @@ char *buf;
 
     /* TODO:    Add in dungeon name */
     if (Is_knox(&u.uz)) {
-        Sprintf(buf, "%s ", dungeons[u.uz.dnum].dname);
+        Sprintf(buf, "%s ", _(dungeons[u.uz.dnum].dname));
     } else if (In_quest(&u.uz)) {
         Sprintf(buf, "Home %d ", dunlev(&u.uz));
     } else if (In_endgame(&u.uz)) {
@@ -591,7 +592,9 @@ bot_via_windowport()
      */
     Strcpy(nb = buf, plname);
     nb[0] = highc(nb[0]);
-    titl = !Upolyd ? rank() : mons[u.umonnum].mname;
+    titl = !Upolyd ? rank()
+                   : (nhi18n_monname(u.umonnum) ? nhi18n_monname(u.umonnum)
+                                                : mons[u.umonnum].mname);
     i = (int) (strlen(buf) + sizeof " the " + strlen(titl) - sizeof "");
     /* if "Name the Rank/monster" is too long, we truncate the name
        but always keep at least 10 characters of it; when hitpintbar is
@@ -2358,7 +2361,7 @@ query_conditions()
                  valid_conditions[i].id, MENU_UNSELECTED);
     }
 
-    end_menu(tmpwin, "Choose status conditions");
+    end_menu(tmpwin, _("Choose status conditions"));
 
     res = select_menu(tmpwin, PICK_ANY, &picks);
     destroy_nhwindow(tmpwin);
@@ -2927,7 +2930,7 @@ status_hilite_menu_choose_field()
                  initblstats[i].fldname, MENU_UNSELECTED);
     }
 
-    end_menu(tmpwin, "Select a hilite field:");
+    end_menu(tmpwin, _("Select a hilite field:"));
 
     res = select_menu(tmpwin, PICK_ONE, &picks);
     destroy_nhwindow(tmpwin);
@@ -3202,17 +3205,17 @@ choose_value:
         }
         if (*inp == '%') {
             if (!percent) {
-                pline("Not expecting a percentage.");
+                pline(_("Not expecting a percentage."));
                 goto choose_behavior;
             }
             *inp = '\0'; /* strip '%' [this accepts trailing junk!] */
         } else if (*inp) {
             /* some random characters */
-            pline("\"%s\" is not a recognized number.", inp);
+            pline(_("\"%s\" is not a recognized number."), inp);
             goto choose_value;
         }
         if (!gotnum) {
-            pline("Is that an invisible number?");
+            pline(_("Is that an invisible number?"));
             goto choose_value;
         }
         op = (lt_gt_eq == LT_VALUE) ? "<"
@@ -3229,7 +3232,7 @@ choose_value:
         if (percent) {
             val = aval.a_int;
             if (initblstats[fld].idxmax == -1) {
-                pline("Field '%s' does not support percentage values.",
+                pline(_("Field '%s' does not support percentage values."),
                       initblstats[fld].fldname);
                 behavior = BL_TH_VAL_ABSOLUTE;
                 goto choose_value;
@@ -3243,7 +3246,7 @@ choose_value:
                 || (val == 0 && lt_gt_eq == LT_VALUE)
                 || (val == 100 && lt_gt_eq == GT_VALUE)
                 || (val > 100 && (val != 101 || lt_gt_eq != LT_VALUE))) {
-                pline("'%s%d%%' is not a valid percent value.", op, val);
+                pline(_("'%s%d%%' is not a valid percent value."), op, val);
                 goto choose_value;
             }
             /* restore suffix for use in color and attribute prompts */
@@ -3255,13 +3258,13 @@ choose_value:
                    && (aval.a_int < ((fld == BL_AC) ? -128
                                      : (lt_gt_eq == GT_VALUE) ? -1
                                        : (lt_gt_eq == LT_VALUE) ? 1 : 0))) {
-            pline("%s'%s%d'%s", threshold_value,
+            pline(_("%s'%s%d'%s"), threshold_value,
                   op, aval.a_int, is_out_of_range);
             goto choose_value;
         } else if (dt == ANY_LONG
                    && (aval.a_long < ((lt_gt_eq == GT_VALUE) ? -1L
                                       : (lt_gt_eq == LT_VALUE) ? 1L : 0L))) {
-            pline("%s'%s%ld'%s", threshold_value,
+            pline(_("%s'%s%ld'%s"), threshold_value,
                   op, aval.a_long, is_out_of_range);
             goto choose_value;
         }
@@ -3484,7 +3487,7 @@ choose_color:
         tmpattr = hlattr2attrname(atr, attrbuf, BUFSZ);
         if (tmpattr)
             Sprintf(eos(clrbuf), "&%s", tmpattr);
-        pline("Added hilite condition/%s/%s",
+        pline(_("Added hilite condition/%s/%s"),
               conditionbitmask2str(cond), clrbuf);
     } else {
         char *p, *q;
@@ -3498,7 +3501,7 @@ choose_color:
             *p = '\0'; /* chop off " or female-rank" */
             /* new rule for male-rank */
             status_hilite_add_threshold(fld, &hilite);
-            pline("Added hilite %s", status_hilite2str(&hilite));
+            pline(_("Added hilite %s"), status_hilite2str(&hilite));
             /* transfer female-rank to start of hilite.textmatch buffer */
             p += sizeof " or " - sizeof "";
             q = hilite.textmatch;
@@ -3507,7 +3510,7 @@ choose_color:
             /* proceed with normal addition of new rule */
         }
         status_hilite_add_threshold(fld, &hilite);
-        pline("Added hilite %s", status_hilite2str(&hilite));
+        pline(_("Added hilite %s"), status_hilite2str(&hilite));
     }
     reset_status_hilites();
     return TRUE;
@@ -3752,7 +3755,7 @@ shlmenu_redo:
                  buf, MENU_UNSELECTED);
     }
 
-    end_menu(tmpwin, "Status hilites:");
+    end_menu(tmpwin, _("Status hilites:"));
     if ((res = select_menu(tmpwin, PICK_ONE, &picks)) > 0) {
         i = picks->item.a_int - 1;
         if (i < 0)
@@ -3775,7 +3778,7 @@ shlmenu_redo:
        and also when non-zero it is the flag to enable highlighting */
     if (countall > 0 && !iflags.hilite_delta)
         pline(
- "To have highlights become active, set 'statushilites' option to non-zero.");
+ _("To have highlights become active, set 'statushilites' option to non-zero."));
 
     return TRUE;
 }

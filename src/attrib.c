@@ -124,7 +124,7 @@ int msgflg; /* positive => no message, zero => message, and */
 
     if ((ndx == A_INT || ndx == A_WIS) && uarmh && uarmh->otyp == DUNCE_CAP) {
         if (msgflg == 0)
-            Your("cap constricts briefly, then relaxes again.");
+            Your(_("cap constricts briefly, then relaxes again."));
         return FALSE;
     }
 
@@ -138,7 +138,7 @@ int msgflg; /* positive => no message, zero => message, and */
             if (AMAX(ndx) > ATTRMAX(ndx))
                 ABASE(ndx) = AMAX(ndx) = ATTRMAX(ndx);
         }
-        attrstr = plusattr[ndx];
+        attrstr = _(plusattr[ndx]);
         abonflg = (ABON(ndx) < 0);
     } else { /* incr is negative */
         if (ABASE(ndx) < ATTRMIN(ndx)) {
@@ -165,26 +165,26 @@ int msgflg; /* positive => no message, zero => message, and */
             if (AMAX(ndx) < ATTRMIN(ndx))
                 AMAX(ndx) = ATTRMIN(ndx);
         }
-        attrstr = minusattr[ndx];
+        attrstr = _(minusattr[ndx]);
         abonflg = (ABON(ndx) > 0);
     }
     if (ACURR(ndx) == old_acurr) {
         if (msgflg == 0 && flags.verbose) {
             if (ABASE(ndx) == old_abase && AMAX(ndx) == old_amax) {
-                pline("You're %s as %s as you can get.",
-                      abonflg ? "currently" : "already", attrstr);
+                pline(_("You're %s as %s as you can get."),
+                      abonflg ? _("currently") : _("already"), attrstr);
             } else {
                 /* current stayed the same but base value changed, or
                    base is at minimum and reduction caused max to drop */
-                Your("innate %s has %s.", attrname[ndx],
-                     (incr > 0) ? "improved" : "declined");
+                Your(_("innate %s has %s."), _(attrname[ndx]),
+                     (incr > 0) ? _("improved") : _("declined"));
             }
         }
         return FALSE;
     }
 
     if (msgflg <= 0)
-        You_feel("%s%s!", (incr > 1 || incr < -1) ? "very " : "", attrstr);
+        You_feel(_("%s%s!"), (incr > 1 || incr < -1) ? _("very ") : "", attrstr);
     context.botl = TRUE;
     if (program_state.in_moveloop && (ndx == A_STR || ndx == A_CON))
         (void) encumber_msg();
@@ -251,7 +251,7 @@ int typ;         /* which attribute */
 boolean exclaim; /* emphasis */
 {
     void VDECL((*func), (const char *, ...)) = poiseff[typ].delivery_func;
-    const char *msg_txt = poiseff[typ].effect_msg;
+    const char *msg_txt = _(poiseff[typ].effect_msg);
 
     /*
      * "You feel weaker" or "you feel very sick" aren't appropriate when
@@ -261,9 +261,9 @@ boolean exclaim; /* emphasis */
      * (dunce cap) is such that we don't need message fixups for them.
      */
     if (typ == A_STR && ACURR(A_STR) == STR19(25))
-        msg_txt = "innately weaker";
+        msg_txt = _("innately weaker");
     else if (typ == A_CON && ACURR(A_CON) == 25)
-        msg_txt = "sick inside";
+        msg_txt = _("sick inside");
 
     (*func)("%s%c", msg_txt, exclaim ? '!' : '.');
 }
@@ -285,14 +285,14 @@ boolean thrown_weapon; /* thrown weapons are less deadly */
         boolean plural = (reason[strlen(reason) - 1] == 's') ? 1 : 0;
 
         /* avoid "The" Orcus's sting was poisoned... */
-        pline("%s%s %s poisoned!",
-              isupper((uchar) *reason) ? "" : "The ", reason,
-              plural ? "were" : "was");
+        pline(_("%s%s %s poisoned!"),
+              isupper((uchar) *reason) ? "" : _("The "), reason,
+              plural ? _("were") : _("was"));
     }
     if (Poison_resistance) {
         if (!strcmp(reason, "blast"))
             shieldeff(u.ux, u.uy);
-        pline_The("poison doesn't seem to affect you.");
+        pline_The(_("poison doesn't seem to affect you."));
         return;
     }
 
@@ -313,7 +313,7 @@ boolean thrown_weapon; /* thrown weapons are less deadly */
         /* instant kill */
         u.uhp = -1;
         context.botl = TRUE;
-        pline_The("poison was deadly...");
+        pline_The(_("poison was deadly..."));
     } else if (i > 5) {
         /* HP damage; more likely--but less severe--with missiles */
         loss = thrown_weapon ? rnd(6) : rn1(10, 6);
@@ -596,9 +596,9 @@ exerchk()
                 /* if you actually changed an attrib - zero accumulation */
                 AEXE(i) = ax = 0;
                 /* then print an explanation */
-                You("%s %s.",
-                    (mod_val > 0) ? "must have been" : "haven't been",
-                    exertext[i][(mod_val > 0) ? 0 : 1]);
+                You(_("%s %s."),
+                    (mod_val > 0) ? _("must have been") : _("haven't been"),
+                    _(exertext[i][(mod_val > 0) ? 0 : 1]));
             }
  nextattrib:
             /* this used to be ``AEXE(i) /= 2'' but that would produce
@@ -845,32 +845,32 @@ int propidx; /* special cases can have negative values */
              * takes priority over knight's innate but limited jumping.
              */
             if (propidx == BLINDED && u.uroleplay.blind)
-                Sprintf(buf, " from birth");
+                Sprintf(buf, _(" from birth"));
             else if (innateness == FROM_ROLE || innateness == FROM_RACE)
-                Strcpy(buf, " innately");
+                Strcpy(buf, _(" innately"));
             else if (innateness == FROM_INTR) /* [].intrinsic & FROMOUTSIDE */
-                Strcpy(buf, " intrinsically");
+                Strcpy(buf, _(" intrinsically"));
             else if (innateness == FROM_EXP)
-                Strcpy(buf, " because of your experience");
+                Strcpy(buf, _(" because of your experience"));
             else if (innateness == FROM_LYCN)
-                Strcpy(buf, " due to your lycanthropy");
+                Strcpy(buf, _(" due to your lycanthropy"));
             else if (innateness == FROM_FORM)
-                Strcpy(buf, " from current creature form");
+                Strcpy(buf, _(" from current creature form"));
             else if (propidx == FAST && Very_fast)
-                Sprintf(buf, because_of,
-                        ((HFast & TIMEOUT) != 0L) ? "a potion or spell"
+                Sprintf(buf, _(because_of),
+                        ((HFast & TIMEOUT) != 0L) ? _("a potion or spell")
                           : ((EFast & W_ARMF) != 0L && uarmf->dknown
                              && objects[uarmf->otyp].oc_name_known)
                               ? ysimple_name(uarmf) /* speed boots */
-                                : EFast ? "worn equipment"
+                                : EFast ? _("worn equipment")
                                   : something);
             else if (wizard
                      && (obj = what_gives(&u.uprops[propidx].extrinsic)) != 0)
-                Sprintf(buf, because_of, obj->oartifact
+                Sprintf(buf, _(because_of), obj->oartifact
                                              ? bare_artifactname(obj)
                                              : ysimple_name(obj));
             else if (propidx == BLINDED && Blindfolded_only)
-                Sprintf(buf, because_of, ysimple_name(ublindf));
+                Sprintf(buf, _(because_of), ysimple_name(ublindf));
 
             /* remove some verbosity and/or redundancy */
             if ((p = strstri(buf, " pair of ")) != 0)
@@ -886,16 +886,16 @@ int propidx; /* special cases can have negative values */
             case BLINDED:
                 if (ublindf
                     && ublindf->oartifact == ART_EYES_OF_THE_OVERWORLD)
-                    Sprintf(buf, because_of, bare_artifactname(ublindf));
+                    Sprintf(buf, _(because_of), bare_artifactname(ublindf));
                 break;
             case INVIS:
                 if (u.uprops[INVIS].blocked & W_ARMC)
-                    Sprintf(buf, because_of,
+                    Sprintf(buf, _(because_of),
                             ysimple_name(uarmc)); /* mummy wrapping */
                 break;
             case CLAIRVOYANT:
                 if (wizard && (u.uprops[CLAIRVOYANT].blocked & W_ARMH))
-                    Sprintf(buf, because_of,
+                    Sprintf(buf, _(because_of),
                             ysimple_name(uarmh)); /* cornuthaum */
                 break;
             }
@@ -953,15 +953,15 @@ int oldlevel, newlevel;
                 *(abil->ability) |= mask;
             if (!(*(abil->ability) & INTRINSIC & ~mask)) {
                 if (*(abil->gainstr))
-                    You_feel("%s!", abil->gainstr);
+                    You_feel(_("%s!"), _(abil->gainstr));
             }
         } else if (oldlevel >= abil->ulevel && newlevel < abil->ulevel) {
             *(abil->ability) &= ~mask;
             if (!(*(abil->ability) & INTRINSIC)) {
                 if (*(abil->losestr))
-                    You_feel("%s!", abil->losestr);
+                    You_feel(_("%s!"), _(abil->losestr));
                 else if (*(abil->gainstr))
-                    You_feel("less %s!", abil->gainstr);
+                    You_feel(_("less %s!"), _(abil->gainstr));
             }
         }
         if (prevabil != *(abil->ability)) /* it changed */
@@ -1151,17 +1151,17 @@ int reason; /* 0==conversion, 1==helm-of-OA on, 2==helm-of-OA off */
         /* worn helm of opposite alignment might block change */
         if (!uarmh || uarmh->otyp != HELM_OF_OPPOSITE_ALIGNMENT)
             u.ualign.type = u.ualignbase[A_CURRENT];
-        You("have a %ssense of a new direction.",
-            (u.ualign.type != oldalign) ? "sudden " : "");
+        You(_("have a %ssense of a new direction."),
+            (u.ualign.type != oldalign) ? _("sudden ") : "");
     } else {
         /* putting on or taking off a helm of opposite alignment */
         u.ualign.type = (aligntyp) newalign;
         if (reason == 1)
-            Your("mind oscillates %s.", Hallucination ? "wildly" : "briefly");
+            Your(_("mind oscillates %s."), Hallucination ? _("wildly") : _("briefly"));
         else if (reason == 2)
-            Your("mind is %s.", Hallucination
-                                    ? "much of a muchness"
-                                    : "back in sync with your body");
+            Your(_("mind is %s."), Hallucination
+                                    ? _("much of a muchness")
+                                    : _("back in sync with your body"));
     }
     if (u.ualign.type != oldalign) {
         u.ualign.record = 0; /* slate is wiped clean */

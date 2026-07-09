@@ -78,12 +78,12 @@ int gloc;
 {
     char sbuf[BUFSZ];
 
-    Sprintf(sbuf, "Use '%s'/'%s' to %s%s%s.",
+    Sprintf(sbuf, _("Use '%s'/'%s' to %s%s%s."),
             k1, k2,
-            iflags.getloc_usemenu ? "get a menu of "
-                                  : "move the cursor to ",
-            gloc_descr[gloc][2 + iflags.getloc_usemenu],
-            gloc_filtertxt[iflags.getloc_filter]);
+            iflags.getloc_usemenu ? _("get a menu of ")
+                                  : _("move the cursor to "),
+            _(gloc_descr[gloc][2 + iflags.getloc_usemenu]),
+            _(gloc_filtertxt[iflags.getloc_filter]));
     putstr(tmpwin, 0, sbuf);
 }
 
@@ -100,15 +100,15 @@ const char *goal;
     winid tmpwin = create_nhwindow(NHW_MENU);
 
     Sprintf(sbuf,
-            "Use '%c', '%c', '%c', '%c' to move the cursor to %s.", /* hjkl */
+            _("Use '%c', '%c', '%c', '%c' to move the cursor to %s."), /* hjkl */
             Cmd.move_W, Cmd.move_S, Cmd.move_N, Cmd.move_E, goal);
     putstr(tmpwin, 0, sbuf);
     Sprintf(sbuf,
-            "Use 'H', 'J', 'K', 'L' to fast-move the cursor, %s.",
-            fastmovemode[iflags.getloc_moveskip]);
+            _("Use 'H', 'J', 'K', 'L' to fast-move the cursor, %s."),
+            _(fastmovemode[iflags.getloc_moveskip]));
     putstr(tmpwin, 0, sbuf);
-    putstr(tmpwin, 0, "Or enter a background symbol (ex. '<').");
-    Sprintf(sbuf, "Use '%s' to move the cursor on yourself.",
+    putstr(tmpwin, 0, _("Or enter a background symbol (ex. '<')."));
+    Sprintf(sbuf, _("Use '%s' to move the cursor on yourself."),
            visctrl(Cmd.spkeys[NHKF_GETPOS_SELF]));
     putstr(tmpwin, 0, sbuf);
     if (!iflags.terrainmode || (iflags.terrainmode & TER_MON) != 0) {
@@ -139,16 +139,16 @@ const char *goal;
                              visctrl(Cmd.spkeys[NHKF_GETPOS_INTERESTING_PREV]),
                              GLOC_INTERESTING);
     }
-    Sprintf(sbuf, "Use '%s' to change fast-move mode to %s.",
+    Sprintf(sbuf, _("Use '%s' to change fast-move mode to %s."),
             visctrl(Cmd.spkeys[NHKF_GETPOS_MOVESKIP]),
-            fastmovemode[!iflags.getloc_moveskip]);
+            _(fastmovemode[!iflags.getloc_moveskip]));
     putstr(tmpwin, 0, sbuf);
     if (!iflags.terrainmode || (iflags.terrainmode & TER_DETECT) == 0) {
-        Sprintf(sbuf, "Use '%s' to toggle menu listing for possible targets.",
+        Sprintf(sbuf, _("Use '%s' to toggle menu listing for possible targets."),
                 visctrl(Cmd.spkeys[NHKF_GETPOS_MENU]));
         putstr(tmpwin, 0, sbuf);
         Sprintf(sbuf,
-                "Use '%s' to change the mode of limiting possible targets.",
+                _("Use '%s' to change the mode of limiting possible targets."),
                 visctrl(Cmd.spkeys[NHKF_GETPOS_LIMITVIEW]));
         putstr(tmpwin, 0, sbuf);
     }
@@ -156,31 +156,31 @@ const char *goal;
         char kbuf[BUFSZ];
 
         if (getpos_getvalid) {
-            Sprintf(sbuf, "Use '%s' or '%s' to move to valid locations.",
+            Sprintf(sbuf, _("Use '%s' or '%s' to move to valid locations."),
                     visctrl(Cmd.spkeys[NHKF_GETPOS_VALID_NEXT]),
                     visctrl(Cmd.spkeys[NHKF_GETPOS_VALID_PREV]));
             putstr(tmpwin, 0, sbuf);
         }
         if (getpos_hilitefunc) {
-            Sprintf(sbuf, "Use '%s' to display valid locations.",
+            Sprintf(sbuf, _("Use '%s' to display valid locations."),
                     visctrl(Cmd.spkeys[NHKF_GETPOS_SHOWVALID]));
             putstr(tmpwin, 0, sbuf);
         }
-        Sprintf(sbuf, "Use '%s' to toggle automatic description.",
+        Sprintf(sbuf, _("Use '%s' to toggle automatic description."),
                 visctrl(Cmd.spkeys[NHKF_GETPOS_AUTODESC]));
         putstr(tmpwin, 0, sbuf);
         if (iflags.cmdassist) { /* assisting the '/' command, I suppose... */
             Sprintf(sbuf,
                     (iflags.getpos_coords == GPCOORDS_NONE)
-         ? "(Set 'whatis_coord' option to include coordinates with '%s' text.)"
-         : "(Reset 'whatis_coord' option to omit coordinates from '%s' text.)",
+         ? _("(Set 'whatis_coord' option to include coordinates with '%s' text.)")
+         : _("(Reset 'whatis_coord' option to omit coordinates from '%s' text.)"),
                     visctrl(Cmd.spkeys[NHKF_GETPOS_AUTODESC]));
         }
         /* disgusting hack; the alternate selection characters work for any
            getpos call, but only matter for dowhatis (and doquickwhatis) */
         doing_what_is = (goal == what_is_an_unknown_object);
         if (doing_what_is) {
-            Sprintf(kbuf, "'%s' or '%s' or '%s' or '%s'",
+            Sprintf(kbuf, _("'%s' or '%s' or '%s' or '%s'"),
                     visctrl(Cmd.spkeys[NHKF_GETPOS_PICK]),
                     visctrl(Cmd.spkeys[NHKF_GETPOS_PICK_Q]),
                     visctrl(Cmd.spkeys[NHKF_GETPOS_PICK_O]),
@@ -188,30 +188,30 @@ const char *goal;
         } else {
             Sprintf(kbuf, "'%s'", visctrl(Cmd.spkeys[NHKF_GETPOS_PICK]));
         }
-        Sprintf(sbuf, "Type a %s when you are at the right place.", kbuf);
+        Sprintf(sbuf, _("Type a %s when you are at the right place."), kbuf);
         putstr(tmpwin, 0, sbuf);
         if (doing_what_is) {
             Sprintf(sbuf,
-       "  '%s' describe current spot, show 'more info', move to another spot.",
+       _("  '%s' describe current spot, show 'more info', move to another spot."),
                     visctrl(Cmd.spkeys[NHKF_GETPOS_PICK_V]));
             putstr(tmpwin, 0, sbuf);
             Sprintf(sbuf,
-                    "  '%s' describe current spot,%s move to another spot;",
+                    _("  '%s' describe current spot,%s move to another spot;"),
                     visctrl(Cmd.spkeys[NHKF_GETPOS_PICK]),
-                    flags.help ? " prompt if 'more info'," : "");
+                    flags.help ? _(" prompt if 'more info',") : "");
             putstr(tmpwin, 0, sbuf);
             Sprintf(sbuf,
-                    "  '%s' describe current spot, move to another spot;",
+                    _("  '%s' describe current spot, move to another spot;"),
                     visctrl(Cmd.spkeys[NHKF_GETPOS_PICK_Q]));
             putstr(tmpwin, 0, sbuf);
             Sprintf(sbuf,
-                    "  '%s' describe current spot, stop looking at things;",
+                    _("  '%s' describe current spot, stop looking at things;"),
                     visctrl(Cmd.spkeys[NHKF_GETPOS_PICK_O]));
             putstr(tmpwin, 0, sbuf);
         }
     }
     if (!force)
-        putstr(tmpwin, 0, "Type Space or Escape when you're done.");
+        putstr(tmpwin, 0, _("Type Space or Escape when you're done."));
     putstr(tmpwin, 0, "");
     display_nhwindow(tmpwin, TRUE);
     destroy_nhwindow(tmpwin);
@@ -464,7 +464,7 @@ boolean fulldir;
     int dst;
 
     if (!dx && !dy) {
-        Sprintf(buf, "here");
+        Sprintf(buf, _("here"));
     } else if ((dst = xytod(dx, dy)) != -1) {
         /* explicit direction; 'one step' is implicit */
         Sprintf(buf, "%s", directionname(dst));
@@ -542,7 +542,7 @@ int cx, cy;
     coord cc;
     int sym = 0;
     char tmpbuf[BUFSZ];
-    const char *firstmatch = "unknown";
+    const char *firstmatch = _("unknown");
 
     cc.x = cx;
     cc.y = cy;
@@ -553,9 +553,9 @@ int cx, cy;
                     "%s%s%s%s%s", firstmatch, *tmpbuf ? " " : "", tmpbuf,
                     (iflags.autodescribe
                      && getpos_getvalid && !(*getpos_getvalid)(cx, cy))
-                      ? " (illegal)" : "",
+                      ? _(" (illegal)") : "",
                     (iflags.getloc_travelmode && !is_valid_travelpt(cx, cy))
-                      ? " (no travel path)" : "");
+                      ? _(" (no travel path)") : "");
         curs(WIN_MAP, cx, cy);
         flush_screen(0);
     }
@@ -578,9 +578,9 @@ int gloc;
 
     if (gcount < 2) { /* gcount always includes the hero */
         free((genericptr_t) garr);
-        You("cannot %s %s.",
-            iflags.getloc_filter == GFILTER_VIEW ? "see" : "detect",
-            gloc_descr[gloc][0]);
+        You(_("cannot %s %s."),
+            iflags.getloc_filter == GFILTER_VIEW ? _("see") : _("detect"),
+            _(gloc_descr[gloc][0]));
         return FALSE;
     }
 
@@ -592,7 +592,7 @@ int gloc;
     for (i = 1; i < gcount; i++) {
         char fullbuf[BUFSZ];
         coord tmpcc;
-        const char *firstmatch = "unknown";
+        const char *firstmatch = _("unknown");
         int sym = 0;
 
         any.a_int = i + 1;
@@ -609,10 +609,10 @@ int gloc;
         }
     }
 
-    Sprintf(tmpbuf, "Pick %s%s%s",
-            an(gloc_descr[gloc][1]),
-            gloc_filtertxt[iflags.getloc_filter],
-            iflags.getloc_travelmode ? " for travel destination" : "");
+    Sprintf(tmpbuf, _("Pick %s%s%s"),
+            an(_(gloc_descr[gloc][1])),
+            _(gloc_filtertxt[iflags.getloc_filter]),
+            iflags.getloc_travelmode ? _(" for travel destination") : "");
     end_menu(tmpwin, tmpbuf);
     pick_cnt = select_menu(tmpwin, PICK_ONE, &picks);
     destroy_nhwindow(tmpwin);
@@ -675,9 +675,9 @@ const char *goal;
     mMoOdDxX[SIZE(mMoOdDxX_def)] = '\0';
 
     if (!goal)
-        goal = "desired location";
+        goal = _("desired location");
     if (flags.verbose) {
-        pline("(For instructions type a '%s')",
+        pline(_("(For instructions type a '%s')"),
               visctrl(Cmd.spkeys[NHKF_GETPOS_HELP]));
         msg_given = TRUE;
     }
@@ -693,7 +693,7 @@ const char *goal;
 #endif
     for (;;) {
         if (show_goal_msg) {
-            pline("Move cursor to %s:", goal);
+            pline(_("Move cursor to %s:"), _(goal));
             curs(WIN_MAP, cx, cy);
             flush_screen(0);
             show_goal_msg = FALSE;
@@ -801,9 +801,9 @@ const char *goal;
             goto nxtc;
         } else if (c == Cmd.spkeys[NHKF_GETPOS_AUTODESC]) {
             iflags.autodescribe = !iflags.autodescribe;
-            pline("Automatic description %sis %s.",
-                  flags.verbose ? "of features under cursor " : "",
-                  iflags.autodescribe ? "on" : "off");
+            pline(_("Automatic description %sis %s."),
+                  flags.verbose ? _("of features under cursor ") : "",
+                  iflags.autodescribe ? _("on") : _("off"));
             if (!iflags.autodescribe)
                 show_goal_msg = TRUE;
             msg_given = TRUE;
@@ -823,15 +823,15 @@ const char *goal;
                 }
                 gidx[i] = gcount[i] = 0;
             }
-            pline("%s.", view_filters[iflags.getloc_filter]);
+            pline(_("%s."), _(view_filters[iflags.getloc_filter]));
             msg_given = TRUE;
             goto nxtc;
         } else if (c == Cmd.spkeys[NHKF_GETPOS_MENU]) {
             iflags.getloc_usemenu = !iflags.getloc_usemenu;
-            pline("%s a menu to show possible targets%s.",
-                  iflags.getloc_usemenu ? "Using" : "Not using",
+            pline(_("%s a menu to show possible targets%s."),
+                  iflags.getloc_usemenu ? _("Using") : _("Not using"),
                   iflags.getloc_usemenu
-                      ? " for 'm|M', 'o|O', 'd|D', and 'x|X'" : "");
+                      ? _(" for 'm|M', 'o|O', 'd|D', and 'x|X'") : "");
             msg_given = TRUE;
             goto nxtc;
         } else if (c == Cmd.spkeys[NHKF_GETPOS_SELF]) {
@@ -844,8 +844,8 @@ const char *goal;
             goto nxtc;
         } else if (c == Cmd.spkeys[NHKF_GETPOS_MOVESKIP]) {
             iflags.getloc_moveskip = !iflags.getloc_moveskip;
-            pline("%skipping over similar terrain when fastmoving the cursor.",
-                  iflags.getloc_moveskip ? "S" : "Not s");
+            pline(_("%skipping over similar terrain when fastmoving the cursor."),
+                  iflags.getloc_moveskip ? "S" : _("Not s"));
         } else if ((cp = index(mMoOdDxX, c)) != 0) { /* 'm|M', 'o|O', &c */
             /* nearest or farthest monster or object or door or unexplored */
             int gtmp = (int) (cp - mMoOdDxX), /* 0..7 */
@@ -937,26 +937,26 @@ const char *goal;
                             } /* column */
                         }     /* row */
                     }         /* pass */
-                    pline("Can't find dungeon feature '%c'.", c);
+                    pline(_("Can't find dungeon feature '%c'."), c);
                     msg_given = TRUE;
                     goto nxtc;
                 } else {
                     char note[QBUFSZ];
 
                     if (!force)
-                        Strcpy(note, "aborted");
+                        Strcpy(note, _("aborted"));
                     else /* hjkl */
-                        Sprintf(note, "use '%c', '%c', '%c', '%c' or '%s'",
+                        Sprintf(note, _("use '%c', '%c', '%c', '%c' or '%s'"),
                                 Cmd.move_W, Cmd.move_S, Cmd.move_N, Cmd.move_E,
                                 visctrl(Cmd.spkeys[NHKF_GETPOS_PICK]));
-                    pline("Unknown direction: '%s' (%s).", visctrl((char) c),
+                    pline(_("Unknown direction: '%s' (%s)."), visctrl((char) c),
                           note);
                     msg_given = TRUE;
                 } /* k => matching */
             }     /* !quitchars */
             if (force)
                 goto nxtc;
-            pline("Done.");
+            pline(_("Done."));
             msg_given = FALSE; /* suppress clear */
             cx = -1;
             cy = 0;
@@ -1132,13 +1132,13 @@ char *monnambuf, *usrbuf;
         /* catch trying to name "the {priest,Angel} of Crom" as "Crom" */
         || ((p = strstri(monnambuf, " of ")) != 0
             && fuzzymatch(usrbuf, p + 4, " -_", TRUE))) {
-        pline("%s is already called %s.",
+        pline(_("%s is already called %s."),
               upstart(strcpy(pronounbuf, mhe(mtmp))), monnambuf);
         return TRUE;
     } else if (mtmp->data == &mons[PM_JUIBLEX]
                && strstri(monnambuf, "Juiblex")
                && !strcmpi(usrbuf, "Jubilex")) {
-        pline("%s doesn't like being called %s.", upstart(monnambuf), usrbuf);
+        pline(_("%s doesn't like being called %s."), upstart(monnambuf), usrbuf);
         return TRUE;
     }
     return FALSE;
@@ -1154,12 +1154,12 @@ do_mname()
     struct monst *mtmp = 0;
 
     if (Hallucination) {
-        You("would never recognize it anyway.");
+        You(_("would never recognize it anyway."));
         return;
     }
     cc.x = u.ux;
     cc.y = u.uy;
-    if (getpos(&cc, FALSE, "the monster you want to name") < 0
+    if (getpos(&cc, FALSE, _("the monster you want to name")) < 0
         || !isok(cc.x, cc.y))
         return;
     cx = cc.x, cy = cc.y;
@@ -1168,7 +1168,7 @@ do_mname()
         if (u.usteed && canspotmon(u.usteed)) {
             mtmp = u.usteed;
         } else {
-            pline("This %s creature is called %s and cannot be renamed.",
+            pline(_("This %s creature is called %s and cannot be renamed."),
                   beautiful(), plname);
             return;
         }
@@ -1181,11 +1181,11 @@ do_mname()
                 || mtmp->mundetected || M_AP_TYPE(mtmp) == M_AP_FURNITURE
                 || M_AP_TYPE(mtmp) == M_AP_OBJECT
                 || (mtmp->minvis && !See_invisible)))) {
-        pline("I see no monster there.");
+        pline(_("I see no monster there."));
         return;
     }
     /* special case similar to the one in lookat() */
-    Sprintf(qbuf, "What do you want to call %s?",
+    Sprintf(qbuf, _("What do you want to call %s?"),
             distant_monnam(mtmp, ARTICLE_THE, monnambuf));
     /* use getlin() to get a name string from the player */
     if (!name_from_player(buf, qbuf, has_mname(mtmp) ? MNAME(mtmp) : NULL))
@@ -1203,15 +1203,15 @@ do_mname()
      */
     if ((mtmp->data->geno & G_UNIQ) && !mtmp->ispriest) {
         if (!alreadynamed(mtmp, monnambuf, buf))
-            pline("%s doesn't like being called names!", upstart(monnambuf));
+            pline(_("%s doesn't like being called names!"), upstart(monnambuf));
     } else if (mtmp->isshk
                && !(Deaf || mtmp->msleeping || !mtmp->mcanmove
                     || mtmp->data->msound <= MS_ANIMAL)) {
         if (!alreadynamed(mtmp, monnambuf, buf))
-            verbalize("I'm %s, not %s.", shkname(mtmp), buf);
+            verbalize(_("I'm %s, not %s."), shkname(mtmp), buf);
     } else if (mtmp->ispriest || mtmp->isminion || mtmp->isshk) {
         if (!alreadynamed(mtmp, monnambuf, buf))
-            pline("%s will not accept the name %s.", upstart(monnambuf), buf);
+            pline(_("%s will not accept the name %s."), upstart(monnambuf), buf);
     } else
         (void) christen_monst(mtmp, buf);
 }
@@ -1234,13 +1234,14 @@ register struct obj *obj;
 
     /* Do this now because there's no point in even asking for a name */
     if (obj->otyp == SPE_NOVEL) {
-        pline("%s already has a published name.", Ysimple_name2(obj));
+        pline(_("%s already has a published name."), Ysimple_name2(obj));
         return;
     }
 
-    Sprintf(qbuf, "What do you want to name %s ",
-            is_plural(obj) ? "these" : "this");
-    (void) safe_qbuf(qbuf, qbuf, "?", obj, xname, simpleonames, "item");
+    Sprintf(qbuf, _("What do you want to name %s "),
+            is_plural(obj) ? _("these") : _("this"));
+    (void) safe_qbuf(qbuf, qbuf, NC_("nameobj", "?"), obj, xname, simpleonames,
+                     _("item"));
     /* use getlin() to get a name string from the player */
     if (!name_from_player(buf, qbuf, safe_oname(obj)))
         return;
@@ -1260,7 +1261,7 @@ register struct obj *obj;
         Strcpy(buf, aname);
 
     if (obj->oartifact) {
-        pline_The("artifact seems to resist the attempt.");
+        pline_The(_("artifact seems to resist the attempt."));
         return;
     } else if (restrict_name(obj, buf) || exist_artifact(obj->otyp, buf)) {
         /* this used to change one letter, substituting a value
@@ -1280,9 +1281,9 @@ register struct obj *obj;
         do {
             wipeout_text(bufp, rn2_on_display_rng(2), (unsigned) 0);
         } while (!strcmp(buf, bufcpy));
-        pline("While engraving, your %s slips.", body_part(HAND));
+        pline(_("While engraving, your %s slips."), body_part(HAND));
         display_nhwindow(WIN_MESSAGE, FALSE);
-        You("engrave: \"%s\".", buf);
+        You(_("engrave: \"%s\"."), buf);
         /* violate illiteracy conduct since hero attempted to write
            a valid artifact name */
         u.uconduct.literate++;
@@ -1370,27 +1371,27 @@ docallcmd()
     any = zeroany;
     any.a_char = 'm'; /* group accelerator 'C' */
     add_menu(win, NO_GLYPH, &any, abc ? 0 : any.a_char, 'C', ATR_NONE,
-             "a monster", MENU_UNSELECTED);
+             _("a monster"), MENU_UNSELECTED);
     if (invent) {
         /* we use y and n as accelerators so that we can accept user's
            response keyed to old "name an individual object?" prompt */
         any.a_char = 'i'; /* group accelerator 'y' */
         add_menu(win, NO_GLYPH, &any, abc ? 0 : any.a_char, 'y', ATR_NONE,
-                 "a particular object in inventory", MENU_UNSELECTED);
+                 _("a particular object in inventory"), MENU_UNSELECTED);
         any.a_char = 'o'; /* group accelerator 'n' */
         add_menu(win, NO_GLYPH, &any, abc ? 0 : any.a_char, 'n', ATR_NONE,
-                 "the type of an object in inventory", MENU_UNSELECTED);
+                 _("the type of an object in inventory"), MENU_UNSELECTED);
     }
     any.a_char = 'f'; /* group accelerator ',' (or ':' instead?) */
     add_menu(win, NO_GLYPH, &any, abc ? 0 : any.a_char, ',', ATR_NONE,
-             "the type of an object upon the floor", MENU_UNSELECTED);
+             _("the type of an object upon the floor"), MENU_UNSELECTED);
     any.a_char = 'd'; /* group accelerator '\' */
     add_menu(win, NO_GLYPH, &any, abc ? 0 : any.a_char, '\\', ATR_NONE,
-             "the type of an object on discoveries list", MENU_UNSELECTED);
+             _("the type of an object on discoveries list"), MENU_UNSELECTED);
     any.a_char = 'a'; /* group accelerator 'l' */
     add_menu(win, NO_GLYPH, &any, abc ? 0 : any.a_char, 'l', ATR_NONE,
-             "record an annotation for the current level", MENU_UNSELECTED);
-    end_menu(win, "What do you want to name?");
+             _("record an annotation for the current level"), MENU_UNSELECTED);
+    end_menu(win, _("What do you want to name?"));
     if (select_menu(win, PICK_ONE, &pick_list) > 0) {
         ch = pick_list[0].item.a_char;
         free((genericptr_t) pick_list);
@@ -1421,10 +1422,10 @@ docallcmd()
             (void) xname(obj);
 
             if (!obj->dknown) {
-                You("would never recognize another one.");
+                You(_("would never recognize another one."));
 #if 0
             } else if (!objtyp_is_callable(obj->otyp)) {
-                You("know those as well as you ever will.");
+                You(_("know those as well as you ever will."));
 #endif
             } else {
                 docall(obj);
@@ -1490,11 +1491,11 @@ struct obj *obj;
 
     if (obj->oclass == POTION_CLASS && obj->fromsink)
         /* kludge, meaning it's sink water */
-        Sprintf(qbuf, "Call a stream of %s fluid:",
+        Sprintf(qbuf, _("Call a stream of %s fluid:"),
                 OBJ_DESCR(objects[obj->otyp]));
     else
-        (void) safe_qbuf(qbuf, "Call ", ":", obj,
-                         docall_xname, simpleonames, "thing");
+        (void) safe_qbuf(qbuf, _("Call "), _(":"), obj,
+                         docall_xname, simpleonames, _("thing"));
     /* pointer to old name */
     str1 = &(objects[obj->otyp].oc_uname);
     /* use getlin() to get a name string from the player */
@@ -1533,8 +1534,8 @@ namefloorobj()
     /* "dot for under/over you" only makes sense when the cursor hasn't
        been moved off the hero's '@' yet, but there's no way to adjust
        the help text once getpos() has started */
-    Sprintf(buf, "object on map (or '.' for one %s you)",
-            (u.uundetected && hides_under(youmonst.data)) ? "over" : "under");
+    Sprintf(buf, _("object on map (or '.' for one %s you)"),
+            (u.uundetected && hides_under(youmonst.data)) ? _("over") : _("under"));
     if (getpos(&cc, FALSE, buf) < 0 || cc.x <= 0)
         return;
     if (cc.x == u.ux && cc.y == u.uy) {
@@ -1547,8 +1548,8 @@ namefloorobj()
     }
     if (!obj) {
         /* "under you" is safe here since there's no object to hide under */
-        pline("There doesn't seem to be any object %s.",
-              (cc.x == u.ux && cc.y == u.uy) ? "under you" : "there");
+        pline(_("There doesn't seem to be any object %s."),
+              (cc.x == u.ux && cc.y == u.uy) ? _("under you") : _("there"));
         return;
     }
     /* note well: 'obj' might be an instance of STRANGE_OBJECT if target
@@ -1581,16 +1582,16 @@ namefloorobj()
         /* traditional */
         unames[4] = roguename();
         /* silly */
-        unames[5] = "Wibbly Wobbly";
-        pline("%s %s to call you \"%s.\"",
-              The(buf), use_plural ? "decide" : "decides",
+        unames[5] = _("Wibbly Wobbly");
+        pline(_("%s %s to call you \"%s.\""),
+              The(buf), use_plural ? _("decide") : _("decides"),
               unames[rn2_on_display_rng(SIZE(unames))]);
     } else if (!objtyp_is_callable(obj->otyp)) {
-        pline("%s %s can't be assigned a type name.",
-              use_plural ? "Those" : "That", buf);
+        pline(_("%s %s can't be assigned a type name."),
+              use_plural ? _("Those") : _("That"), buf);
     } else if (!obj->dknown) {
-        You("don't know %s %s well enough to name %s.",
-            use_plural ? "those" : "that", buf, use_plural ? "them" : "it");
+        You(_("don't know %s %s well enough to name %s."),
+            use_plural ? _("those") : _("that"), buf, use_plural ? _("them") : _("it"));
     } else {
         docall(obj);
     }
@@ -1615,7 +1616,7 @@ static const char *const ghostnames[] = {
 const char *
 rndghostname()
 {
-    return rn2(7) ? ghostnames[rn2(SIZE(ghostnames))] : (const char *) plname;
+    return rn2(7) ? _(ghostnames[rn2(SIZE(ghostnames))]) : (const char *) plname;
 }
 
 /*
@@ -1661,6 +1662,7 @@ boolean called;
     char *buf = nextmbuf();
     struct permonst *mdat = mtmp->data;
     const char *pm_name = mdat->mname;
+    const char *i18n_name = nhi18n_monname(monsndx(mdat));
     boolean do_hallu, do_invis, do_it, do_saddle, do_name;
     boolean name_at_start, has_adjectives;
     char *bp;
@@ -1682,7 +1684,7 @@ boolean called;
 
     /* unseen monsters, etc.  Use "it" */
     if (do_it) {
-        Strcpy(buf, "it");
+        Strcpy(buf, _("it"));
         return buf;
     }
 
@@ -1712,6 +1714,11 @@ boolean called;
     else if (mdat == &mons[PM_HIGH_PRIEST] && mtmp->female)
         pm_name = "high priestess";
 
+    /* Use the localized base name for the active language (display only).
+       Left untouched when the explicit priest/priestess override above ran. */
+    if (i18n_name && pm_name == mdat->mname)
+        pm_name = i18n_name;
+
     /* Shopkeepers: use shopkeeper name.  For normal shopkeepers, just
      * "Asidonhopo"; for unusual ones, "Asidonhopo the invisible
      * shopkeeper" or "Asidonhopo the blue dragon".  If hallucinating,
@@ -1721,29 +1728,29 @@ boolean called;
         if (adjective && article == ARTICLE_THE) {
             /* pathological case: "the angry Asidonhopo the blue dragon"
                sounds silly */
-            Strcpy(buf, "the ");
-            Strcat(strcat(buf, adjective), " ");
+            Strcpy(buf, nhi18n_uses_articles() ? "the " : ""); /* zh: no article */
+            Strcat(strcat(buf, _(adjective)), nhi18n_uses_articles() ? " " : "");
             Strcat(buf, shkname(mtmp));
             return buf;
         }
         Strcat(buf, shkname(mtmp));
         if (mdat == &mons[PM_SHOPKEEPER] && !do_invis)
             return buf;
-        Strcat(buf, " the ");
+        Strcat(buf, nhi18n_uses_articles() ? " the " : ""); /* zh: no article */
         if (do_invis)
-            Strcat(buf, "invisible ");
-        Strcat(buf, pm_name);
+            Strcat(buf, _("invisible "));
+        Strcat(buf, _(pm_name));
         return buf;
     }
 
     /* Put the adjectives in the buffer */
     if (adjective)
-        Strcat(strcat(buf, adjective), " ");
+        Strcat(strcat(buf, _(adjective)), nhi18n_uses_articles() ? " " : "");
     if (do_invis)
-        Strcat(buf, "invisible ");
+        Strcat(buf, _("invisible "));
     if (do_saddle && (mtmp->misc_worn_check & W_SADDLE) && !Blind
         && !Hallucination)
-        Strcat(buf, "saddled ");
+        Strcat(buf, _("saddled "));
     has_adjectives = (buf[0] != '\0');
 
     /* Put the actual monster name or type into the buffer now.
@@ -1758,10 +1765,10 @@ boolean called;
         char *name = MNAME(mtmp);
 
         if (mdat == &mons[PM_GHOST]) {
-            Sprintf(eos(buf), "%s ghost", s_suffix(name));
+            Sprintf(eos(buf), _("%s ghost"), s_suffix(name));
             name_at_start = TRUE;
         } else if (called) {
-            Sprintf(eos(buf), "%s called %s", pm_name, name);
+            Sprintf(eos(buf), _("%s called %s"), pm_name, name);
             name_at_start = (boolean) type_is_pname(mdat);
         } else if (is_mplayer(mdat) && (bp = strstri(name, " the ")) != 0) {
             /* <name> the <adjective> <invisible> <saddled> <rank> */
@@ -1787,7 +1794,7 @@ boolean called;
         Strcat(buf, lcase(pbuf));
         name_at_start = FALSE;
     } else {
-        Strcat(buf, pm_name);
+        Strcat(buf, _(pm_name));
         name_at_start = (boolean) type_is_pname(mdat);
     }
 
@@ -1803,9 +1810,20 @@ boolean called;
     {
         char buf2[BUFSZ];
 
+        /* Languages without articles (e.g. Chinese) drop a/an/the entirely;
+           "your" becomes the localized possessive prefix. */
+        if (!nhi18n_uses_articles()) {
+            if (article == ARTICLE_YOUR) {
+                Strcpy(buf2, nhi18n_prefix("Your ", "\344\275\240")); /* 你 forces zh */
+                Strcat(buf2, buf);
+                Strcpy(buf, buf2);
+            }
+            return buf;
+        }
+
         switch (article) {
         case ARTICLE_YOUR:
-            Strcpy(buf2, "your ");
+            Strcpy(buf2, _("your "));
             Strcat(buf2, buf);
             Strcpy(buf, buf2);
             return buf;
@@ -1951,8 +1969,8 @@ char *outbuf;
        its own obfuscation) */
     if (mon->data == &mons[PM_HIGH_PRIEST] && !Hallucination
         && Is_astralevel(&u.uz) && distu(mon->mx, mon->my) > 2) {
-        Strcpy(outbuf, article == ARTICLE_THE ? "the " : "");
-        Strcat(outbuf, mon->female ? "high priestess" : "high priest");
+        Strcpy(outbuf, (nhi18n_uses_articles() && article == ARTICLE_THE) ? "the " : "");
+        Strcat(outbuf, mon->female ? _("high priestess") : _("high priest"));
     } else {
         Strcpy(outbuf, x_monnam(mon, article, (char *) 0, 0, TRUE));
     }
@@ -1973,13 +1991,13 @@ struct monst *mon, *other_mon;
         outbuf = nextmbuf();
         switch (pronoun_gender(mon, FALSE)) {
         case 0:
-            Strcpy(outbuf, "himself");
+            Strcpy(outbuf, _("himself"));
             break;
         case 1:
-            Strcpy(outbuf, "herself");
+            Strcpy(outbuf, _("herself"));
             break;
         default:
-            Strcpy(outbuf, "itself");
+            Strcpy(outbuf, _("itself"));
             break;
         }
     }
@@ -1997,15 +2015,15 @@ boolean ckloc;
     char *outbuf = nextmbuf();
 
     if (!mon) {
-        Strcpy(outbuf, "[Null monster]");
+        Strcpy(outbuf, _("[Null monster]"));
     } else if ((ptr = mon->data) == 0) {
-        Strcpy(outbuf, "[Null mon->data]");
+        Strcpy(outbuf, _("[Null mon->data]"));
     } else if (ptr < &mons[0]) {
-        Sprintf(outbuf, "[Invalid mon->data %s < %s]",
+        Sprintf(outbuf, _("[Invalid mon->data %s < %s]"),
                 fmt_ptr((genericptr_t) mon->data),
                 fmt_ptr((genericptr_t) &mons[0]));
     } else if (ptr >= &mons[NUMMONS]) {
-        Sprintf(outbuf, "[Invalid mon->data %s >= %s]",
+        Sprintf(outbuf, _("[Invalid mon->data %s >= %s]"),
                 fmt_ptr((genericptr_t) mon->data),
                 fmt_ptr((genericptr_t) &mons[NUMMONS]));
     } else if (ckloc && ptr == &mons[PM_LONG_WORM]
@@ -2035,7 +2053,7 @@ char *buf, *code;
     /* might fail (return empty buf[]) if the file isn't available */
     get_rnd_text(BOGUSMONFILE, buf, rn2_on_display_rng);
     if (!*mname) {
-        Strcpy(buf, "bogon");
+        Strcpy(buf, _("bogon"));
     } else if (index(bogon_codes, *mname)) { /* strip prefix if present */
         if (code)
             *code = *mname;
@@ -2096,8 +2114,8 @@ roguename()
                 return i + 5;
             }
     }
-    return rn2(3) ? (rn2(2) ? "Michael Toy" : "Kenneth Arnold")
-                  : "Glenn Wichman";
+    return rn2(3) ? (rn2(2) ? _("Michael Toy") : _("Kenneth Arnold"))
+                  : _("Glenn Wichman");
 }
 
 static NEARDATA const char *const hcolors[] = {
@@ -2115,8 +2133,8 @@ hcolor(colorpref)
 const char *colorpref;
 {
     return (Hallucination || !colorpref)
-        ? hcolors[rn2_on_display_rng(SIZE(hcolors))]
-        : colorpref;
+        ? _(hcolors[rn2_on_display_rng(SIZE(hcolors))])
+        : _(colorpref);
 }
 
 /* return a random real color unless hallucinating */
@@ -2126,8 +2144,8 @@ rndcolor()
     int k = rn2(CLR_MAX);
 
     return Hallucination ? hcolor((char *) 0)
-                         : (k == NO_COLOR) ? "colorless"
-                                           : c_obj_colors[k];
+                         : (k == NO_COLOR) ? _("colorless")
+                                           : _(c_obj_colors[k]);
 }
 
 static NEARDATA const char *const hliquids[] = {
@@ -2144,8 +2162,8 @@ const char *
 hliquid(liquidpref)
 const char *liquidpref;
 {
-    return (Hallucination || !liquidpref) ? hliquids[rn2(SIZE(hliquids))]
-                                          : liquidpref;
+    return (Hallucination || !liquidpref) ? _(hliquids[rn2(SIZE(hliquids))])
+                                          : _(liquidpref);
 }
 
 /* Aliases for road-runner nemesis
@@ -2169,8 +2187,8 @@ char *buf;
     if (mtmp && buf) {
         Sprintf(buf, "%s - %s",
                 x_monnam(mtmp, ARTICLE_NONE, (char *) 0, 0, TRUE),
-                mtmp->mcan ? coynames[SIZE(coynames) - 1]
-                           : coynames[mtmp->m_id % (SIZE(coynames) - 1)]);
+                mtmp->mcan ? _(coynames[SIZE(coynames) - 1])
+                           : _(coynames[mtmp->m_id % (SIZE(coynames) - 1)]));
     }
     return buf;
 }
@@ -2215,7 +2233,7 @@ const char *gang, *other;
         boolean nameit = FALSE;
 
         if (gang && orcname) {
-            Sprintf(buf, "%s of %s", upstart(orcname),
+            Sprintf(buf, _("%s of %s"), upstart(orcname),
                     upstart(strcpy(gbuf, gang)));
             nameit = TRUE;
         } else if (other && orcname) {
@@ -2256,7 +2274,7 @@ int *novidx;
         else if (*novidx >= 0 && *novidx < k)
             j = *novidx;
     }
-    return sir_Terry_novels[j];
+    return _(sir_Terry_novels[j]);
 }
 
 const char *
@@ -2275,12 +2293,12 @@ int *idx;
             || !strcmpi(The(lookname), sir_Terry_novels[k])) {
             if (idx)
                 *idx = k;
-            return sir_Terry_novels[k];
+            return _(sir_Terry_novels[k]);
         }
     }
     /* name not found; if novelidx is already set, override the name */
     if (idx && *idx >= 0 && *idx < SIZE(sir_Terry_novels))
-        return sir_Terry_novels[*idx];
+        return _(sir_Terry_novels[*idx]);
 
     return (const char *) 0;
 }

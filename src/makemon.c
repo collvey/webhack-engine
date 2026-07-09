@@ -105,7 +105,7 @@ int x, y, n, mmflags;
     cnt /= (u.ulevel < 3) ? 4 : (u.ulevel < 5) ? 2 : 1;
 #if defined(__GNUC__) && (defined(HPUX) || defined(DGUX))
     if (cnt != (cnttmp / cntdiv)) {
-        pline("cnt=%d using %d, cnttmp=%d, cntdiv=%d", cnt,
+        pline(_("cnt=%d using %d, cnttmp=%d, cntdiv=%d"), cnt,
               (u.ulevel < 3) ? 4 : (u.ulevel < 5) ? 2 : 1, cnttmp, cntdiv);
     }
 #endif
@@ -1862,9 +1862,9 @@ struct monst *mtmp, *victim;
 
         if (mvitals[newtype].mvflags & G_GENOD) { /* allow G_EXTINCT */
             if (canspotmon(mtmp))
-                pline("As %s grows up into %s, %s %s!", mon_nam(mtmp),
+                pline(_("As %s grows up into %s, %s %s!"), mon_nam(mtmp),
                       an(ptr->mname), mhe(mtmp),
-                      nonliving(ptr) ? "expires" : "dies");
+                      nonliving(ptr) ? _("expires") : _("dies"));
             set_mon_data(mtmp, ptr); /* keep mvitals[] accurate */
             mondied(mtmp);
             return (struct permonst *) 0;
@@ -1876,17 +1876,17 @@ struct monst *mtmp, *victim;
              */
             Sprintf(buf, "%s%s",
                     /* deal with female gnome becoming a gnome lord */
-                    (mtmp->female && !fem) ? "male "
+                    (mtmp->female && !fem) ? _("male ")
                         /* or a male gnome becoming a gnome lady
                            (can't happen with 3.6.0 mons[], but perhaps
                            slightly less sexist if prepared for it...) */
-                      : (fem && !mtmp->female) ? "female " : "",
-                    ptr->mname);
-            pline("%s %s %s.", upstart(y_monnam(mtmp)),
-                  (fem != mtmp->female) ? "changes into"
-                                        : humanoid(ptr) ? "becomes"
-                                                        : "grows up into",
-                  an(buf));
+                      : (fem && !mtmp->female) ? _("female ") : "",
+                    nhi18n_monname(monsndx(ptr)) ? nhi18n_monname(monsndx(ptr))
+                                                 : ptr->mname);
+            pline((fem != mtmp->female) ? _("%s changes into %s.")
+                      : humanoid(ptr) ? _("%s becomes %s.")
+                                      : _("%s grows up into %s."),
+                  upstart(y_monnam(mtmp)), an(buf));
         }
         set_mon_data(mtmp, ptr);
         newsym(mtmp->mx, mtmp->my);    /* color may change */
@@ -2283,7 +2283,7 @@ int *seencount;  /* secondary output */
         impossible("bad bag o' tricks");
     } else if (bag->spe < 1) {
         /* if tipping known empty bag, give normal empty container message */
-        pline1((tipping && bag->cknown) ? "It's empty." : nothing_happens);
+        pline1((tipping && bag->cknown) ? _("It's empty.") : nothing_happens);
         /* now known to be empty if sufficiently discovered */
         if (bag->dknown && objects[bag->otyp].oc_name_known)
             bag->cknown = 1;
@@ -2309,7 +2309,7 @@ int *seencount;  /* secondary output */
             if (bag->dknown)
                 makeknown(BAG_OF_TRICKS);
         } else if (!tipping) {
-            pline1(!moncount ? nothing_happens : "Nothing seems to happen.");
+            pline1(!moncount ? nothing_happens : _("Nothing seems to happen."));
         }
     }
     return moncount;

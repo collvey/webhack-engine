@@ -26,7 +26,28 @@ rem WASM should behave like UNIX, not Windows
 rem Add -DNOMAIL to match onames.h state (SCR_MAIL not generated)
 rem CRITICAL: -s ASYNCIFY=1 enables blocking I/O (fgets) to work in WASM
 rem Force-undefine WIN32 macros that emcc auto-defines when building on Windows
-emcc -O2 ^
+rem Silence two benign but VERY high-volume warning classes that otherwise
+rem flood the terminal with ~30k lines (can make the build look "stuck"):
+rem  -Wformat-security: fires on every pline(_("...")) because the _() gettext
+rem     macro returns a non-literal; our format strings come from a trusted
+rem     catalog, not user input, so this is a false positive here.
+rem  -Wdeprecated-non-prototype: NetHack's K&R srand48()/sleep() decls in
+rem     system.h, included by nearly every TU.
+rem NOTE: `call` is REQUIRED here. emcc resolves to emcc.bat; invoking a batch
+rem file from a batch file WITHOUT `call` transfers control and never returns,
+rem so the ERRORLEVEL check and "Build complete" banner below would never run
+rem (the build still produced output, but never reported success/failure).
+rem --- progress heartbeat (Option A): the compile is quiet because warnings are
+rem     suppressed, so print a "still compiling" line every ~20s to clearly show
+rem     the build is alive (vs stuck). A marker file (nh_build.flag) keeps a small
+rem     background PowerShell timer alive; it is deleted the instant emcc returns,
+rem     and the timer self-terminates after 20 min if ever orphaned.
+echo running> "%TEMP%\nh_build.flag"
+start "" /b powershell -NoProfile -Command "$s=[Diagnostics.Stopwatch]::StartNew(); $n=0; while((Test-Path $env:TEMP\nh_build.flag) -and ($n -lt 60)){ Start-Sleep -Seconds 20; $n++; if(Test-Path $env:TEMP\nh_build.flag){ [Console]::WriteLine('   [building] still compiling... ' + [int]$s.Elapsed.TotalSeconds + 's elapsed') } }"
+call emcc -O2 ^
+     -Wno-format-security ^
+     -Wno-deprecated-non-prototype ^
+     -Wno-macro-redefined ^
      -UWIN32 ^
      -U_WIN32 ^
      -U__WIN32__ ^
@@ -48,7 +69,7 @@ emcc -O2 ^
      -s EXPORT_NAME=NetHackModule ^
      -s ENVIRONMENT=web ^
      -s EXPORTED_RUNTIME_METHODS=FS,ccall,cwrap,UTF8ToString,allocateUTF8 ^
-     -s EXPORTED_FUNCTIONS=_main,_save_to_slot,_load_from_slot,_list_save_slots,_delete_save_slot,_init_save_slots,_wasm_early_init,_set_option_direct ^
+     -s EXPORTED_FUNCTIONS=_main,_save_to_slot,_load_from_slot,_list_save_slots,_delete_save_slot,_init_save_slots,_wasm_early_init,_set_option_direct,_nhi18n_set_language ^
      -s INITIAL_MEMORY=67108864 ^
      -s ASYNCIFY=1 ^
      -s ASYNCIFY_STACK_SIZE=262144 ^
@@ -60,6 +81,7 @@ emcc -O2 ^
      --preload-file sys/wasm/.nethackrc@/home/web_user/.nethackrc ^
      --preload-file sys/wasm/sysconf@/sysconf ^
      --preload-file sys/wasm/nhdat@/nhdat ^
+     --preload-file sys/wasm/nhdat.zh-CN@/nhdat.zh-CN ^
      --preload-file sys/wasm/dungeon@/dungeon ^
      --exclude-file *.exe ^
      --exclude-file *.dll ^
@@ -126,6 +148,7 @@ emcc -O2 ^
      src/mthrowu.c ^
      src/muse.c ^
      src/music.c ^
+     src/nhi18n.c ^
      src/o_init.c ^
      src/objects.c ^
      src/objnam.c ^
@@ -185,7 +208,12 @@ emcc -O2 ^
      sys/wasm/wasm_tty_stubs.c ^
      win/headless/save_slots.c
 
-if %ERRORLEVEL% neq 0 (
+rem --- stop the progress heartbeat. Capture emcc's exit code FIRST so the
+rem     following `del` command doesn't overwrite it. ---
+set "BUILD_RC=%ERRORLEVEL%"
+del /f /q "%TEMP%\nh_build.flag" >nul 2>&1
+
+if %BUILD_RC% neq 0 (
     echo.
     echo ERROR: Build failed!
     popd

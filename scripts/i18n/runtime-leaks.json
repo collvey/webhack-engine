@@ -1,0 +1,287 @@
+{
+  "_doc": "Curated RUNTIME i18n leaks the literal scanner cannot see: the format string is translated (green), but a %s argument is composed at runtime by a helper (s_suffix/makeplural/xname/urole.name.m/align_gtitle/corpse_xname) and stays English. Merged inline into coverage-core.mjs reshapeCFile(). status 'runtime-leak' (open, magenta, counts as a gap) vs 'runtime-fixed' (fixed:true, green, not a gap). Set fixed:true once the underlying code is fixed AND the wasm rebuilt; delete the entry after the user confirms in playtest. CAUTION: coverage-core JSON.parse()s this file — keep each src/<file> key UNIQUE (duplicate keys silently collapse to last-wins and drop earlier entries; merged 2026-07-08). NOTE: this file is for English LEAKS only; present-but-WRONG zh (word order/mistranslation) is tracked in the SIBLING file scripts/i18n/translation-defects.json (status zh-defect, also merged by coverage-core + rendered in the dashboard). See memory composed-message-word-order.",
+  "src/hacklib.c": [
+    {
+      "line": 319,
+      "fixed": true,
+      "text": "s_suffix() 追加 \"'s\"",
+      "reason": "RL-1 根因：s_suffix() 给已本地化的名字加英文 \"'s\"。已修复：zh 走 _(\"'s\")→「的」分支（153 处调用统一收敛）。已构建。待游玩验证（店铺欢迎语）。"
+    }
+  ],
+  "src/shk.c": [
+    {
+      "line": 614,
+      "fixed": true,
+      "text": "s_suffix(shkname(shkp))",
+      "reason": "RL-1 实例：店铺欢迎语「…'s 杂货店」。随 hacklib.c:319 修复→「…的杂货店」。已构建。待游玩验证。"
+    },
+    {
+      "line": 617,
+      "fixed": true,
+      "text": "s_suffix(shkname(shkp))",
+      "reason": "RL-1 实例：进店变体，同 shk.c:614。已修复+构建。"
+    }
+  ],
+  "src/cmd.c": [
+    {
+      "line": 2234,
+      "fixed": true,
+      "text": "_(attrname[attrindx])",
+      "reason": "RL-3c：属性名裸传。已修复：改为 _(attrname[attrindx])。★运行时已验证★ ^X 开悟窗口显示「你的力量 是 18/01」等（e2e/tests/i18n-leak-fix.test.ts）。"
+    },
+    {
+      "line": 1617,
+      "fixed": true,
+      "text": "You_/are/have/had… 框架词 + 空串目录条目被生成器丢弃",
+      "reason": "RL-5（游玩中新发现，已修复）：enlght_line 已用 _() 包 You_/have/are 等框架词，但 gen-c-catalog.mjs 会跳过「空串译文」，导致「have 」等 zh 有意省略词（值=\"\"）找不到条目而回退英文键 → 「你HAVE 刚刚开始」。根因在生成器（丢弃 23 个语法助词：冠词 the/a、助动词 have/are、序数后缀 st/nd/th、敬称 Mr./Ms.）。已修复：生成器改为 emit 空串译文。★运行时已验证★ 现显示「你刚刚开始你的冒险。」。"
+    },
+    {
+      "line": 1790,
+      "fixed": true,
+      "text": "urole.name.m / urace.noun / urace.adj / You_ / were 裸传（死亡开悟披露）",
+      "reason": "✅已修复（源码+构建，★运行时已验证★ ^X 开悟截图 i18n-leak-fix.test/01-attributes-zh.png：「PLAYER瓦尔基里的属性」「你少年武士，1级的人类瓦尔基里。」「你守序，为提尔效力」——职业/种族/框架词全中文，无 humanArcheologist / You were 泄漏）｜RL-23（游玩新发现，待审）：死亡后属性披露四行泄漏——①标题「千寻Archeologist的属性」②「你曾挖掘工，1级的男性 humanArcheologist」③「You were 守序，为克察尔科亚特尔效力」④告别「再见，千寻，Archeologist……」。根因：enlightenment/background_enlightenment 里职业名 urole.name.m/f、种族 urace.noun/adj 裸传进已译格式串（cmd.c:1790 标题、1844 role_titl、1880 urace.noun、1883 urace.adj；end.c:1489-1493 告别）；且对齐行 cmd.c:1891 把框架词 You_/were 当 %s 实参裸传（未像 enlght_line:1655 那样 _() 包裹）；另 cmd.c:1943「started out」性别形容词 genders[].adj 裸传。★纯代码★：审计 role.c 全部 13 职业名 + 164 军衔名 + 5 种族 noun/adj 均已在 nhi18n_catalog.h（考古学家/挖掘工/人类/矮人…，仅数组末尾 Undefined 占位缺，不显示），故无需补目录。对照 rank_of(botl.c:301-310) 早已 _() 包军衔与职业名——同数据、调用点不一致（军衔显示 挖掘工 而职业名泄漏即为此）。修复：各显示点包 _(urole.name…)/_(urace.noun/adj)/_(You_)/_(!final?are:were)/_(genders[].adj)。role_titl 于 1844 统一 _()，使 1877 strcmpi(rank_titl,role_titl) 变为中文↔中文比较（顶级军衔=职业名时正确省略）。★同类审计（种族/职业裸传，本次已顺带修 2 处显示泄漏）：pager.c:92 self_lookat 种族前缀、pray.c:1391「altar stained with %s blood」——均改 _(urace.adj)。★仍待审集群（非本次范围）：end.c:769-773 文本转储记录 + cmd.c:3082-3120 #attributes「Starting/Current」菜单——两者格式串本身未译（转储惯例英文），另 questpgr.c:343 任务模板 %r、wield.c:609 makeplural(职业名)、eat.c:1039 an(种族名)、do_name.c:1569 命名默认、read.c:2268、polyself.c:250/1089、hack.c:2972、sounds.c:563——需逐一判定显示/内部。"
+    }
+  ],
+  "src/polyself.c": [
+    {
+      "line": 195,
+      "fixed": true,
+      "text": "You(_(fmt), arg)  /* arg 是裸种族名 */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-10（游玩新发现，待审）：「你变回了human的形态！」。polyman(fmt,arg) 只翻格式串 _(fmt)，arg 裸传。两处调用都传种族名：polyself.c:1089 urace.adj（变回形态）、:367 urace.noun（feel like a new %s）。「human」→人类 早在目录里（tracker 显示已译/绿），但此路径不查目录——与神名/tin 同属「名字参数裸传进已译格式串」类，字面量扫描器看不到 %s 运行时值（根本盲区）。修复：polyman 内改 You(_(fmt), _(arg))，一处修复两个调用点（_(NULL) 安全）。种族形容词 elven/dwarvish 等若缺则另补目录。"
+    }
+  ],
+  "src/do_name.c": [
+    {
+      "line": 1687,
+      "fixed": true,
+      "text": "Strcpy(buf, \"it\")  /* 未见怪物代词硬编码 */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-17（游玩新发现，待审）：「It落空了！」「你击中it。」。x_monnam 对未见/不可见怪物返回硬编码 \"it\"（do_name.c:1687），目录里 it→它、It→它 却没用上；Monnam 把 it 大写成 It。对照同函数 do_name.c:1594 已用 _(\"it\")/_(\"them\")——调用点不一致。修复：Strcpy(buf, _(\"it\"))；highc/大写对中文「它」是 no-op。审计同类代词泄漏：genders[].he/she/it 裸传（apply.c:229 `genders[gndr].he`，注释就写着 he/she/it）、mon.c:2350 `kwhom = \"it\"`（击杀者上下文）。"
+    },
+    {
+      "line": 1750,
+      "fixed": true,
+      "text": "Strcat(buf, \"invisible \")  /* 前缀硬编码（非商店主路径，实际泄漏点）*/",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-15 复发（游玩再次发现，待审）：「Invisible 潜行者落空了！」。★RL-15 原始条目（原 line 1741）当时声称『1741 及 1750』两处都改了，实则只改了 1741（商店主分支 _(\"invisible \")），普通怪物主路径 1750 漏改，仍裸 \"invisible \"——潜行者非商店主，走 1750，故泄漏一直存在。目录里 \"invisible \"→隐形的 早已就位（nhi18n_catalog.h:7345），★纯代码漏改★，包 _() 即可，无需改目录。教训：多点同类修复要逐点核对，勿凭注释假定全覆盖。同函数其它硬编码前缀：\"saddled \"（已 _()）、\"the \"/\" the \"（1731/1739，zh 由 nhi18n_uses_articles 门控省略）。"
+    }
+  ],
+  "src/end.c": [
+    {
+      "line": 446,
+      "fixed": true,
+      "text": "Strcat(buf, \"invisible \")  /* 死亡/凶手名前缀硬编码 */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-15 同类审计（death disclosure）：凶手名组装 \"invisible \" 前缀裸英文（death_related monster name buf），怪物名本身已本地化。对照 mhitu.c:196/202、priest.c:316 同函数族已用 _(\"invisible \")——调用点不一致。修复：Strcat(buf, _(\"invisible \"))，目录已有隐形的。注：同处 \"the \"（442，鬼魂名前缀）仍硬编码，属冠词类（zh 应省略，nhi18n_uses_articles 门控），未在本次范围。"
+    }
+  ],
+  "src/pager.c": [
+    {
+      "line": 95,
+      "fixed": true,
+      "text": "? \"invisible \" : \"\"  /* self_lookat 前缀硬编码 */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-15 同类审计（查看自身/隐形时）：self_lookat 格式串 _(\"%s%s%s called %s\") 已译，但 invisible 前缀实参裸 \"invisible \"。对照 mhitu.c:196/202 已用 Invis ? _(\"invisible \") : \"\"——同一模式调用点不一致。修复：? _(\"invisible \") : \"\"。注：pager.c:631 / read.c:2465-2467 的 \"invisible \" 是英文侧 strstri/strncmp 解析（非显示），保持英文正确，不动。"
+    }
+  ],
+  "src/objnam.c": [
+    {
+      "line": 876,
+      "fixed": true,
+      "text": "strncat(buf, ONAME(obj))  /* 神器名裸取 ONAME */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-22（游玩新发现，待审）：「j - 已祝福的+0 Staff of Aesculapius。」。神器创建时 oname(otmp, a->name)（artifact.c:212）把英文神器名存进 ONAME(obj)；xname_flags 的 nameit 分支直接 strncat(ONAME(obj))，绕过 artiname() 的 _() 本地化。★影响全部 34 个神器★（非仅圣杖），凡经 xname/doname 显示者皆泄漏。对照 bare_artifactname/killer_xname 已走 artiname()——路径不一致。修复：nameit 处若 obj->oartifact 改用 artiname(obj->oartifact)，普通用户命名对象仍裸用 ONAME。审计：artilist.h 全部 34 个真实神器名（除 #0 空占位）均已在 nhi18n_catalog.h（含 The Staff of Aesculapius→阿斯克勒庇俄斯之杖），故本地化即时生效，无需补目录。注：artiname 返回 _(\"The …\")，zh 值本就无冠词；英文侧 xname:880 已 strip 前导 \"the \"，故英文显示不变（无回归）。"
+    },
+    {
+      "line": 1570,
+      "fixed": true,
+      "text": "corpse \"the \" gate",
+      "reason": "RL-4：corpse_xname 硬编码 \"the \"→「the 下水道鼠尸体」。已修复：包进 if (nhi18n_uses_articles())。已构建。待游玩验证（吃尸体）。"
+    },
+    {
+      "line": 621,
+      "fixed": true,
+      "text": "Strcpy(buf, _(f->fname))  /* SLIME_MOLD 水果名本地化 */",
+      "reason": "RL-6 已修复：fruit 路径改 Strcpy(buf, _(f->fname))，目录加 slime mold→黏菌；pluralize 的 makeplural 加 nhi18n_uses_plurals() gate。自定义水果名经 _() 回退。已构建，黏菌 已进 wasm。待游玩验证（物品栏/地面 slime mold）。"
+    },
+    {
+      "line": 122,
+      "fixed": true,
+      "text": "nhi18n_objname(otyp) 现覆盖玻璃宝石",
+      "reason": "RL-7 已修复：gen-c-objnames.mjs 现在也解析 onames.h 里被注释的 ONAME（/* #define … 433 */），对这 9 个玻璃宝石按数值 emit `case 433 /* … */:`；object-names.zh-CN.json 补齐 9 条（不值钱的白色玻璃 等）。已构建，字符串已进 wasm。待游玩验证（鉴定后的玻璃宝石）。注：前端物品栏 nomenclature 另有独立缺口。"
+    },
+    {
+      "line": 2530,
+      "fixed": true,
+      "text": "Strcpy(spot + 1, \"'s\")  /* makeplural 非 zh-aware */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-14（游玩新发现，待审）：「d - 已祝福的+5 独角兽之角（手's持武器）」。makeplural 对「末字节非 ASCII 字母」的串走 !letter 分支追加英文所有格 \"'s\"（objnam.c:2530）——已本地化的「手」末字节是 UTF-8 0x8B，非字母 → 「手's」。调用点 objnam.c:1339 `hand_s = makeplural(body_part(HAND))`（双手武器），body_part→mbodypart 已本地化返回「手」。与 RL-2（currency）同根：makeplural 作用于已本地化文本。★系统性修复★：makeplural 顶部加 `if (!nhi18n_uses_plurals()) return strcpy(buf, str);`——中文无复数，一处修复所有 makeplural-on-localized 泄漏。★规模★：全库 ~60+ 处 `makeplural(body_part(...))`（眼睛/手/脚/腿/脚趾/手指/手臂/肺…），如 region.c:976「你的眼睛's刺痛」、potion/read/wield/trap/detect/do_wear 等，全部产生「X's」；顶部门控一处全修。"
+    },
+    {
+      "line": 648,
+      "fixed": true,
+      "text": "Strcpy(buf, actualn)  /* TIN: actualn 仍为英文 \"tin\" */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-9（游玩新发现，待审）：「你看到这里有tin」。TIN 不在 object-names.zh-CN.json → nhi18n_objname(TIN)=NULL → 食物名回退英文 OBJ_NAME \"tin\"。追踪历史：字面量扫描器只经 eat.c:1312 的 _(\"tin\")（陷阱爆炸消息）收录过 \"tin\"→锡，故 tracker 误显示「已译/绿」；物品显示路径本身从未被追踪（同 slime mold/egg 盲区），也从未被排除。两个附带问题：(1) 锡 是误译——NetHack 的 tin 是食物罐头（用开罐器打开吃内容），应为 罐头 而非金属锡；(2) 上一轮对象名审计其实已标出 TIN 缺失，但我误当成 figurine/statue 那类内联处理的假阳性而忽略了。修复建议：object-names.zh-CN.json 加 TIN→罐头，并把 eat.c 上下文的 锡 改 罐头。"
+    }
+  ],
+  "src/eat.c": [
+    {
+      "line": 3193,
+      "fixed": true,
+      "text": "floorfood 提问后缀 verb / \"it\" 裸传",
+      "reason": "✅已修复（源码+目录+构建，e2e 无回归）｜RL-24（游玩新发现，待审）：「这里是豺尸体；eatit吗？」。floorfood 组装地面食物提问后缀 _(\" here; %s %s?\") 时，verb（\"eat\"，来自 floorfood(\"eat\",…) 裸 C 串）与 one?\"it\":_(\"one\") 里的 \"it\" 均裸传 → 「eat」+「it」黏成「eatit」。对照同函数 3211 `You_cant(_(\"%s that!\"), _(verb))` 已 _(verb)——调用点不一致。修复：_(verb) + one?_(\"it\"):_(\"one\")。目录已有 eat→吃、it→它、tin→锡；补 sacrifice→献祭（floorfood 三调用方 eat/tin/sacrifice 之一，pray.c:1343）。"
+    },
+    {
+      "line": 3057,
+      "fixed": true,
+      "text": "_(urole.name.m)",
+      "reason": "RL-3b：角色名「Wizard急需食物」。已修复：改为 _(urole.name.m)（目录已有 Wizard→巫师）。已构建。待游玩验证（饥饿）。"
+    },
+    {
+      "line": 1237,
+      "fixed": true,
+      "text": "Strcpy(eos(buf), \" of \")  /* tin_details 连接词硬编码 */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-11（游玩新发现，待审）：「已祝福的tin of blue dragon肉」。tin_details 组装「tin of <怪物> meat」：此处 \" of \" 连接词硬编码英文（未知罐头种类分支）；同函数 1224 \" of spinach\"、1226 \"empty tin\" 亦硬编码。注意 zh 语序不同——英文「tin of X meat」应为「X肉罐头」（内容在前、罐头在后），非简单 _() 包裹可解，需重排；且依赖 RL-9 的 tin→罐头。"
+    },
+    {
+      "line": 1242,
+      "fixed": true,
+      "text": "mons[mnum].mname  /* 罐头内怪物名裸传 */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-11 同源：怪物名「blue dragon/Cyclops/silver dragon」由 mons[mnum].mname 裸传（1240 素食分支、1242 _(\"%s meat\") 荤食分支），未走 nhi18n_monname → 英文。修复：nhi18n_monname(mnum) ? … : mons[mnum].mname（同 figurine/statue 已用的模式）→ 蓝龙/独眼巨人/银龙。"
+    },
+    {
+      "line": 1362,
+      "fixed": true,
+      "text": "what = mons[mnum].mname — 开罐闻味裸怪物名",
+      "reason": "✅已修复（源码+构建，e2e i18n-leak-fix 无回归，待游玩验证）｜RL-30（游玩新发现）：开罐「它闻起来像green dragon。」。tinopen 的 _(\"It smells like %s.\") 已译，但 what=mons[mnum].mname 裸传怪物名，绕过 nhi18n_monname。与 RL-11(tin_details 罐头物品名) 同罐头子系统、不同显示点——RL-11 修的是物品名「X肉罐头」，此处是开罐后闻味提示，RL-11 未覆盖。对照同函数 eat.c:1390「consume %s %s」已用 nhi18n_monname(mnum)?:mname——调用点不一致。修复：what = nhi18n_monname(mnum)?:mons[mnum].mname（后续 makeplural/the 分支已分别经 uses_plurals/uses_articles 门控，安全）。审计 backlog：同函数幻觉分支 1360 what=rndmonnam(NULL) 随机怪物名本地化未验，另查。"
+    }
+  ],
+  "src/dog.c": [
+    {
+      "line": 177,
+      "fixed": true,
+      "text": "默认宠物名 Slasher/Hachi/Idefix/Sirius 硬编码英文",
+      "reason": "✅已修复（源码+目录+构建，e2e 无回归）｜RL-25（游玩新发现，待审）：「你和Hachi交换了位置。」武士默认宠物名 Hachi（涩谷忠犬八公）硬编码英文，christen_monst 存进 ONAME。四职业默认犬名（穴居人 Slasher、武士 Hachi、蛮子 Idefix、游侠 Sirius）dog.c:174-181 皆裸串。修复：各包 _()（仅默认名，用户 dogname/catname 选项不译）+ 目录补 利刃/八公/伊德菲克斯/天狼星。宠物名经 xname nameit 显示——与 RL-22 神器名同路径（该处已改 artiname；用户命名走 ONAME 裸用，故此处必须在赋值点 _() 本地化）。"
+    }
+  ],
+  "src/trap.c": [
+    {
+      "line": 2386,
+      "fixed": true,
+      "text": "tower_of_flame 静态英文常量裸传",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-26（游玩新发现，待审）：「一个tower of flame从地面下方的Hachi喷发而出！」。trap.c:47 static const tower_of_flame[]=\"tower of flame\" 裸传进已译格式串（2386/2389 火焰陷阱、3148 宝箱火焰陷阱、3184 losehp 死因）。目录早有 tower of flame→火焰之柱（nhi18n_catalog.h:9660），对照 explode.c:132 已用 _(\"tower of flame\")——纯代码漏包。修复：四处一律 _(tower_of_flame)。explode.c:553 strcmpi(str,\"tower of flame\") 是英文侧冠词判定（str 于 132 已本地化，zh 忽略冠词，良性），不动。Hachi 部分由 RL-25 修复。"
+    },
+    {
+      "line": 944,
+      "fixed": true,
+      "text": "defsyms[trap_to_defsym(ttype)].explanation  /* 陷阱名裸传，全部陷阱类型 */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-16（游玩发现，待审）：「你逃离 magic trap」「你逃离 dart trap」——所有陷阱类型皆泄漏。trap.c:944 把陷阱名 defsyms[trap_to_defsym(ttype)].explanation（drawing.c 定义）裸传进 _(\"escape %s %s.\")，未包 _()。★纯代码问题★：陷阱名在主目录里已全部翻译（dart trap→飞镖陷阱、magic trap→魔法陷阱、arrow trap→飞箭陷阱、bear trap→捕熊夹…全部命中），泄漏 100% 因裸传。全 trap.c 共 10 处裸传（929/936/944/947/1296/2481/4080/4090 等）vs 仅 2 处已包 _()——同一数组、调用点不一致。修复：这 10 处一律包 _(defsyms[...].explanation)，无需加目录。"
+    }
+  ],
+  "src/nhi18n.c": [
+    {
+      "line": 132,
+      "fixed": true,
+      "text": "nhi18n_prefix 对已含代词的译文重复添加「你」→「你你」",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-27（游玩新发现，待审）：「你你携带的东西太多，无法通过。」。You() 经 nhi18n_prefix(\"You \",line) 在 line 已译（含 CJK）时前置 zh 前缀「你」；但约 121 条 You()-片段译文被译成含主语的整句（如 are carrying too much…→「你携带…」），前缀再加一个「你」→「你你」。★根因层次：数据（译文不该含主语代词，约定应为片段）+ 机制未防重复★。修复取机制层：nhi18n_prefix 幂等化——若 line 已以该 zh 前缀开头则返回 \"\"，一处修复全类（含 You/Your/You_feel/…），且不影响 985 条守约（不以「你」开头）的片段。审计：You() 专用键 985 条中 121 条以「你」开头（脚本 audit-you2.mjs）；You_feel/hear/see 的「你感觉/你听到」+ 后随「你的…」为合法（假阳性，已排除）。数据侧 121 条冗余「你」暂留（幂等前缀已消除双写），列为数据清理 backlog。"
+    }
+  ],
+  "src/objnam.c/scroll-labels": [
+    {
+      "line": 751,
+      "fixed": true,
+      "text": "随机卷轴标签（HAPAX LEGOMENON 等）目录缺失·刻意 verbatim",
+      "reason": "✅已修复（目录+构建，用户确认音译方案）｜RL-28（游玩新发现，待审）：「卷轴，标记为 HAPAX LEGOMENON」。★非代码 bug★：objnam.c:481 dn=_(dn) 已把外观描述过 _()，注释明言「random scroll labels 留 verbatim」——刻意设计（未译=神秘魔法词）。用户要求本地化。方案（用户选「音译」）：20 个卷轴标签（objects.c:855-875 FOOBIE BLETCH…STRC PRST SKRZ KRK）加音译目录条目（弗比·布莱奇/哈帕克斯·勒戈梅农/兹洛尔菲克…），保留异域不可读的魔法词质感。无需改代码。"
+    }
+  ],
+  "webhack-client/src/hooks/usePromptHandler.ts": [
+    {
+      "line": 148,
+      "fixed": true,
+      "text": "`> ${def} (cancelled)`  /* 前端 ESC 取消回显硬编码 */",
+      "reason": "✅已修复（前端 frontend.json + i18n.t，e2e 无回归）｜RL-21（游玩新发现，待审）：yn 提问按 ESC 取消时消息日志回显「> n (cancelled)」——(cancelled) 硬编码英文。★前端泄漏★（React，非 C/WASM），字面量扫描器与 C 目录都看不到（前端盲区，同 RL-12 阵营值）。修复：messageLog.cancelled 加 EN「(cancelled)」/ zh「（已取消）」，usePromptHandler.ts:148 改 i18n.t('messageLog.cancelled')（仿 InventoryParser.ts 的 import i18n from '../i18n' 命令式用法）。同文件其余 createMessage 皆回显用户输入或后端已译 prompt 文本，无泄漏。★同类审计（前端菜单页脚提示，硬编码英文，未 t()，待修）：MenuStrategy.ts:149『Click/Enter: Select | 0-9: Set Count | Esc: Cancel』、:228『Space: Toggle | . : Select All | …』、PanelTypes.ts:163-175 getDefaultHelpText 全部分支（Press any key to continue / Click to select • Esc to cancel / … / Esc to close）——属菜单帮助文本 i18n 独立簇，本次未纳入。"
+    }
+  ],
+  "src/apply.c": [
+    {
+      "line": 274,
+      "fixed": true,
+      "text": "what = mptr->mname  /* 雕像检视直取裸怪物名 */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-13（游玩新发现，待审）：「作为一尊雕像，Wood golem处于极其出色状态。」。格式串 _(\"%s is in %s health for a statue.\") 已译，但 what=mptr->mname 直取裸英文怪物名，绕过 nhi18n_monname（核心 x_monnam/do_name.c:1664 已本地化，此处旁路）。The() zh 门控只大写首字母 → 「Wood golem」。修复：what = nhi18n_monname(monsndx(mptr)) ? … : mptr->mname。属「直取 .mname 绕过本地化」类——见审计（全库约 40 处 ->mname/.mname 裸访问）。"
+    }
+  ],
+  "src/botl.c": [
+    {
+      "line": 394,
+      "fixed": true,
+      "text": "dungeons[u.uz.dnum].dname  /* 地牢名裸传，无本地化路径 */",
+      "reason": "✅已修复（源码+目录+追踪面 dungeon-names，e2e 无回归）｜RL-19（游玩新发现，待审）：死亡披露/地牢概览/状态栏里所有地牢名泄漏英文——「Gehennom」「The Dungeons of Doom」「The Gnomish Mines」「Sokoban」「The Quest」。dungeons[].dname 从地牢数据加载，全库裸用（botl.c:394 状态栏、dungeon.c 概览「通往%s/第X至Y层」、artifact.c:1559 菜单等），★根本没有本地化路径★。修复需新机制：nhi18n_dname(dnum) 或地牢名目录，在所有 dname 显示点接入——属新子系统，比单点 _() 大。"
+    },
+    {
+      "line": 632,
+      "fixed": true,
+      "text": "\"Neutral\"  /* BL_ALIGN 原始值，前端透传显示 */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-12（游玩新发现，待审）：「阵营 : Neutral」。根因在前端：StatusBars.tsx:338 `value={fields.align}` 直接显示 C botl 原始值（botl.c:629-633 硬编码 Chaotic/Neutral/Lawful），未像 hunger/encumbrance/conditions 那样经 t('statusBars.…') 映射；标签「阵营」t('statusBars.align') 已本地化，值没映射。追踪状态：botl.c 这些串在 tracker 里被标 excluded·不显示·tty（理由「WebHack 由 React 前端渲染，tty botl 不用」）——对 tty 渲染成立，但值串确实透传到前端并显示；真正缺口是前端少了 alignment 值映射，而「.tsx 里渲染裸值而非 t()」tracker 看不到（前端盲区）。修复在前端：加 alignment 映射（如 t(`statusBars.alignment.${fields.align.toLowerCase()}`)）+ frontend.json 补 中立/守序/混沌，与 hunger/enc 一致；非 C 侧改动。"
+    }
+  ],
+  "src/priest.c": [
+    {
+      "line": 341,
+      "fixed": true,
+      "text": "Strcat(pname, \" of \")  /* priestname 连接词硬编码 */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-18（游玩新发现，待审）：「The 祭司 of 摩洛落空了！」。priestname 组装「the <title> of <god>」：title（祭司/女祭司/high，priest.c:323-330 已 _()）与 god 名（摩洛，halu_gname→align_gname 经 RL-8 已本地化）都翻了，但连接词 \" of \"（:341）、冠词 \"the \"（:313）、\"invisible \"（:315，同 RL-15）硬编码英文。zh 语序不同：「the X of Y」应为「Y的X」（摩洛的祭司），需重排 god+的+title——非简单 _() 可解，同 tin_details RL-11；\"the \" zh 应省略（nhi18n_uses_articles 门控）。"
+    }
+  ],
+  "src/questpgr.c": [
+    {
+      "line": 178,
+      "fixed": true,
+      "text": "mons[i].mname  /* ldrname 首领名裸传 + \"the \" 硬编码 */",
+      "reason": "✅已修复（源码+构建，e2e 无回归）｜RL-20（游玩新发现，待审）：「被Hippocrates召唤而来」。ldrname()/neminame()（questpgr.c:177/264）用 mons[i].mname 裸传任务首领/宿敌名（Hippocrates 等），绕过 nhi18n_monname，且前缀 \"the \" 硬编码。同 apply.c:274（裸 mname）+ RL-4/15（硬编码 the）。修复：nhi18n_monname(i) ? … : mons[i].mname；\"the \" zh 门控省略。"
+    },
+    {
+      "line": 380,
+      "fixed": true,
+      "text": "%G → align_gtitle()",
+      "reason": "RL-3d 实例：任务文本「你的 god Tyr…」。随 pray.c:2212 修复→「你的神 Tyr…」。已构建。待游玩验证（任务对话）。"
+    },
+    {
+      "line": 398,
+      "fixed": true,
+      "text": "%C/%N/%L/%x",
+      "reason": "RL-3d 同源：convert_line 的 chaotic/neutral/lawful/see/sense 分支。已修复：各分支 _() 包裹（目录已有译文）。已构建。"
+    }
+  ],
+  "src/pray.c": [
+    {
+      "line": 2212,
+      "fixed": true,
+      "text": "align_gtitle → _(\"god\")",
+      "reason": "RL-3d 根因：align_gtitle() 硬编码 \"god\"/\"goddess\"。已修复：改为 _(\"god\")/_(\"goddess\")，目录加 god→神、goddess→女神。已构建。"
+    },
+    {
+      "line": 2134,
+      "fixed": true,
+      "text": "return _(gnam)  /* align_gname 神名本地化 */",
+      "reason": "RL-8 已修复：align_gname 下划线剥离后 return _(gnam)；目录补齐 7 个女神/Moloch（Tyr 等大多数早已在目录，之前泄漏纯因未包 _()）。★运行时已验证★ 祈祷显示「你开始向提尔祈祷」「提尔的声音雷鸣般响起」（e2e/tests/i18n-godname.test.ts），同时旁证 minion 声音路径与 s_suffix 的「的」。已构建。"
+    }
+  ],
+  "src/invent.c": [
+    {
+      "line": 1293,
+      "fixed": true,
+      "text": "makeplural gate (currency)",
+      "reason": "RL-2：makeplural 作用于「佐克金币」。已修复：加 nhi18n_uses_plurals() gate。已构建。待游玩验证（出售/价签）。★部分旁证★ ^X 显示「你的钱包 是 空空如也」无 's。"
+    }
+  ],
+  "src/dogmove.c": [
+    {
+      "line": 279,
+      "fixed": true,
+      "text": "distant_name(obj, doname)",
+      "reason": "RL-3a：物品名「egg」泄漏。已修复：object-names.zh-CN.json 加 EGG→蛋（nhi18n_objname 已接入 xname）。已构建。待游玩验证（宠物吃蛋）。"
+    }
+  ],
+  "src/detect.c": [
+    {
+      "line": 760,
+      "fixed": true,
+      "text": "You(_(\"detect the %s of %s.\"), …, stuff) — stuff 为裸英文物类名",
+      "reason": "✅已修复（源码+构建，e2e i18n-leak-fix 无回归，待游玩验证）｜RL-29（游玩新发现）：物品探测「你察觉到 存在 的 objects。」。object_detect 组装 stuff：class?def_oc_syms[class].name:\"objects\"（drawing.c 的 weapons/armor/potions… 全部物类名）与幻觉分支 something 均裸传，未经 _()；格式串 _(\"detect the %s of %s.\")→「察觉到 %s 的 %s。」与 _(\"sense %s nearby.\") 已译，但第二个 %s(stuff) 泄漏英文。目录早有 objects→物品、weapons→武器…something→某物（全部命中），纯裸传。修复：拷入 stuff 时本地化 Strcpy(stuff, _(class?def_oc_syms[class].name:\"objects\")) 与 _(something)，使后续 _(\" and/or large stones\") 拼接一致。同类：detect.c:673 sense%s 复用同 stuff（一并修复）。"
+    }
+  ]
+}

@@ -104,13 +104,13 @@ boolean forceshow;
         egrd->fcbeg++;
     }
     if (sawcorridor && !silently)
-        pline_The("corridor disappears.");
+        pline_The(_("corridor disappears."));
     /* only give encased message if hero is still alive (might get here
        via paygd() -> mongone() -> grddead() when game is over;
        died: no message, quit: message) */
     if (IS_ROCK(levl[u.ux][u.uy].typ) && (Upolyd ? u.mh : u.uhp) > 0
         && !silently)
-        You("are encased in rock.");
+        You(_("are encased in rock."));
     return TRUE;
 }
 
@@ -253,7 +253,7 @@ struct monst *grd;
         && um_dist(grd->mx, grd->my, 1)) {
         if (grd->mpeaceful) {
             if (canspotmon(grd)) /* see or sense via telepathy */
-                pline("%s becomes irate.", Monnam(grd));
+                pline(_("%s becomes irate."), Monnam(grd));
             grd->mpeaceful = 0; /* bypass setmangry() */
         }
         /* if arriving outside guard's temporary corridor, give the
@@ -399,17 +399,17 @@ invault()
         reset_faint(); /* if fainted - wake up */
         gsensed = !canspotmon(guard);
         if (!gsensed)
-            pline("Suddenly one of the Vault's %s enters!",
+            pline(_("Suddenly one of the Vault's %s enters!"),
                   makeplural(guard->data->mname));
         else
-            pline("Someone else has entered the Vault.");
+            pline(_("Someone else has entered the Vault."));
         newsym(guard->mx, guard->my);
         if (u.uswallow) {
             /* can't interrogate hero, don't interrogate engulfer */
             if (!Deaf)
-                verbalize("What's going on here?");
+                verbalize(_("What's going on here?"));
             if (gsensed)
-                pline_The("other presence vanishes.");
+                pline_The(_("other presence vanishes."));
             mongone(guard);
             return;
         }
@@ -417,10 +417,10 @@ invault()
             if (U_AP_TYPE == M_AP_OBJECT
                 && youmonst.mappearance != GOLD_PIECE)
                 if (!Deaf)
-                    verbalize("Hey!  Who left that %s in here?",
+                    verbalize(_("Hey!  Who left that %s in here?"),
                               mimic_obj_name(&youmonst));
             /* You're mimicking some object or you're hidden. */
-            pline("Puzzled, %s turns around and leaves.", mhe(guard));
+            pline(_("Puzzled, %s turns around and leaves."), mhe(guard));
             mongone(guard);
             return;
         }
@@ -429,9 +429,9 @@ invault()
                been given in order to vary it upon repeat visits, but
                discarding the monster and its egd data renders that hard] */
             if (Deaf)
-                pline("%s huffs and turns to leave.", noit_Monnam(guard));
+                pline(_("%s huffs and turns to leave."), noit_Monnam(guard));
             else
-                verbalize("I'll be back when you're ready to speak to me!");
+                verbalize(_("I'll be back when you're ready to speak to me!"));
             mongone(guard);
             return;
         }
@@ -444,8 +444,8 @@ invault()
         buf[0] = '\0';
         trycount = 5;
         do {
-            getlin(Deaf ? "You are required to supply your name. -"
-                        : "\"Hello stranger, who are you?\" -", buf);
+            getlin(Deaf ? _("You are required to supply your name. -")
+                        : _("\"Hello stranger, who are you?\" -"), buf);
             (void) mungspaces(buf);
         } while (!buf[0] && --trycount > 0);
 
@@ -460,21 +460,21 @@ invault()
             if (!mvitals[PM_CROESUS].died) {
                 if (Deaf) {
                     if (!Blind)
-                        pline("%s waves goodbye.", noit_Monnam(guard));
+                        pline(_("%s waves goodbye."), noit_Monnam(guard));
                 } else {
                     verbalize(
-                         "Oh, yes, of course.  Sorry to have disturbed you.");
+                         _("Oh, yes, of course.  Sorry to have disturbed you."));
                 }
                 mongone(guard);
             } else {
                 setmangry(guard, FALSE);
                 if (Deaf) {
                    if (!Blind)
-                        pline("%s mouths something and looks very angry!",
+                        pline(_("%s mouths something and looks very angry!"),
                               noit_Monnam(guard));
                 } else {
                    verbalize(
-                           "Back from the dead, are you?  I'll remedy that!");
+                           _("Back from the dead, are you?  I'll remedy that!"));
                 }
                 /* don't want guard to waste next turn wielding a weapon */
                 if (!MON_WEP(guard)) {
@@ -485,37 +485,37 @@ invault()
             return;
         }
         if (Deaf)
-            pline("%s doesn't %srecognize you.", noit_Monnam(guard),
-                    (Blind) ? "" : "appear to ");
+            pline(_("%s doesn't %srecognize you."), noit_Monnam(guard),
+                    (Blind) ? "" : _("appear to "));
         else
-            verbalize("I don't know you.");
+            verbalize(_("I don't know you."));
         umoney = money_cnt(invent);
         if (!umoney && !hidden_gold()) {
             if (Deaf)
-                pline("%s stomps%s.", noit_Monnam(guard),
-                      (Blind) ? "" : " and beckons");
+                pline(_("%s stomps%s."), noit_Monnam(guard),
+                      (Blind) ? "" : _(" and beckons"));
             else
-                verbalize("Please follow me.");
+                verbalize(_("Please follow me."));
         } else {
             if (!umoney) {
                 if (Deaf) {
                     if (!Blind)
-                        pline("%s glares at you%s.", noit_Monnam(guard),
-                              invent ? "r stuff" : "");
+                        pline(_("%s glares at you%s."), noit_Monnam(guard),
+                              invent ? _("r stuff") : "");
                 } else {
-                   verbalize("You have hidden gold.");
+                   verbalize(_("You have hidden gold."));
                 }
             }
             if (Deaf) {
                 if (!Blind)
                     pline(
-                       "%s holds out %s palm and beckons with %s other hand.",
+                       _("%s holds out %s palm and beckons with %s other hand."),
                           noit_Monnam(guard), noit_mhis(guard),
                           noit_mhis(guard));
             } else {
                 verbalize(
-                    "Most likely all your gold was stolen from this vault.");
-                verbalize("Please drop that gold and follow me.");
+                    _("Most likely all your gold was stolen from this vault."));
+                verbalize(_("Please drop that gold and follow me."));
             }
         }
         EGD(guard)->gdx = gx;
@@ -625,13 +625,13 @@ struct monst *grd;
 
     if (movedgold || fixed) {
         if (in_fcorridor(grd, grd->mx, grd->my) || cansee(grd->mx, grd->my))
-            pline("%s whispers an incantation.", noit_Monnam(grd));
+            pline(_("%s whispers an incantation."), noit_Monnam(grd));
         else
-            You_hear("a distant chant.");
+            You_hear(_("a distant chant."));
         if (movedgold)
-            pline("A mysterious force moves the gold into the vault.");
+            pline(_("A mysterious force moves the gold into the vault."));
         if (fixed)
-            pline_The("damaged vault's walls are magically restored!");
+            pline_The(_("damaged vault's walls are magically restored!"));
     }
 }
 
@@ -642,7 +642,7 @@ int nx, ny;
 {
     if (MON_AT(nx, ny) && !(nx == grd->mx && ny == grd->my)) {
         if (!Deaf)
-            verbalize("Out of my way, scum!");
+            verbalize(_("Out of my way, scum!"));
         if (!rloc(m_at(nx, ny), FALSE) || MON_AT(nx, ny))
             m_into_limbo(m_at(nx, ny));
     }
@@ -723,10 +723,10 @@ int goldx, goldy; /* <gold->ox, gold->oy> */
         Strcpy(monnambuf, Monnam(grd));
         if (!strcmpi(monnambuf, "It"))
             Strcpy(monnambuf, "Someone");
-        pline("%s%s picks up the gold%s.", monnambuf,
+        pline(_("%s%s picks up the gold%s."), _(monnambuf),
               (grd->mpeaceful && EGD(grd)->warncnt > 5)
-                 ? " calms down and" : "",
-              under_u ? " from beneath you" : "");
+                 ? _(" calms down and") : "",
+              under_u ? _(" from beneath you") : "");
     }
 
     /* if guard was moved to get the gold, move him back */
@@ -790,8 +790,8 @@ register struct monst *grd;
 
     if (egrd->witness) {
         if (!Deaf)
-            verbalize("How dare you %s that gold, scoundrel!",
-                      (egrd->witness & GD_EATGOLD) ? "consume" : "destroy");
+            verbalize(_("How dare you %s that gold, scoundrel!"),
+                      (egrd->witness & GD_EATGOLD) ? _("consume") : _("destroy"));
         egrd->witness = 0;
         grd->mpeaceful = 0;
         return -1;
@@ -802,16 +802,16 @@ register struct monst *grd;
     if (egrd->fcend == 1) {
         if (u_in_vault && (u_carry_gold || um_dist(grd->mx, grd->my, 1))) {
             if (egrd->warncnt == 3 && !Deaf)
-                verbalize("I repeat, %sfollow me!",
+                verbalize(_("I repeat, %sfollow me!"),
                           u_carry_gold
-                              ? (!umoney ? "drop that hidden money and "
-                                         : "drop that money and ")
+                              ? (!umoney ? _("drop that hidden money and ")
+                                         : _("drop that money and "))
                               : "");
             if (egrd->warncnt == 7) {
                 m = grd->mx;
                 n = grd->my;
                 if (!Deaf)
-                    verbalize("You've been warned, knave!");
+                    verbalize(_("You've been warned, knave!"));
                 mnexto(grd);
                 levl[m][n].typ = egrd->fakecorr[0].ftyp;
                 newsym(m, n);
@@ -834,20 +834,20 @@ register struct monst *grd;
                 grd->mpeaceful = 0;
  letknow:
                 if (!cansee(grd->mx, grd->my) || !mon_visible(grd))
-                    You_hear("%s.",
+                    You_hear(_("%s."),
                              m_carrying(grd, TIN_WHISTLE)
-                                 ? "the shrill sound of a guard's whistle"
-                                 : "angry shouting");
+                                 ? _("the shrill sound of a guard's whistle")
+                                 : _("angry shouting"));
                 else
                     You(um_dist(grd->mx, grd->my, 2)
-                            ? "see %s approaching."
-                            : "are confronted by %s.",
+                            ? _("see %s approaching.")
+                            : _("are confronted by %s."),
                         /* "an angry guard" */
-                        x_monnam(grd, ARTICLE_A, "angry", 0, FALSE));
+                        x_monnam(grd, ARTICLE_A, _("angry"), 0, FALSE));
                 return -1;
             } else {
                 if (!Deaf)
-                    verbalize("Well, begone.");
+                    verbalize(_("Well, begone."));
                 egrd->gddone = 1;
                 goto cleanup;
             }
@@ -859,7 +859,7 @@ register struct monst *grd;
             && !egrd->gddone && !in_fcorridor(grd, u.ux, u.uy)
             && levl[egrd->fakecorr[0].fx][egrd->fakecorr[0].fy].typ
                    == egrd->fakecorr[0].ftyp) {
-            pline("%s, confused, disappears.", noit_Monnam(grd));
+            pline(_("%s, confused, disappears."), noit_Monnam(grd));
             disappear_msg_seen = TRUE;
             goto cleanup;
         }
@@ -874,19 +874,19 @@ register struct monst *grd;
                 egrd->warncnt = 6;
                 if (Deaf) {
                     if (!Blind)
-                        pline("%s holds out %s palm demandingly!",
+                        pline(_("%s holds out %s palm demandingly!"),
                               noit_Monnam(grd), noit_mhis(grd));
                 } else {
-                    verbalize("Drop all your gold, scoundrel!");
+                    verbalize(_("Drop all your gold, scoundrel!"));
                 }
                 return 0;
             } else {
                 if (Deaf) {
                     if (!Blind)
-                        pline("%s rubs %s hands with enraged delight!",
+                        pline(_("%s rubs %s hands with enraged delight!"),
                               noit_Monnam(grd), noit_mhis(grd));
                 } else {
-                    verbalize("So be it, rogue!");
+                    verbalize(_("So be it, rogue!"));
                 }
                 grd->mpeaceful = 0;
                 return -1;
@@ -912,7 +912,7 @@ register struct monst *grd;
     if (um_dist(grd->mx, grd->my, 1) || egrd->gddone) {
         if (!egrd->gddone && !rn2(10) && !Deaf && !u.uswallow
             && !(u.ustuck && !sticks(youmonst.data)))
-            verbalize("Move along!");
+            verbalize(_("Move along!"));
         restfakecorr(grd);
         return 0; /* didn't move */
     }
@@ -1013,7 +1013,7 @@ register struct monst *grd;
         /* We're stuck, so try to find a new destination. */
         if (!find_guard_dest(grd, &egrd->gdx, &egrd->gdy)
             || (egrd->gdx == gx && egrd->gdy == gy)) {
-            pline("%s, confused, disappears.", Monnam(grd));
+            pline(_("%s, confused, disappears."), Monnam(grd));
             disappear_msg_seen = TRUE;
             goto cleanup;
         } else
@@ -1042,7 +1042,7 @@ register struct monst *grd;
                     grd->isgd ? " attempt" : "");
         if (!semi_dead && (in_fcorridor(grd, u.ux, u.uy) || cansee(x, y))) {
             if (!disappear_msg_seen && see_guard)
-                pline("Suddenly, %s disappears.", noit_mon_nam(grd));
+                pline(_("Suddenly, %s disappears."), noit_mon_nam(grd));
             return 1;
         }
         return -2;
@@ -1057,7 +1057,7 @@ register struct monst *grd;
            it and give an inappropriate message */
         mpickgold(grd);
         if (canspotmon(grd))
-            pline("%s picks up some gold.", Monnam(grd));
+            pline(_("%s picks up some gold."), Monnam(grd));
     } else
         newsym(grd->mx, grd->my);
     restfakecorr(grd);
@@ -1080,7 +1080,7 @@ boolean silently;
 
     if (u.uinvault) {
         if (!silently)
-            Your("%ld %s goes into the Magic Memory Vault.",
+            Your(_("%ld %s goes into the Magic Memory Vault."),
                  umoney, currency(umoney));
         gx = u.ux;
         gy = u.uy;
@@ -1090,7 +1090,7 @@ boolean silently;
 
         mnexto(grd);
         if (!silently)
-            pline("%s remits your gold to the vault.", Monnam(grd));
+            pline(_("%s remits your gold to the vault."), Monnam(grd));
         gx = rooms[EGD(grd)->vroom].lx + rn2(2);
         gy = rooms[EGD(grd)->vroom].ly + rn2(2);
         Sprintf(buf, "To Croesus: here's the gold recovered from %s the %s.",

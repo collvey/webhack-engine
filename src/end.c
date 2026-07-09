@@ -338,7 +338,7 @@ done2()
 {
     if (iflags.debug_fuzzer)
         return 0;
-    if (!paranoid_query(ParanoidQuit, "Really quit?")) {
+    if (!paranoid_query(ParanoidQuit, _("Really quit?"))) {
 #ifndef NO_SIGNAL
         (void) signal(SIGINT, (SIG_RET_TYPE) done1);
 #endif
@@ -359,12 +359,12 @@ done2()
 #ifdef VMS
         extern int debuggable; /* sys/vms/vmsmisc.c, vmsunix.c */
 
-        c = !debuggable ? 'n' : ynq("Enter debugger?");
+        c = !debuggable ? 'n' : ynq(_("Enter debugger?"));
 #else
 #ifdef LATTICE
-        c = ynq("Create SnapShot?");
+        c = ynq(_("Create SnapShot?"));
 #else
-        c = ynq("Dump core?");
+        c = ynq(_("Dump core?"));
 #endif
 #endif
         if (c == 'y') {
@@ -425,7 +425,7 @@ int how;
             mimicker = (M_AP_TYPE(mtmp) == M_AP_MONSTER),
             imitator = (mptr != champtr || mimicker);
 
-    You((how == STONING) ? "turn to stone..." : "die...");
+    You((how == STONING) ? _("turn to stone...") : _("die..."));
     mark_synch(); /* flush buffered screen output */
     buf[0] = '\0';
     killer.format = KILLED_BY_AN;
@@ -443,9 +443,9 @@ int how;
         killer.format = KILLED_BY;
     }
     if (mtmp->minvis)
-        Strcat(buf, "invisible ");
+        Strcat(buf, _("invisible "));
     if (distorted)
-        Strcat(buf, "hallucinogen-distorted ");
+        Strcat(buf, _("hallucinogen-distorted "));
 
     if (imitator) {
         char shape[BUFSZ];
@@ -463,41 +463,54 @@ int how;
                to redundant looking "vampire in vampire bat form" */
             fakenm = "bat";
         }
+        /* zh: localize the real/shape monster names (English strcmp above stays
+           correct because it runs before this substitution) */
+        if (!nhi18n_uses_articles()) {
+            const char *z;
+
+            if ((z = nhi18n_monname((int) (champtr - mons))) != 0)
+                realnm = z;
+            z = !strcmp(fakenm, "bat") ? nhi18n_monname(PM_BAT)
+                                       : nhi18n_monname((int) (mptr - mons));
+            if (z)
+                fakenm = z;
+        }
         /* for the alternate format, always suppress any article;
            pname and the_unique should also have s_suffix() applied,
            but vampires don't take on any shapes which warrant that */
         if (alt || type_is_pname(mptr)) /* no article */
             Strcpy(shape, fakenm);
         else if (the_unique_pm(mptr)) /* "the"; don't use the() here */
-            Sprintf(shape, "the %s", fakenm);
+            Sprintf(shape, nhi18n_uses_articles() ? "the %s" : "%s", fakenm);
         else /* "a"/"an" */
             Strcpy(shape, an(fakenm));
         /* omit "called" to avoid excessive verbosity */
         Sprintf(eos(buf),
-                alt ? "%s in %s form"
-                    : mimicker ? "%s disguised as %s"
-                               : "%s imitating %s",
+                alt ? _("%s in %s form")
+                    : mimicker ? _("%s disguised as %s")
+                               : _("%s imitating %s"),
                 realnm, shape);
         mptr = mtmp->data; /* reset for mimicker case */
     } else if (mptr == &mons[PM_GHOST]) {
-        Strcat(buf, "ghost");
+        Strcat(buf, _("ghost"));
         if (has_mname(mtmp))
-            Sprintf(eos(buf), " of %s", MNAME(mtmp));
+            Sprintf(eos(buf), _(" of %s"), MNAME(mtmp));
     } else if (mtmp->isshk) {
         const char *shknm = shkname(mtmp),
                    *honorific = shkname_is_pname(mtmp) ? ""
-                                   : mtmp->female ? "Ms. " : "Mr. ";
+                                   : mtmp->female ? _("Ms. ") : _("Mr. ");
 
-        Sprintf(eos(buf), "%s%s, the shopkeeper", honorific, shknm);
+        Sprintf(eos(buf), _("%s%s, the shopkeeper"), honorific, shknm);
         killer.format = KILLED_BY;
     } else if (mtmp->ispriest || mtmp->isminion) {
         /* m_monnam() suppresses "the" prefix plus "invisible", and
            it overrides the effect of Hallucination on priestname() */
         Strcat(buf, m_monnam(mtmp));
     } else {
-        Strcat(buf, mptr->mname);
+        Strcat(buf, nhi18n_monname(monsndx(mptr)) ? nhi18n_monname(monsndx(mptr))
+                                                  : mptr->mname);
         if (has_mname(mtmp))
-            Sprintf(eos(buf), " called %s", MNAME(mtmp));
+            Sprintf(eos(buf), _(" called %s"), MNAME(mtmp));
     }
 
     Strcpy(killer.name, buf);
@@ -800,10 +813,10 @@ boolean taken;
 
     if (invent && !done_stopprint) {
         if (taken)
-            Sprintf(qbuf, "Do you want to see what you had when you %s?",
-                    (how == QUIT) ? "quit" : "died");
+            Sprintf(qbuf, _("Do you want to see what you had when you %s?"),
+                    (how == QUIT) ? _("quit") : _("died"));
         else
-            Strcpy(qbuf, "Do you want your possessions identified?");
+            Strcpy(qbuf, _("Do you want your possessions identified?"));
 
         ask = should_query_disclose_option('i', &defquery);
         c = ask ? yn_function(qbuf, ynqchars, defquery) : defquery;
@@ -818,7 +831,7 @@ boolean taken;
 
     if (!done_stopprint) {
         ask = should_query_disclose_option('a', &defquery);
-        c = ask ? yn_function("Do you want to see your attributes?", ynqchars,
+        c = ask ? yn_function(_("Do you want to see your attributes?"), ynqchars,
                               defquery)
                 : defquery;
         if (c == 'y')
@@ -841,7 +854,7 @@ boolean taken;
 
     if (!done_stopprint) {
         ask = should_query_disclose_option('c', &defquery);
-        c = ask ? yn_function("Do you want to see your conduct?", ynqchars,
+        c = ask ? yn_function(_("Do you want to see your conduct?"), ynqchars,
                               defquery)
                 : defquery;
         if (c == 'y')
@@ -852,7 +865,7 @@ boolean taken;
 
     if (!done_stopprint) {
         ask = should_query_disclose_option('o', &defquery);
-        c = ask ? yn_function("Do you want to see the dungeon overview?",
+        c = ask ? yn_function(_("Do you want to see the dungeon overview?"),
                               ynqchars, defquery)
                 : defquery;
         if (c == 'y')
@@ -900,9 +913,9 @@ int how;
         expels(u.ustuck, u.ustuck->data, TRUE);
     } else if (u.ustuck) {
         if (Upolyd && sticks(youmonst.data))
-            You("release %s.", mon_nam(u.ustuck));
+            You(_("release %s."), mon_nam(u.ustuck));
         else
-            pline("%s releases you.", Monnam(u.ustuck));
+            pline(_("%s releases you."), Monnam(u.ustuck));
         unstuck(u.ustuck);
     }
 }
@@ -1081,7 +1094,7 @@ winid endwin;
                 discover_object(otmp->otyp, TRUE, FALSE);
                 otmp->known = otmp->dknown = otmp->bknown = otmp->rknown = 1;
                 /* assumes artifacts don't have quan > 1 */
-                Sprintf(pbuf, "%s%s (worth %ld %s and %ld points)",
+                Sprintf(pbuf, _("%s%s (worth %ld %s and %ld points)"),
                         the_unique_obj(otmp) ? "The " : "",
                         otmp->oartifact ? artifact_name(xname(otmp), &dummy)
                                         : OBJ_NAME(objects[otmp->otyp]),
@@ -1107,7 +1120,7 @@ int how;
             killer.name[0] = '\0';
         }
         if (wizard) {
-            You("are a very tricky wizard, it seems.");
+            You(_("are a very tricky wizard, it seems."));
             killer.format = KILLED_BY_AN; /* reset to 0 */
             return;
         }
@@ -1151,7 +1164,7 @@ int how;
     if (!killer.name[0] && (how == STARVING || how == BURNING))
         killer.format = KILLED_BY;
     if (!killer.name[0] || how >= PANICKED)
-        Strcpy(killer.name, deaths[how]);
+        Strcpy(killer.name, _(deaths[how]));
 
     if (how < PANICKED) {
         u.umortality++;
@@ -1166,28 +1179,28 @@ int how;
         }
     }
     if (Lifesaved && (how <= GENOCIDED)) {
-        pline("But wait...");
+        pline(_("But wait..."));
         makeknown(AMULET_OF_LIFE_SAVING);
-        Your("medallion %s!", !Blind ? "begins to glow" : "feels warm");
+        Your(_("medallion %s!"), !Blind ? _("begins to glow") : _("feels warm"));
         if (how == CHOKING)
-            You("vomit ...");
-        You_feel("much better!");
-        pline_The("medallion crumbles to dust!");
+            You(_("vomit ..."));
+        You_feel(_("much better!"));
+        pline_The(_("medallion crumbles to dust!"));
         if (uamul)
             useup(uamul);
 
         (void) adjattrib(A_CON, -1, TRUE);
         savelife(how);
         if (how == GENOCIDED) {
-            pline("Unfortunately you are still genocided...");
+            pline(_("Unfortunately you are still genocided..."));
         } else {
             survive = TRUE;
         }
     }
     /* explore and wizard modes offer player the option to keep playing */
     if (!survive && (wizard || discover) && how <= GENOCIDED
-        && !paranoid_query(ParanoidDie, "Die?")) {
-        pline("OK, so you don't %s.", (how == CHOKING) ? "choke" : "die");
+        && !paranoid_query(ParanoidDie, _("Die?"))) {
+        pline(_("OK, so you don't %s."), (how == CHOKING) ? _("choke") : _("die"));
         iflags.last_msg = PLNMSG_OK_DONT_DIE;
         savelife(how);
         survive = TRUE;
@@ -1251,7 +1264,7 @@ int how;
      * smiling... :-)  -3.
      */
     if (moves <= 1 && how < PANICKED && !done_stopprint)
-        pline("Do not pass Go.  Do not collect 200 %s.", currency(200L));
+        pline(_("Do not pass Go.  Do not collect 200 %s."), currency(200L));
 
     if (have_windows)
         wait_synch(); /* flush screen output */
@@ -1288,7 +1301,7 @@ int how;
         if (u.uhp < 1) {
             how = DIED;
             u.umortality++; /* skipped above when how==QUIT */
-            Strcpy(killer.name, "quit while already on Charon's boat");
+            Strcpy(killer.name, _("quit while already on Charon's boat"));
         }
     }
     if (how == ESCAPED || how == PANICKED)
@@ -1410,10 +1423,10 @@ int how;
         /* give this feedback even if bones aren't going to be created,
            so that its presence or absence doesn't tip off the player to
            new bones or their lack; it might be a lie if makemon fails */
-        Your("%s as %s...",
+        Your(_("%s as %s..."),
              (u.ugrave_arise != PM_GREEN_SLIME)
-                 ? "body rises from the dead"
-                 : "revenant persists",
+                 ? _("body rises from the dead")
+                 : _("revenant persists"),
              an(mons[u.ugrave_arise].mname));
         display_nhwindow(WIN_MESSAGE, FALSE);
     }
@@ -1464,21 +1477,21 @@ int how;
     }
 #endif
     if (u.uhave.amulet) {
-        Strcat(killer.name, " (with the Amulet)");
+        Strcat(killer.name, _(" (with the Amulet)"));
     } else if (how == ESCAPED) {
         if (Is_astralevel(&u.uz)) /* offered Amulet to wrong deity */
-            Strcat(killer.name, " (in celestial disgrace)");
+            Strcat(killer.name, _(" (in celestial disgrace)"));
         else if (carrying(FAKE_AMULET_OF_YENDOR))
-            Strcat(killer.name, " (with a fake Amulet)");
+            Strcat(killer.name, _(" (with a fake Amulet)"));
         /* don't bother counting to see whether it should be plural */
     }
 
-    Sprintf(pbuf, "%s %s the %s...", Goodbye(), plname,
+    Sprintf(pbuf, _("%s %s the %s..."), Goodbye(), plname,
             (how != ASCENDED)
-                ? (const char *) ((flags.female && urole.name.f)
+                ? (const char *) _((flags.female && urole.name.f)
                     ? urole.name.f
                     : urole.name.m)
-                : (const char *) (flags.female ? "Demigoddess" : "Demigod"));
+                : (const char *) (flags.female ? _("Demigoddess") : _("Demigod")));
     dump_forward_putstr(endwin, 0, pbuf, done_stopprint);
     dump_forward_putstr(endwin, 0, "", done_stopprint);
 
@@ -1508,10 +1521,10 @@ int how;
 
         viz_array[0][0] |= IN_SIGHT; /* need visibility for naming */
         mtmp = mydogs;
-        Strcpy(pbuf, "You");
+        Strcpy(pbuf, _("You"));
         if (mtmp || Schroedingers_cat) {
             while (mtmp) {
-                Sprintf(eos(pbuf), " and %s", mon_nam(mtmp));
+                Sprintf(eos(pbuf), _(" and %s"), mon_nam(mtmp));
                 if (mtmp->mtame)
                     nowrap_add(u.urexp, mtmp->mhp);
                 mtmp = mtmp->nmon;
@@ -1523,17 +1536,17 @@ int how;
 
                 mhp = d(m_lev, 8);
                 nowrap_add(u.urexp, mhp);
-                Strcat(eos(pbuf), " and Schroedinger's cat");
+                Strcat(eos(pbuf), _(" and Schroedinger's cat"));
             }
             dump_forward_putstr(endwin, 0, pbuf, done_stopprint);
             pbuf[0] = '\0';
         } else {
             Strcat(pbuf, " ");
         }
-        Sprintf(eos(pbuf), "%s with %ld point%s,",
-                how == ASCENDED ? "went to your reward"
-                                 : "escaped from the dungeon",
-                u.urexp, plur(u.urexp));
+        Sprintf(eos(pbuf), _("%s with %ld point%s,"),
+                how == ASCENDED ? _("went to your reward")
+                                 : _("escaped from the dungeon"),
+                u.urexp, nhi18n_uses_plurals() ? plur(u.urexp) : "");
         dump_forward_putstr(endwin, 0, pbuf, done_stopprint);
 
         if (!done_stopprint)
@@ -1562,13 +1575,13 @@ int how;
                     if (has_oname(otmp))
                         free_oname(otmp);
                     otmp->quan = count;
-                    Sprintf(pbuf, "%8ld %s (worth %ld %s),", count,
+                    Sprintf(pbuf, _("%8ld %s (worth %ld %s),"), count,
                             xname(otmp), count * (long) objects[typ].oc_cost,
                             currency(2L));
                     obfree(otmp, (struct obj *) 0);
                 } else {
-                    Sprintf(pbuf, "%8ld worthless piece%s of colored glass,",
-                            count, plur(count));
+                    Sprintf(pbuf, _("%8ld worthless piece%s of colored glass,"),
+                            count, nhi18n_uses_plurals() ? plur(count) : "");
                 }
                 dump_forward_putstr(endwin, 0, pbuf, 0);
             }
@@ -1579,30 +1592,33 @@ int how;
         if (u.uz.dnum == 0 && u.uz.dlevel <= 0) {
             /* level teleported out of the dungeon; `how' is DIED,
                due to falling or to "arriving at heaven prematurely" */
-            Sprintf(pbuf, "You %s beyond the confines of the dungeon",
-                    (u.uz.dlevel < 0) ? "passed away" : ends[how]);
+            Sprintf(pbuf, _("You %s beyond the confines of the dungeon"),
+                    (u.uz.dlevel < 0) ? _("passed away") : _(ends[how]));
         } else {
             /* more conventional demise */
             const char *where = dungeons[u.uz.dnum].dname;
 
             if (Is_astralevel(&u.uz))
-                where = "The Astral Plane";
-            Sprintf(pbuf, "You %s in %s", ends[how], where);
+                where = _("The Astral Plane");
+            Sprintf(pbuf, _("You %s in %s"), _(ends[how]), where);
             if (!In_endgame(&u.uz) && !Is_knox(&u.uz))
-                Sprintf(eos(pbuf), " on dungeon level %d",
+                Sprintf(eos(pbuf), _(" on dungeon level %d"),
                         In_quest(&u.uz) ? dunlev(&u.uz) : depth(&u.uz));
         }
 
-        Sprintf(eos(pbuf), " with %ld point%s,", u.urexp, plur(u.urexp));
+        Sprintf(eos(pbuf), _(" with %ld point%s,"), u.urexp,
+                nhi18n_uses_plurals() ? plur(u.urexp) : "");
         dump_forward_putstr(endwin, 0, pbuf, done_stopprint);
     }
 
-    Sprintf(pbuf, "and %ld piece%s of gold, after %ld move%s.", umoney,
-            plur(umoney), moves, plur(moves));
+    Sprintf(pbuf, _("and %ld piece%s of gold, after %ld move%s."), umoney,
+            nhi18n_uses_plurals() ? plur(umoney) : "", moves,
+            nhi18n_uses_plurals() ? plur(moves) : "");
     dump_forward_putstr(endwin, 0, pbuf, done_stopprint);
     Sprintf(pbuf,
-            "You were level %d with a maximum of %d hit point%s when you %s.",
-            u.ulevel, u.uhpmax, plur(u.uhpmax), ends[how]);
+            _("You were level %d with a maximum of %d hit point%s when you %s."),
+            u.ulevel, u.uhpmax, nhi18n_uses_plurals() ? plur(u.uhpmax) : "",
+            _(ends[how]));
     dump_forward_putstr(endwin, 0, pbuf, done_stopprint);
     dump_forward_putstr(endwin, 0, "", done_stopprint);
     if (!done_stopprint)
@@ -1658,7 +1674,7 @@ boolean identified, all_containers, reportempty;
                    reports the box as containing "1 item" */
                 cat = SchroedingersBox(box);
 
-                Sprintf(buf, "Contents of %s:", the(xname(box)));
+                Sprintf(buf, _("Contents of %s:"), the(xname(box)));
                 putstr(tmpwin, 0, buf);
                 if (!dumping)
                     putstr(tmpwin, 0, "");
@@ -1683,7 +1699,7 @@ boolean identified, all_containers, reportempty;
                     }
                     unsortloot(&sortedcobj);
                 } else if (cat) {
-                    Strcpy(&buf[2], "Schroedinger's cat!");
+                    Strcpy(&buf[2], _("Schroedinger's cat!"));
                     putstr(tmpwin, 0, buf);
                 }
                 if (dumping)
@@ -1694,7 +1710,7 @@ boolean identified, all_containers, reportempty;
                     container_contents(box->cobj, identified, TRUE,
                                        reportempty);
             } else if (reportempty) {
-                pline("%s is empty.", upstart(thesimpleoname(box)));
+                pline(_("%s is empty."), upstart(thesimpleoname(box)));
                 display_nhwindow(WIN_MESSAGE, FALSE);
             }
         }
@@ -1855,10 +1871,10 @@ set_vanq_order()
         if (i == VANQ_ALPHA_MIX || i == VANQ_MCLS_HTOL) /* skip these */
             continue;
         any.a_int = i + 1;
-        add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, vanqorders[i],
+        add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, _(vanqorders[i]),
                  (i == vanq_sortmode) ? MENU_SELECTED : MENU_UNSELECTED);
     }
-    end_menu(tmpwin, "Sort order for vanquished monster counts");
+    end_menu(tmpwin, _("Sort order for vanquished monster counts"));
 
     n = select_menu(tmpwin, PICK_ONE, &selected);
     destroy_nhwindow(tmpwin);
@@ -1920,7 +1936,7 @@ boolean ask;
         boolean class_header, uniq_header, was_uniq = FALSE;
 
         c = ask ? yn_function(
-                            "Do you want an account of creatures vanquished?",
+                            _("Do you want an account of creatures vanquished?"),
                               ynaqchars, defquery)
                 : defquery;
         if (c == 'q')
@@ -1937,7 +1953,7 @@ boolean ask;
                             || vanq_sortmode == VANQ_MCLS_HTOL);
 
             klwin = create_nhwindow(NHW_MENU);
-            putstr(klwin, 0, "Vanquished creatures:");
+            putstr(klwin, 0, _("Vanquished creatures:"));
             if (!dumping)
                 putstr(klwin, 0, "");
 
@@ -1954,18 +1970,18 @@ boolean ask;
                 }
                 if (UniqCritterIndx(i)) {
                     Sprintf(buf, "%s%s",
-                            !type_is_pname(&mons[i]) ? "the " : "",
-                            mons[i].mname);
+                            (nhi18n_uses_articles() && !type_is_pname(&mons[i])) ? "the " : "",
+                            nhi18n_monname(i) ? nhi18n_monname(i) : mons[i].mname);
                     if (nkilled > 1) {
                         switch (nkilled) {
                         case 2:
-                            Sprintf(eos(buf), " (twice)");
+                            Sprintf(eos(buf), _(" (twice)"));
                             break;
                         case 3:
-                            Sprintf(eos(buf), " (thrice)");
+                            Sprintf(eos(buf), _(" (thrice)"));
                             break;
                         default:
-                            Sprintf(eos(buf), " (%d times)", nkilled);
+                            Sprintf(eos(buf), _(" (%d times)"), nkilled);
                             break;
                         }
                     }
@@ -1978,10 +1994,14 @@ boolean ask;
                     /* trolls or undead might have come back,
                        but we don't keep track of that */
                     if (nkilled == 1)
-                        Strcpy(buf, an(mons[i].mname));
+                        Strcpy(buf, an(nhi18n_monname(i) ? nhi18n_monname(i)
+                                                         : mons[i].mname));
                     else
                         Sprintf(buf, "%3d %s", nkilled,
-                                makeplural(mons[i].mname));
+                                nhi18n_uses_plurals()
+                                    ? makeplural(mons[i].mname)
+                                    : (nhi18n_monname(i) ? nhi18n_monname(i)
+                                                         : mons[i].mname));
                 }
                 /* number of leading spaces to match 3 digit prefix */
                 pfx = !strncmpi(buf, "the ", 3) ? 0
@@ -2000,7 +2020,7 @@ boolean ask;
             if (ntypes > 1) {
                 if (!dumping)
                     putstr(klwin, 0, "");
-                Sprintf(buf, "%ld creatures vanquished.", total_killed);
+                Sprintf(buf, _("%ld creatures vanquished."), total_killed);
                 putstr(klwin, 0, buf);
             }
             display_nhwindow(klwin, TRUE);
@@ -2008,7 +2028,7 @@ boolean ask;
         }
     } else if (defquery == 'a') {
         /* #dovanquished rather than final disclosure, so pline() is ok */
-        pline("No creatures have been vanquished.");
+        pline(_("No creatures have been vanquished."));
 #ifdef DUMPLOG
     } else if (dumping) {
         putstr(0, 0, "No creatures were vanquished."); /* not pline() */
@@ -2068,18 +2088,18 @@ boolean ask;
 
     /* genocided or extinct species list */
     if (ngenocided != 0 || nextinct != 0) {
-        Sprintf(buf, "Do you want a list of %sspecies%s%s?",
-                (nextinct && !ngenocided) ? "extinct " : "",
-                (ngenocided) ? " genocided" : "",
-                (nextinct && ngenocided) ? " and extinct" : "");
+        Sprintf(buf, _("Do you want a list of %sspecies%s%s?"),
+                (nextinct && !ngenocided) ? _("extinct ") : "",
+                (ngenocided) ? _(" genocided") : "",
+                (nextinct && ngenocided) ? _(" and extinct") : "");
         c = ask ? yn_function(buf, ynqchars, defquery) : defquery;
         if (c == 'q')
             done_stopprint++;
         if (c == 'y') {
             klwin = create_nhwindow(NHW_MENU);
-            Sprintf(buf, "%s%s species:",
-                    (ngenocided) ? "Genocided" : "Extinct",
-                    (nextinct && ngenocided) ? " or extinct" : "");
+            Sprintf(buf, _("%s%s species:"),
+                    (ngenocided) ? _("Genocided") : _("Extinct"),
+                    (nextinct && ngenocided) ? _(" or extinct") : "");
             putstr(klwin, 0, buf);
             if (!dumping)
                 putstr(klwin, 0, "");
@@ -2090,7 +2110,11 @@ boolean ask;
                 if (UniqCritterIndx(i))
                     continue;
                 if (mvitals[i].mvflags & G_GONE) {
-                    Sprintf(buf, " %s", makeplural(mons[i].mname));
+                    Sprintf(buf, " %s",
+                            nhi18n_uses_plurals()
+                                ? makeplural(mons[i].mname)
+                                : (nhi18n_monname(i) ? nhi18n_monname(i)
+                                                     : mons[i].mname));
                     /*
                      * "Extinct" is unfortunate terminology.  A species
                      * is marked extinct when its birth limit is reached,
@@ -2098,18 +2122,18 @@ boolean ask;
                      * alive, contradicting the meaning of the word.
                      */
                     if ((mvitals[i].mvflags & G_GONE) == G_EXTINCT)
-                        Strcat(buf, " (extinct)");
+                        Strcat(buf, _(" (extinct)"));
                     putstr(klwin, 0, buf);
                 }
             }
             if (!dumping)
                 putstr(klwin, 0, "");
             if (ngenocided > 0) {
-                Sprintf(buf, "%d species genocided.", ngenocided);
+                Sprintf(buf, _("%d species genocided."), ngenocided);
                 putstr(klwin, 0, buf);
             }
             if (nextinct > 0) {
-                Sprintf(buf, "%d species extinct.", nextinct);
+                Sprintf(buf, _("%d species extinct."), nextinct);
                 putstr(klwin, 0, buf);
             }
 

@@ -127,7 +127,7 @@ getmailstatus()
 
     if (mailbox && stat(mailbox, &omstat)) {
 #ifdef PERMANENT_MAILBOX
-        pline("Cannot get status of MAIL=\"%s\".", mailbox);
+        pline(_("Cannot get status of MAIL=\"%s\"."), mailbox);
         free_maildata(); /* set 'mailbox' to Null */
 #else
         omstat.st_mtime = 0;
@@ -334,7 +334,7 @@ register int tx, ty; /* destination of mail daemon */
         if ((mon = m_at(fx, fy)) != 0) /* save monster at this position */
             verbalize1(md_exclamations());
         else if (fx == u.ux && fy == u.uy)
-            verbalize("Excuse me.");
+            verbalize(_("Excuse me."));
 
         if (mon)
             remove_monster(fx, fy);
@@ -362,7 +362,7 @@ register int tx, ty; /* destination of mail daemon */
         remove_monster(fx, fy);
         place_monster(md, fx, fy); /* display md with text below */
         newsym(fx, fy);
-        verbalize("This place's too crowded.  I'm outta here.");
+        verbalize(_("This place's too crowded.  I'm outta here."));
         remove_monster(fx, fy);
 
         if ((mon->mx != fx) || (mon->my != fy)) /* put mon back */
@@ -403,7 +403,7 @@ struct mail_info *info;
         goto go_back;
 
     message_seen = TRUE;
-    verbalize("%s, %s!  %s.", Hello(md), plname, info->display_txt);
+    verbalize(_("%s, %s!  %s."), Hello(md), plname, info->display_txt);
 
     if (info->message_typ) {
         struct obj *obj = mksobj(SCR_MAIL, FALSE, FALSE);
@@ -414,7 +414,7 @@ struct mail_info *info;
             new_omailcmd(obj, info->response_cmd);
 
         if (distu(md->mx, md->my) > 2)
-            verbalize("Catch!");
+            verbalize(_("Catch!"));
         display_nhwindow(WIN_MESSAGE, FALSE);
         obj = hold_another_object(obj, "Oops!", (const char *) 0,
                                   (const char *) 0);
@@ -430,7 +430,7 @@ struct mail_info *info;
  give_up:
     /* deliver some classes of messages even if no daemon ever shows up */
     if (!message_seen && info->message_typ == MSG_OTHER)
-        pline("Hark!  \"%s.\"", info->display_txt);
+        pline(_("Hark!  \"%s.\""), info->display_txt);
 }
 
 #if !defined(UNIX) && !defined(VMS)
@@ -521,9 +521,9 @@ struct obj *otmp UNUSED;
         }
     }
     if (Blind) {
-        pline("Unfortunately you cannot see what it says.");
+        pline(_("Unfortunately you cannot see what it says."));
     } else
-        pline("It reads:  \"%s\"", junk[rn2(SIZE(junk))]);
+        pline(_("It reads:  \"%s\""), junk[rn2(SIZE(junk))]);
 }
 
 #endif /* !UNIX && !VMS */
@@ -545,7 +545,7 @@ ckmailstatus()
     laststattime = moves;
     if (stat(mailbox, &nmstat)) {
 #ifdef PERMANENT_MAILBOX
-        pline("Cannot get status of MAIL=\"%s\" anymore.", mailbox);
+        pline(_("Cannot get status of MAIL=\"%s\" anymore."), mailbox);
         free_maildata();
 #else
         nmstat.st_mtime = 0;
@@ -608,8 +608,8 @@ boolean adminmsg;
             fl.l_type = F_UNLCK;
             fcntl (fileno(mb), F_UNLCK, &fl);
 #endif
-            pline("There is a%s message on this scroll.",
-                  seen_one_already ? "nother" : "");
+            pline(_("There is a%s message on this scroll."),
+                  seen_one_already ? _("nother") : "");
         }
         msg = strchr(curline, ':');
 
@@ -620,11 +620,11 @@ boolean adminmsg;
         msg++;
         msg[strlen(msg) - 1] = '\0'; /* kill newline */
 
-        pline(msgfrom, curline);
+        pline(_(msgfrom), curline);
         if (adminmsg)
-            verbalize(msg);
+            verbalize(_(msg));
         else
-            pline("It reads: \"%s\".", msg);
+            pline(_("It reads: \"%s\"."), msg);
 
         seen_one_already = TRUE;
 #ifdef SIMPLE_MAIL
@@ -651,7 +651,7 @@ boolean adminmsg;
  bail:
     /* bail out _professionally_ */
     if (!adminmsg)
-        pline("It appears to be all gibberish.");
+        pline(_("It appears to be all gibberish."));
 }
 #endif /* SIMPLE_MAIL */
 

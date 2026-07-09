@@ -285,9 +285,10 @@ free_youbuf()
     you_buf_siz = 0;
 }
 
-/* `prefix' must be a string literal, not a pointer */
+/* `prefix' may be a string literal or a (NUL-terminated) char pointer
+   (e.g. a localized prefix from nhi18n_prefix()); sized via strlen. */
 #define YouPrefix(pointer, prefix, text) \
-    Strcpy((pointer = You_buf((int) (strlen(text) + sizeof prefix))), prefix)
+    Strcpy((pointer = You_buf((int) (strlen(text) + strlen(prefix) + 1))), prefix)
 
 #define YouMessage(pointer, prefix, text) \
     strcat((YouPrefix(pointer, prefix, text), pointer), text)
@@ -297,10 +298,12 @@ void You
 VA_DECL(const char *, line)
 {
     char *tmp;
+    const char *pfx;
 
     VA_START(line);
     VA_INIT(line, const char *);
-    vpline(YouMessage(tmp, "You ", line), VA_ARGS);
+    pfx = nhi18n_prefix("You ", line);
+    vpline(YouMessage(tmp, pfx, line), VA_ARGS);
     VA_END();
 }
 
@@ -309,10 +312,12 @@ void Your
 VA_DECL(const char *, line)
 {
     char *tmp;
+    const char *pfx;
 
     VA_START(line);
     VA_INIT(line, const char *);
-    vpline(YouMessage(tmp, "Your ", line), VA_ARGS);
+    pfx = nhi18n_prefix("Your ", line);
+    vpline(YouMessage(tmp, pfx, line), VA_ARGS);
     VA_END();
 }
 
@@ -325,9 +330,9 @@ VA_DECL(const char *, line)
     VA_START(line);
     VA_INIT(line, const char *);
     if (Unaware)
-        YouPrefix(tmp, "You dream that you feel ", line);
+        YouPrefix(tmp, nhi18n_prefix("You dream that you feel ", line), line);
     else
-        YouPrefix(tmp, "You feel ", line);
+        YouPrefix(tmp, nhi18n_prefix("You feel ", line), line);
     vpline(strcat(tmp, line), VA_ARGS);
     VA_END();
 }
@@ -337,10 +342,12 @@ void You_cant
 VA_DECL(const char *, line)
 {
     char *tmp;
+    const char *pfx;
 
     VA_START(line);
     VA_INIT(line, const char *);
-    vpline(YouMessage(tmp, "You can't ", line), VA_ARGS);
+    pfx = nhi18n_prefix("You can't ", line);
+    vpline(YouMessage(tmp, pfx, line), VA_ARGS);
     VA_END();
 }
 
@@ -349,10 +356,12 @@ void pline_The
 VA_DECL(const char *, line)
 {
     char *tmp;
+    const char *pfx;
 
     VA_START(line);
     VA_INIT(line, const char *);
-    vpline(YouMessage(tmp, "The ", line), VA_ARGS);
+    pfx = nhi18n_prefix("The ", line);
+    vpline(YouMessage(tmp, pfx, line), VA_ARGS);
     VA_END();
 }
 
@@ -361,10 +370,12 @@ void There
 VA_DECL(const char *, line)
 {
     char *tmp;
+    const char *pfx;
 
     VA_START(line);
     VA_INIT(line, const char *);
-    vpline(YouMessage(tmp, "There ", line), VA_ARGS);
+    pfx = nhi18n_prefix("There ", line);
+    vpline(YouMessage(tmp, pfx, line), VA_ARGS);
     VA_END();
 }
 
@@ -379,11 +390,11 @@ VA_DECL(const char *, line)
     VA_START(line);
     VA_INIT(line, const char *);
     if (Underwater)
-        YouPrefix(tmp, "You barely hear ", line);
+        YouPrefix(tmp, nhi18n_prefix("You barely hear ", line), line);
     else if (Unaware)
-        YouPrefix(tmp, "You dream that you hear ", line);
+        YouPrefix(tmp, nhi18n_prefix("You dream that you hear ", line), line);
     else
-        YouPrefix(tmp, "You hear ", line);  /* Deaf-aware */
+        YouPrefix(tmp, nhi18n_prefix("You hear ", line), line);  /* Deaf-aware */
     vpline(strcat(tmp, line), VA_ARGS);
     VA_END();
 }
@@ -397,11 +408,11 @@ VA_DECL(const char *, line)
     VA_START(line);
     VA_INIT(line, const char *);
     if (Unaware)
-        YouPrefix(tmp, "You dream that you see ", line);
+        YouPrefix(tmp, nhi18n_prefix("You dream that you see ", line), line);
     else if (Blind) /* caller should have caught this... */
-        YouPrefix(tmp, "You sense ", line);
+        YouPrefix(tmp, nhi18n_prefix("You sense ", line), line);
     else
-        YouPrefix(tmp, "You see ", line);
+        YouPrefix(tmp, nhi18n_prefix("You see ", line), line);
     vpline(strcat(tmp, line), VA_ARGS);
     VA_END();
 }
@@ -506,12 +517,12 @@ VA_DECL(const char *, s)
     paniclog("impossible", pbuf);
     if (iflags.debug_fuzzer)
         panic("%s", pbuf);
-    pline("%s", VA_PASS1(pbuf));
+    pline(_("%s"), VA_PASS1(pbuf));
     /* reuse pbuf[] */
-    Strcpy(pbuf, "Program in disorder!");
+    Strcpy(pbuf, _("Program in disorder!"));
     if (program_state.something_worth_saving)
-        Strcat(pbuf, "  (Saving and reloading may fix this problem.)");
-    pline("%s", VA_PASS1(pbuf));
+        Strcat(pbuf, _("  (Saving and reloading may fix this problem.)"));
+    pline(_("%s"), VA_PASS1(pbuf));
 
     program_state.in_impossible = 0;
     VA_END();
@@ -554,7 +565,7 @@ const char *line;
     } else if (f == -1) {
         perror((char *) 0);
         use_pline_handler = FALSE;
-        pline("%s", VA_PASS1("Fork to message handler failed."));
+        pline(_("%s"), VA_PASS1(_("Fork to message handler failed.")));
     }
 }
 #endif /* MSGHANDLER && (POSIX_TYPES || __GNUC__) */

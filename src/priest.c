@@ -128,7 +128,7 @@ pick_move:
 #if 0 /* dead code; maybe someday someone will track down why... */
         if (ib) {
             if (cansee(mtmp->mx, mtmp->my))
-                pline("%s picks up %s.", Monnam(mtmp),
+                pline(_("%s picks up %s."), Monnam(mtmp),
                       distant_name(ib, doname));
             obj_extract_self(ib);
             (void) mpickobj(mtmp, ib);
@@ -204,7 +204,7 @@ register struct monst *priest;
         || (Conflict && !resist(priest, RING_CLASS, 0, 0))) {
         if (monnear(priest, u.ux, u.uy)) {
             if (Displaced)
-                Your("displaced image doesn't fool %s!", mon_nam(priest));
+                Your(_("displaced image doesn't fool %s!"), mon_nam(priest));
             (void) mattacku(priest);
             return 0;
         } else if (index(u.urooms, temple)) {
@@ -304,40 +304,56 @@ char *pname; /* caller-supplied output buffer */
             high_priest = mon->data == &mons[PM_HIGH_PRIEST];
     char whatcode = '\0';
     const char *what = do_hallu ? rndmonnam(&whatcode) : mon->data->mname;
+    char adjs[BUFSZ]; /* invisible/renegade/high/guardian prefixes */
+    boolean add_god;
 
     if (!mon->ispriest && !mon->isminion) /* should never happen...  */
         return strcpy(pname, what);       /* caller must be confused */
 
     *pname = '\0';
-    if (!do_hallu || !bogon_is_pname(whatcode))
-        Strcat(pname, "the ");
+    adjs[0] = '\0';
     if (mon->minvis)
-        Strcat(pname, "invisible ");
+        Strcat(adjs, _("invisible "));
     if (mon->isminion && EMIN(mon)->renegade)
-        Strcat(pname, "renegade ");
+        Strcat(adjs, _("renegade "));
 
     if (mon->ispriest || aligned_priest) { /* high_priest implies ispriest */
         if (!aligned_priest && !high_priest) {
             ; /* polymorphed priest; use ``what'' as is */
         } else {
             if (high_priest)
-                Strcat(pname, "high ");
+                Strcat(adjs, _("high "));
             if (Hallucination)
-                what = "poohbah";
+                what = _("poohbah");
             else if (mon->female)
-                what = "priestess";
+                what = _("priestess");
             else
-                what = "priest";
+                what = _("priest");
         }
     } else {
         if (mon->mtame && !strcmpi(what, "Angel"))
-            Strcat(pname, "guardian ");
+            Strcat(adjs, _("guardian "));
     }
 
-    Strcat(pname, what);
     /* same as distant_monnam(), more or less... */
-    if (do_hallu || !high_priest || !Is_astralevel(&u.uz)
-        || distu(mon->mx, mon->my) <= 2 || program_state.gameover) {
+    add_god = (do_hallu || !high_priest || !Is_astralevel(&u.uz)
+               || distu(mon->mx, mon->my) <= 2 || program_state.gameover);
+
+    if (!nhi18n_uses_articles()) {
+        /* zh: "<god>的<adjs><title>" — god moves to front, no article */
+        if (add_god)
+            Sprintf(pname, "%s%s", halu_gname(mon_aligntyp(mon)), _("'s"));
+        Strcat(pname, adjs);
+        Strcat(pname, what);
+        return pname;
+    }
+
+    /* English: "the <adjs><title> of <god>" */
+    if (!do_hallu || !bogon_is_pname(whatcode))
+        Strcat(pname, "the ");
+    Strcat(pname, adjs);
+    Strcat(pname, what);
+    if (add_god) {
         Strcat(pname, " of ");
         Strcat(pname, halu_gname(mon_aligntyp(mon)));
     }
@@ -416,8 +432,8 @@ int roomno;
                Moloch so suppress the "of Moloch" for him here too */
             if (sanctum && !Hallucination)
                 priest->ispriest = 0;
-            pline("%s intones:",
-                  canseemon(priest) ? Monnam(priest) : "A nearby voice");
+            pline(_("%s intones:"),
+                  canseemon(priest) ? Monnam(priest) : _("A nearby voice"));
             priest->ispriest = save_priest;
             epri_p->intone_time = moves + (long) d(10, 500); /* ~2505 */
             /* make sure that we don't suppress entry message when
@@ -438,14 +454,14 @@ int roomno;
                 msg1 = "You desecrate this place by your presence!";
             }
         } else if (moves >= epri_p->enter_time) {
-            Sprintf(buf, "Pilgrim, you enter a %s place!",
-                    !shrined ? "desecrated" : "sacred");
+            Sprintf(buf, _("Pilgrim, you enter a %s place!"),
+                    !shrined ? _("desecrated") : _("sacred"));
             msg1 = buf;
         }
         if (msg1 && can_speak && !Deaf) {
-            verbalize1(msg1);
+            verbalize1(_(msg1));
             if (msg2)
-                verbalize1(msg2);
+                verbalize1(_(msg2));
             epri_p->enter_time = moves + (long) d(10, 100); /* ~505 */
         }
         if (!sanctum) {
@@ -457,7 +473,10 @@ int roomno;
                 other_time = &epri_p->peaceful_time;
             } else {
                 msg1 = "experience %s sense of peace.";
-                msg2 = (u.ualign.record >= ALGN_PIOUS) ? "a" : "an unusual";
+                /* "a" is an English article; no-article languages (zh) drop it */
+                msg2 = (u.ualign.record >= ALGN_PIOUS)
+                           ? (nhi18n_uses_articles() ? "a" : "")
+                           : "an unusual";
                 this_time = &epri_p->peaceful_time;
                 other_time = &epri_p->hostile_time;
             }
@@ -465,7 +484,7 @@ int roomno;
                if alignment update has caused it to switch from
                forbidding to sense-of-peace or vice versa */
             if (moves >= *this_time || *other_time >= *this_time) {
-                You(msg1, msg2);
+                You(_(msg1), _(msg2));
                 *this_time = moves + (long) d(10, 20); /* ~55 */
                 /* avoid being tricked by the RNG:  switch might have just
                    happened and previous random threshold could be larger */
@@ -481,13 +500,13 @@ int roomno;
 
         switch (rn2(4)) {
         case 0:
-            You("have an eerie feeling...");
+            You(_("have an eerie feeling..."));
             break;
         case 1:
-            You_feel("like you are being watched.");
+            You_feel(_("like you are being watched."));
             break;
         case 2:
-            pline("A shiver runs down your %s.", body_part(SPINE));
+            pline(_("A shiver runs down your %s."), body_part(SPINE));
             break;
         default:
             break; /* no message; unfortunately there's no
@@ -499,15 +518,15 @@ int roomno;
                    != 0) {
             int ngen = mvitals[PM_GHOST].born;
             if (canspotmon(mtmp))
-                pline("A%s ghost appears next to you%c",
-                      ngen < 5 ? "n enormous" : "",
+                pline(_("A%s ghost appears next to you%c"),
+                      ngen < 5 ? _("n enormous") : "",
                       ngen < 10 ? '!' : '.');
             else
-                You("sense a presence close by!");
+                You(_("sense a presence close by!"));
             mtmp->mpeaceful = 0;
             set_malign(mtmp);
             if (flags.verbose)
-                You("are frightened to death, and unable to move.");
+                You(_("are frightened to death, and unable to move."));
             nomul(-3);
             multi_reason = "being terrified of a ghost";
             nomovemsg = "You regain your composure.";
@@ -542,7 +561,7 @@ register struct monst *priest;
     u.uconduct.gnostic++;
 
     if (priest->mflee || (!priest->ispriest && coaligned && strayed)) {
-        pline("%s doesn't want anything to do with you!", Monnam(priest));
+        pline(_("%s doesn't want anything to do with you!"), Monnam(priest));
         priest->mpeaceful = 0;
         return;
     }
@@ -557,13 +576,13 @@ register struct monst *priest;
         };
 
         if (!priest->mcanmove || priest->msleeping) {
-            pline("%s breaks out of %s reverie!", Monnam(priest),
+            pline(_("%s breaks out of %s reverie!"), Monnam(priest),
                   mhis(priest));
             priest->mfrozen = priest->msleeping = 0;
             priest->mcanmove = 1;
         }
         priest->mpeaceful = 0;
-        verbalize1(cranky_msg[rn2(3)]);
+        verbalize1(_(cranky_msg[rn2(3)]));
         return;
     }
 
@@ -571,7 +590,7 @@ register struct monst *priest;
     if (priest->mpeaceful && *in_rooms(priest->mx, priest->my, TEMPLE)
         && !has_shrine(priest)) {
         verbalize(
-              "Begone!  Thou desecratest this holy place with thy presence.");
+              _("Begone!  Thou desecratest this holy place with thy presence."));
         priest->mpeaceful = 0;
         return;
     }
@@ -580,38 +599,38 @@ register struct monst *priest;
             long pmoney = money_cnt(priest->minvent);
             if (pmoney > 0L) {
                 /* Note: two bits is actually 25 cents.  Hmm. */
-                pline("%s gives you %s for an ale.", Monnam(priest),
-                      (pmoney == 1L) ? "one bit" : "two bits");
+                pline(_("%s gives you %s for an ale."), Monnam(priest),
+                      (pmoney == 1L) ? _("one bit") : _("two bits"));
                 money2u(priest, pmoney > 1L ? 2 : 1);
             } else
-                pline("%s preaches the virtues of poverty.", Monnam(priest));
+                pline(_("%s preaches the virtues of poverty."), Monnam(priest));
             exercise(A_WIS, TRUE);
         } else
-            pline("%s is not interested.", Monnam(priest));
+            pline(_("%s is not interested."), Monnam(priest));
         return;
     } else {
         long offer;
 
-        pline("%s asks you for a contribution for the temple.",
+        pline(_("%s asks you for a contribution for the temple."),
               Monnam(priest));
         if ((offer = bribe(priest)) == 0) {
-            verbalize("Thou shalt regret thine action!");
+            verbalize(_("Thou shalt regret thine action!"));
             if (coaligned)
                 adjalign(-1);
         } else if (offer < (u.ulevel * 200)) {
             if (money_cnt(invent) > (offer * 2L)) {
-                verbalize("Cheapskate.");
+                verbalize(_("Cheapskate."));
             } else {
-                verbalize("I thank thee for thy contribution.");
+                verbalize(_("I thank thee for thy contribution."));
                 /* give player some token */
                 exercise(A_WIS, TRUE);
             }
         } else if (offer < (u.ulevel * 400)) {
-            verbalize("Thou art indeed a pious individual.");
+            verbalize(_("Thou art indeed a pious individual."));
             if (money_cnt(invent) < (offer * 2L)) {
                 if (coaligned && u.ualign.record <= ALGN_SINNED)
                     adjalign(1);
-                verbalize("I bestow upon thee a blessing.");
+                verbalize(_("I bestow upon thee a blessing."));
                 incr_itimeout(&HClairvoyant, rn1(500, 500));
             }
         } else if (offer < (u.ulevel * 600)
@@ -622,7 +641,7 @@ register struct monst *priest;
                    && (!(HProtection & INTRINSIC)
                        || (u.ublessed < 20
                            && (u.ublessed < 9 || !rn2(u.ublessed))))) {
-            verbalize("Thou hast been rewarded for thy devotion.");
+            verbalize(_("Thou hast been rewarded for thy devotion."));
             if (!(HProtection & INTRINSIC)) {
                 HProtection |= FROMOUTSIDE;
                 if (!u.ublessed)
@@ -630,7 +649,7 @@ register struct monst *priest;
             } else
                 u.ublessed++;
         } else {
-            verbalize("Thy selfless generosity is deeply appreciated.");
+            verbalize(_("Thy selfless generosity is deeply appreciated."));
             if (money_cnt(invent) < (offer * 2L) && coaligned) {
                 if (strayed && (moves - u.ucleansed) > 5000L) {
                     u.ualign.record = 0; /* cleanse thee */
@@ -774,15 +793,15 @@ struct monst *priest;
 
     switch (rn2(3)) {
     case 0:
-        pline("%s roars in anger:  \"Thou shalt suffer!\"",
+        pline(_("%s roars in anger:  \"Thou shalt suffer!\""),
               a_gname_at(ax, ay));
         break;
     case 1:
-        pline("%s voice booms:  \"How darest thou harm my servant!\"",
+        pline(_("%s voice booms:  \"How darest thou harm my servant!\""),
               s_suffix(a_gname_at(ax, ay)));
         break;
     default:
-        pline("%s roars:  \"Thou dost profane my shrine!\"",
+        pline(_("%s roars:  \"Thou dost profane my shrine!\""),
               a_gname_at(ax, ay));
         break;
     }
@@ -877,15 +896,15 @@ aligntyp alignment;
 {
     switch ((int) alignment) {
     case A_CHAOTIC:
-        return "chaotic";
+        return _("chaotic");
     case A_NEUTRAL:
-        return "neutral";
+        return _("neutral");
     case A_LAWFUL:
-        return "lawful";
+        return _("lawful");
     case A_NONE:
-        return "unaligned";
+        return _("unaligned");
     }
-    return "unknown";
+    return _("unknown");
 }
 
 /* used for self-probing */
@@ -921,9 +940,11 @@ const char *suffix;
     else
         pio = "transgressed";
 
-    Sprintf(buf, "%s", pio);
+    Sprintf(buf, "%s", _(pio));
     if (suffix && (!showneg || u.ualign.record >= 0)) {
-        if (u.ualign.record != 3)
+        /* English inserts a space between adverb and suffix; no-article
+           languages (zh) compose without it, e.g. 虔诚地守序 */
+        if (u.ualign.record != 3 && nhi18n_uses_articles())
             Strcat(buf, " ");
         Strcat(buf, suffix);
     }
@@ -940,16 +961,16 @@ struct monst *mtmp;
 
     info[0] = 0;
     if (mtmp->mtame) {
-        Strcat(info, ", tame");
+        Strcat(info, _(", tame"));
         if (wizard) {
             Sprintf(eos(info), " (%d", mtmp->mtame);
             if (!mtmp->isminion)
-                Sprintf(eos(info), "; hungry %ld; apport %d",
+                Sprintf(eos(info), _("; hungry %ld; apport %d"),
                         EDOG(mtmp)->hungrytime, EDOG(mtmp)->apport);
             Strcat(info, ")");
         }
     } else if (mtmp->mpeaceful)
-        Strcat(info, ", peaceful");
+        Strcat(info, _(", peaceful"));
 
     if (mtmp->data == &mons[PM_LONG_WORM]) {
         int segndx, nsegs = count_wsegs(mtmp);
@@ -958,72 +979,72 @@ struct monst *mtmp;
            the worm's segments, but we count it as such when presenting
            worm feedback to the player */
         if (!nsegs) {
-            Strcat(info, ", single segment");
+            Strcat(info, _(", single segment"));
         } else {
             ++nsegs; /* include head in the segment count */
             segndx = wseg_at(mtmp, bhitpos.x, bhitpos.y);
-            Sprintf(eos(info), ", %d%s of %d segments",
+            Sprintf(eos(info), _(", %d%s of %d segments"),
                     segndx, ordin(segndx), nsegs);
         }
     }
     if (mtmp->cham >= LOW_PM && mtmp->data != &mons[mtmp->cham])
         /* don't reveal the innate form (chameleon, vampire, &c),
            just expose the fact that this current form isn't it */
-        Strcat(info, ", shapechanger");
+        Strcat(info, _(", shapechanger"));
     /* pets eating mimic corpses mimic while eating, so this comes first */
     if (mtmp->meating)
-        Strcat(info, ", eating");
+        Strcat(info, _(", eating"));
     /* a stethoscope exposes mimic before getting here so this
        won't be relevant for it, but wand of probing doesn't */
     if (mtmp->mundetected || mtmp->m_ap_type)
         mhidden_description(mtmp, TRUE, eos(info));
     if (mtmp->mcan)
-        Strcat(info, ", cancelled");
+        Strcat(info, _(", cancelled"));
     if (mtmp->mconf)
-        Strcat(info, ", confused");
+        Strcat(info, _(", confused"));
     if (mtmp->mblinded || !mtmp->mcansee)
-        Strcat(info, ", blind");
+        Strcat(info, _(", blind"));
     if (mtmp->mstun)
-        Strcat(info, ", stunned");
+        Strcat(info, _(", stunned"));
     if (mtmp->msleeping)
-        Strcat(info, ", asleep");
+        Strcat(info, _(", asleep"));
 #if 0 /* unfortunately mfrozen covers temporary sleep and being busy \
          (donning armor, for instance) as well as paralysis */
     else if (mtmp->mfrozen)
         Strcat(info, ", paralyzed");
 #else
     else if (mtmp->mfrozen || !mtmp->mcanmove)
-        Strcat(info, ", can't move");
+        Strcat(info, _(", can't move"));
 #endif
     /* [arbitrary reason why it isn't moving] */
     else if (mtmp->mstrategy & STRAT_WAITMASK)
-        Strcat(info, ", meditating");
+        Strcat(info, _(", meditating"));
     if (mtmp->mflee)
-        Strcat(info, ", scared");
+        Strcat(info, _(", scared"));
     if (mtmp->mtrapped)
-        Strcat(info, ", trapped");
+        Strcat(info, _(", trapped"));
     if (mtmp->mspeed)
-        Strcat(info, (mtmp->mspeed == MFAST) ? ", fast"
-                      : (mtmp->mspeed == MSLOW) ? ", slow"
-                         : ", [? speed]");
+        Strcat(info, (mtmp->mspeed == MFAST) ? _(", fast")
+                      : (mtmp->mspeed == MSLOW) ? _(", slow")
+                         : _(", [? speed]"));
     if (mtmp->minvis)
-        Strcat(info, ", invisible");
+        Strcat(info, _(", invisible"));
     if (mtmp == u.ustuck)
-        Strcat(info, sticks(youmonst.data) ? ", held by you"
-                      : !u.uswallow ? ", holding you"
+        Strcat(info, sticks(youmonst.data) ? _(", held by you")
+                      : !u.uswallow ? _(", holding you")
                          : attacktype_fordmg(u.ustuck->data, AT_ENGL, AD_DGST)
-                            ? ", digesting you"
-                            : is_animal(u.ustuck->data) ? ", swallowing you"
-                               : ", engulfing you");
+                            ? _(", digesting you")
+                            : is_animal(u.ustuck->data) ? _(", swallowing you")
+                               : _(", engulfing you"));
     if (mtmp == u.usteed)
-        Strcat(info, ", carrying you");
+        Strcat(info, _(", carrying you"));
 
     /* avoid "Status of the invisible newt ..., invisible" */
     /* and unlike a normal mon_nam, use "saddled" even if it has a name */
     Strcpy(monnambuf, x_monnam(mtmp, ARTICLE_THE, (char *) 0,
                                (SUPPRESS_IT | SUPPRESS_INVISIBLE), FALSE));
 
-    pline("Status of %s (%s):  Level %d  HP %d(%d)  AC %d%s.", monnambuf,
+    pline(_("Status of %s (%s):  Level %d  HP %d(%d)  AC %d%s."), monnambuf,
           align_str(alignment), mtmp->m_lev, mtmp->mhp, mtmp->mhpmax,
           find_mac(mtmp), info);
 }
@@ -1036,61 +1057,64 @@ ustatusline()
 
     info[0] = '\0';
     if (Sick) {
-        Strcat(info, ", dying from");
+        Strcat(info, _(", dying from"));
         if (u.usick_type & SICK_VOMITABLE)
-            Strcat(info, " food poisoning");
+            Strcat(info, _(" food poisoning"));
         if (u.usick_type & SICK_NONVOMITABLE) {
             if (u.usick_type & SICK_VOMITABLE)
-                Strcat(info, " and");
-            Strcat(info, " illness");
+                Strcat(info, _(" and"));
+            Strcat(info, _(" illness"));
         }
     }
     if (Stoned)
-        Strcat(info, ", solidifying");
+        Strcat(info, _(", solidifying"));
     if (Slimed)
-        Strcat(info, ", becoming slimy");
+        Strcat(info, _(", becoming slimy"));
     if (Strangled)
-        Strcat(info, ", being strangled");
+        Strcat(info, _(", being strangled"));
     if (Vomiting)
-        Strcat(info, ", nauseated"); /* !"nauseous" */
+        Strcat(info, _(", nauseated")); /* !"nauseous" */
     if (Confusion)
-        Strcat(info, ", confused");
+        Strcat(info, _(", confused"));
     if (Blind) {
-        Strcat(info, ", blind");
+        /* zh: restructured to avoid English "blind"+"ed" wordplay split */
         if (u.ucreamed) {
             if ((long) u.ucreamed < Blinded || Blindfolded
                 || !haseyes(youmonst.data))
-                Strcat(info, ", cover");
-            Strcat(info, "ed by sticky goop");
+                Strcat(info, _(", blind, covered by sticky goop"));
+            else
+                Strcat(info, _(", blinded by sticky goop"));
+        } else {
+            Strcat(info, _(", blind"));
         } /* note: "goop" == "glop"; variation is intentional */
     }
     if (Stunned)
-        Strcat(info, ", stunned");
+        Strcat(info, _(", stunned"));
     if (!u.usteed && Wounded_legs) {
         const char *what = body_part(LEG);
         if ((Wounded_legs & BOTH_SIDES) == BOTH_SIDES)
             what = makeplural(what);
-        Sprintf(eos(info), ", injured %s", what);
+        Sprintf(eos(info), _(", injured %s"), what);
     }
     if (Glib)
-        Sprintf(eos(info), ", slippery %s", makeplural(body_part(HAND)));
+        Sprintf(eos(info), _(", slippery %s"), makeplural(body_part(HAND)));
     if (u.utrap)
-        Strcat(info, ", trapped");
+        Strcat(info, _(", trapped"));
     if (Fast)
-        Strcat(info, Very_fast ? ", very fast" : ", fast");
+        Strcat(info, Very_fast ? _(", very fast") : _(", fast"));
     if (u.uundetected)
-        Strcat(info, ", concealed");
+        Strcat(info, _(", concealed"));
     if (Invis)
-        Strcat(info, ", invisible");
+        Strcat(info, _(", invisible"));
     if (u.ustuck) {
         if (sticks(youmonst.data))
-            Strcat(info, ", holding ");
+            Strcat(info, _(", holding "));
         else
-            Strcat(info, ", held by ");
+            Strcat(info, _(", held by "));
         Strcat(info, mon_nam(u.ustuck));
     }
 
-    pline("Status of %s (%s):  Level %d  HP %d(%d)  AC %d%s.", plname,
+    pline(_("Status of %s (%s):  Level %d  HP %d(%d)  AC %d%s."), plname,
           piousness(FALSE, align_str(u.ualign.type)),
           Upolyd ? mons[u.umonnum].mlevel : u.ulevel, Upolyd ? u.mh : u.uhp,
           Upolyd ? u.mhmax : u.uhpmax, u.uac, info);

@@ -72,11 +72,11 @@ amulet()
             if (ttmp->ttyp == MAGIC_PORTAL) {
                 int du = distu(ttmp->tx, ttmp->ty);
                 if (du <= 9)
-                    pline("%s hot!", Tobjnam(amu, "feel"));
+                    pline(_("%s hot!"), Tobjnam(amu, _("feel")));
                 else if (du <= 64)
-                    pline("%s very warm.", Tobjnam(amu, "feel"));
+                    pline(_("%s very warm."), Tobjnam(amu, _("feel")));
                 else if (du <= 144)
-                    pline("%s warm.", Tobjnam(amu, "feel"));
+                    pline(_("%s warm."), Tobjnam(amu, _("feel")));
                 /* else, the amulet feels normal */
                 break;
             }
@@ -93,7 +93,7 @@ amulet()
             mtmp->msleeping = 0;
             if (distu(mtmp->mx, mtmp->my) > 2)
                 You(
-      "get the creepy feeling that somebody noticed your taking the Amulet.");
+      _("get the creepy feeling that somebody noticed your taking the Amulet."));
             return;
         }
     }
@@ -423,7 +423,7 @@ register struct monst *mtmp;
 
                 if ((otmp = on_ground(which_arti(targ))) != 0) {
                     if (cansee(mtmp->mx, mtmp->my))
-                        pline("%s picks up %s.", Monnam(mtmp),
+                        pline(_("%s picks up %s."), Monnam(mtmp),
                               (distu(mtmp->mx, mtmp->my) <= 5)
                                   ? doname(otmp)
                                   : distant_name(otmp, doname));
@@ -672,8 +672,8 @@ resurrect()
         mtmp->mtame = mtmp->mpeaceful = 0; /* paranoia */
         set_malign(mtmp);
         if (!Deaf) {
-            pline("A voice booms out...");
-            verbalize("So thou thought thou couldst %s me, fool.", verb);
+            pline(_("A voice booms out..."));
+            verbalize(_("So thou thought thou couldst %s me, fool."), _(verb));
         }
     }
 }
@@ -688,11 +688,11 @@ intervene()
     switch (which) {
     case 0:
     case 1:
-        You_feel("vaguely nervous.");
+        You_feel(_("vaguely nervous."));
         break;
     case 2:
         if (!Blind)
-            You("notice a %s glow surrounding you.", hcolor(NH_BLACK));
+            You(_("notice a %s glow surrounding you."), hcolor(NH_BLACK));
         rndcurse();
         break;
     case 3:
@@ -746,27 +746,27 @@ register struct monst *mtmp;
         return;
     if (mtmp->iswiz) {
         if (!rn2(5)) /* typical bad guy action */
-            pline("%s laughs fiendishly.", Monnam(mtmp));
+            pline(_("%s laughs fiendishly."), Monnam(mtmp));
         else if (u.uhave.amulet && !rn2(SIZE(random_insult)))
-            verbalize("Relinquish the amulet, %s!",
-                      random_insult[rn2(SIZE(random_insult))]);
+            verbalize(_("Relinquish the amulet, %s!"),
+                      _(random_insult[rn2(SIZE(random_insult))]));
         else if (u.uhp < 5 && !rn2(2)) /* Panic */
-            verbalize(rn2(2) ? "Even now thy life force ebbs, %s!"
-                             : "Savor thy breath, %s, it be thy last!",
-                      random_insult[rn2(SIZE(random_insult))]);
+            verbalize(rn2(2) ? _("Even now thy life force ebbs, %s!")
+                             : _("Savor thy breath, %s, it be thy last!"),
+                      _(random_insult[rn2(SIZE(random_insult))]));
         else if (mtmp->mhp < 5 && !rn2(2)) /* Parthian shot */
-            verbalize(rn2(2) ? "I shall return." : "I'll be back.");
+            verbalize(rn2(2) ? _("I shall return.") : _("I'll be back."));
         else
-            verbalize("%s %s!",
-                      random_malediction[rn2(SIZE(random_malediction))],
-                      random_insult[rn2(SIZE(random_insult))]);
+            verbalize(_("%s %s!"),
+                      _(random_malediction[rn2(SIZE(random_malediction))]),
+                      _(random_insult[rn2(SIZE(random_insult))]));
     } else if (is_lminion(mtmp)
                && !(mtmp->isminion && EMIN(mtmp)->renegade)) {
         com_pager(rn2(QTN_ANGELIC - 1 + (Hallucination ? 1 : 0))
                   + QT_ANGELIC);
     } else {
         if (!rn2(is_minion(mtmp->data) ? 100 : 5))
-            pline("%s casts aspersions on your ancestry.", Monnam(mtmp));
+            pline(_("%s casts aspersions on your ancestry."), Monnam(mtmp));
         else
             com_pager(rn2(QTN_DEMONIC) + QT_DEMONIC);
     }

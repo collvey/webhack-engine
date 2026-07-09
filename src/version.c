@@ -87,7 +87,7 @@ doversion()
 {
     char buf[BUFSZ];
 
-    pline("%s", getversionstring(buf));
+    pline(_("%s"), getversionstring(buf));
     return 0;
 }
 
@@ -264,7 +264,7 @@ boolean complain;
 #endif
         ) {
         if (complain)
-            pline("Version mismatch for file \"%s\".", filename);
+            pline(_("Version mismatch for file \"%s\"."), filename);
         return FALSE;
     } else if (
 #ifndef IGNORED_FEATURES
@@ -277,7 +277,7 @@ boolean complain;
         || version_data->struct_sizes1 != VERSION_SANITY2
         || version_data->struct_sizes2 != VERSION_SANITY3) {
         if (complain)
-            pline("Configuration incompatibility for file \"%s\".", filename);
+            pline(_("Configuration incompatibility for file \"%s\"."), filename);
         return FALSE;
     }
     return TRUE;
@@ -298,7 +298,7 @@ const char *name;
     minit(); /* ZEROCOMP */
     if (rlen == 0) {
         if (verbose) {
-            pline("File \"%s\" is empty?", name);
+            pline(_("File \"%s\" is empty?"), name);
             wait_synch();
         }
         return FALSE;

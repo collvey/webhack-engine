@@ -59,8 +59,8 @@ STATIC_VAR NEARDATA const char *const barehands_or_martial[] = {
     ((skill_names_indices[type] > 0)                    \
          ? OBJ_NAME(objects[skill_names_indices[type]]) \
          : (type == P_BARE_HANDED_COMBAT)               \
-               ? barehands_or_martial[martial_bonus()]  \
-               : odd_skill_names[-skill_names_indices[type]])
+               ? _(barehands_or_martial[martial_bonus()])  \
+               : _(odd_skill_names[-skill_names_indices[type]]))
 
 static NEARDATA const char kebabable[] = { S_XORN, S_DRAGON, S_JABBERWOCK,
                                            S_NAGA, S_GIANT,  '\0' };
@@ -69,11 +69,11 @@ STATIC_OVL void
 give_may_advance_msg(skill)
 int skill;
 {
-    You_feel("more confident in your %sskills.",
+    You_feel(_("more confident in your %sskills."),
              (skill == P_NONE) ? ""
-                 : (skill <= P_LAST_WEAPON) ? "weapon "
-                     : (skill <= P_LAST_SPELL) ? "spell casting "
-                         : "fighting ");
+                 : (skill <= P_LAST_WEAPON) ? _("weapon ")
+                     : (skill <= P_LAST_SPELL) ? _("spell casting ")
+                         : _("fighting "));
 }
 
 /* weapon's skill category name for use as generalized description of weapon;
@@ -451,13 +451,13 @@ long silverhit;
            silver [see hmonas(uhitm.c) for explanation of 'multi_claw'] */
         both = ((ltyp == rtyp && uleft->dknown == uright->dknown)
                 || (l_ag && r_ag));
-        Sprintf(rings, "ring%s", both ? "s" : "");
-        Your("%s%s %s %s!",
-             (l_ag || r_ag) ? "silver "
+        Sprintf(rings, _("ring%s"), both ? "s" : "");
+        Your(_("%s%s %s %s!"),
+             (l_ag || r_ag) ? _("silver ")
              : both ? ""
-               : ((silverhit & W_RINGL) != 0L) ? "left "
-                 : "right ",
-             rings, vtense(rings, "sear"), mon_nam(mdef));
+               : ((silverhit & W_RINGL) != 0L) ? _("left ")
+                 : _("right "),
+             rings, vtense(rings, _("sear")), mon_nam(mdef));
     }
 }
 
@@ -712,11 +712,11 @@ boolean polyspot;
         mon->weapon_check = NO_WEAPON_WANTED;
         obj_extract_self(obj);
         if (cansee(mon->mx, mon->my)) {
-            pline("%s drops %s.", Monnam(mon), distant_name(obj, doname));
+            pline(_("%s drops %s."), Monnam(mon), distant_name(obj, doname));
             newsym(mon->mx, mon->my);
         }
         /* might be dropping object into water or lava */
-        if (!flooreffects(obj, mon->mx, mon->my, "drop")) {
+        if (!flooreffects(obj, mon->mx, mon->my, _("drop"))) {
             if (polyspot)
                 bypass_obj(obj);
             place_object(obj, mon->mx, mon->my);
@@ -810,17 +810,17 @@ register struct monst *mon;
 
                 if (bimanual(mw_tmp))
                     mon_hand = makeplural(mon_hand);
-                Sprintf(welded_buf, "%s welded to %s %s",
+                Sprintf(welded_buf, _("%s welded to %s %s"),
                         otense(mw_tmp, "are"), mhis(mon), mon_hand);
 
                 if (obj->otyp == PICK_AXE) {
-                    pline("Since %s weapon%s %s,", s_suffix(mon_nam(mon)),
+                    pline(_("Since %s weapon%s %s,"), s_suffix(mon_nam(mon)),
                           plur(mw_tmp->quan), welded_buf);
-                    pline("%s cannot wield that %s.", mon_nam(mon),
+                    pline(_("%s cannot wield that %s."), mon_nam(mon),
                           xname(obj));
                 } else {
-                    pline("%s tries to wield %s.", Monnam(mon), doname(obj));
-                    pline("%s %s!", Yname2(mw_tmp), welded_buf);
+                    pline(_("%s tries to wield %s."), Monnam(mon), doname(obj));
+                    pline(_("%s %s!"), Yname2(mw_tmp), welded_buf);
                 }
                 mw_tmp->bknown = 1;
             }
@@ -833,7 +833,7 @@ register struct monst *mon;
         if (canseemon(mon)) {
             boolean newly_welded;
 
-            pline("%s wields %s!", Monnam(mon), doname(obj));
+            pline(_("%s wields %s!"), Monnam(mon), doname(obj));
             /* 3.6.3: mwelded() predicate expects the object to have its
                W_WEP bit set in owormmask, but the pline here and for
                artifact_light don't want that because they'd have '(weapon
@@ -847,8 +847,8 @@ register struct monst *mon;
 
                 if (bimanual(obj))
                     mon_hand = makeplural(mon_hand);
-                pline("%s %s to %s %s!", Tobjnam(obj, "weld"),
-                      is_plural(obj) ? "themselves" : "itself",
+                pline(_("%s %s to %s %s!"), Tobjnam(obj, _("weld")),
+                      is_plural(obj) ? _("themselves") : _("itself"),
                       s_suffix(mon_nam(mon)), mon_hand);
                 obj->bknown = 1;
             }
@@ -856,15 +856,15 @@ register struct monst *mon;
         if (artifact_light(obj) && !obj->lamplit) {
             begin_burn(obj, FALSE);
             if (canseemon(mon))
-                pline("%s %s in %s %s!", Tobjnam(obj, "shine"),
+                pline(_("%s %s in %s %s!"), Tobjnam(obj, _("shine")),
                       arti_light_description(obj), s_suffix(mon_nam(mon)),
                       mbodypart(mon, HAND));
             /* 3.6.3: artifact might be getting wielded by invisible monst */
             else if (cansee(mon->mx, mon->my))
-                pline("Light begins shining %s.",
+                pline(_("Light begins shining %s."),
                       (distu(mon->mx, mon->my) <= 5 * 5)
-                          ? "nearby"
-                          : "in the distance");
+                          ? _("nearby")
+                          : _("in the distance"));
         }
         obj->owornmask = W_WEP;
         return 1;
@@ -968,11 +968,11 @@ boolean verbose;
                                      : (!obj->spe ? "wet" : "wetter");
 
             if (carried(obj))
-                pline("%s gets %s.", Yobjnam2(obj, (const char *) 0),
-                      wetness);
+                pline(_("%s gets %s."), Yobjnam2(obj, (const char *) 0),
+                      _(wetness));
             else if (mcarried(obj) && canseemon(obj->ocarry))
-                pline("%s %s gets %s.", s_suffix(Monnam(obj->ocarry)),
-                      xname(obj), wetness);
+                pline(_("%s %s gets %s."), s_suffix(Monnam(obj->ocarry)),
+                      xname(obj), _(wetness));
         }
     }
     obj->spe = min(newspe, 7);
@@ -996,11 +996,11 @@ boolean verbose;
     if (newspe < obj->spe) {
         if (verbose) {
             if (carried(obj))
-                pline("%s dries%s.", Yobjnam2(obj, (const char *) 0),
-                      !newspe ? " out" : "");
+                pline(_("%s dries%s."), Yobjnam2(obj, (const char *) 0),
+                      !newspe ? _(" out") : "");
             else if (mcarried(obj) && canseemon(obj->ocarry))
-                pline("%s %s drie%s.", s_suffix(Monnam(obj->ocarry)),
-                      xname(obj), !newspe ? " out" : "");
+                pline(_("%s %s drie%s."), s_suffix(Monnam(obj->ocarry)),
+                      xname(obj), !newspe ? _(" out") : "");
         }
     }
     newspe = min(newspe, 7);
@@ -1044,7 +1044,7 @@ char *buf;
         ptr = "Unknown";
         break;
     }
-    Strcpy(buf, ptr);
+    Strcpy(buf, _(ptr));
     return buf;
 }
 
@@ -1135,8 +1135,8 @@ int skill;
     P_SKILL(skill)++;
     u.skill_record[u.skills_advanced++] = skill;
     /* subtly change the advance message to indicate no more advancement */
-    You("are now %s skilled in %s.",
-        P_SKILL(skill) >= P_MAX_SKILL(skill) ? "most" : "more",
+    You(_("are now %s skilled in %s."),
+        P_SKILL(skill) >= P_MAX_SKILL(skill) ? _("most") : _("more"),
         P_NAME(skill));
 }
 
@@ -1168,7 +1168,7 @@ enhance_weapon_skill()
     winid win;
     boolean speedy = FALSE;
 
-    if (wizard && yn("Advance skills without practice?") == 'y')
+    if (wizard && yn(_("Advance skills without practice?")) == 'y')
         speedy = TRUE;
 
     do {
@@ -1195,18 +1195,18 @@ enhance_weapon_skill()
         if (eventually_advance > 0 || maxxed_cnt > 0) {
             any = zeroany;
             if (eventually_advance > 0) {
-                Sprintf(buf, "(Skill%s flagged by \"*\" may be enhanced %s.)",
-                        plur(eventually_advance),
+                Sprintf(buf, _("(Skill%s flagged by \"*\" may be enhanced %s.)"),
+                        nhi18n_uses_plurals() ? plur(eventually_advance) : "",
                         (u.ulevel < MAXULEV)
-                            ? "when you're more experienced"
-                            : "if skill slots become available");
+                            ? _("when you're more experienced")
+                            : _("if skill slots become available"));
                 add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, buf,
                          MENU_UNSELECTED);
             }
             if (maxxed_cnt > 0) {
                 Sprintf(buf,
-                 "(Skill%s flagged by \"#\" cannot be enhanced any further.)",
-                        plur(maxxed_cnt));
+                 _("(Skill%s flagged by \"#\" cannot be enhanced any further.)"),
+                        nhi18n_uses_plurals() ? plur(maxxed_cnt) : "");
                 add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, buf,
                          MENU_UNSELECTED);
             }
@@ -1225,7 +1225,7 @@ enhance_weapon_skill()
                 any = zeroany;
                 if (i == skill_ranges[pass].first)
                     add_menu(win, NO_GLYPH, &any, 0, 0, iflags.menu_headings,
-                             skill_ranges[pass].name, MENU_UNSELECTED);
+                             _(skill_ranges[pass].name), MENU_UNSELECTED);
 
                 if (P_RESTRICTED(i))
                     continue;
@@ -1270,10 +1270,10 @@ enhance_weapon_skill()
                          MENU_UNSELECTED);
             }
 
-        Strcpy(buf, (to_advance > 0) ? "Pick a skill to advance:"
-                                     : "Current skills:");
+        Strcpy(buf, (to_advance > 0) ? _("Pick a skill to advance:")
+                                     : _("Current skills:"));
         if (wizard && !speedy)
-            Sprintf(eos(buf), "  (%d slot%s available)", u.weapon_slots,
+            Sprintf(eos(buf), _("  (%d slot%s available)"), u.weapon_slots,
                     plur(u.weapon_slots));
         end_menu(win, buf);
         n = select_menu(win, to_advance ? PICK_ONE : PICK_NONE, &selected);
@@ -1286,7 +1286,7 @@ enhance_weapon_skill()
             for (n = i = 0; i < P_NUM_SKILLS; i++) {
                 if (can_advance(i, speedy)) {
                     if (!speedy)
-                        You_feel("you could be more dangerous!");
+                        You_feel(_("you could be more dangerous!"));
                     n++;
                     break;
                 }
@@ -1668,9 +1668,9 @@ register struct obj *obj;
     if (artifact_light(obj) && obj->lamplit) {
         end_burn(obj, FALSE);
         if (canseemon(mon))
-            pline("%s in %s %s %s shining.", The(xname(obj)),
+            pline(_("%s in %s %s %s shining."), The(xname(obj)),
                   s_suffix(mon_nam(mon)), mbodypart(mon, HAND),
-                  otense(obj, "stop"));
+                  otense(obj, _("stop")));
     }
     if (MON_WEP(mon) == obj)
         MON_NOWEP(mon);

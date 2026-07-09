@@ -633,13 +633,13 @@ struct mkroom *sroom;
         if (wizard) {
             register int j = sroom->doorct;
 
-            pline("Where is shopdoor?");
-            pline("Room at (%d,%d),(%d,%d).", sroom->lx, sroom->ly, sroom->hx,
+            pline(_("Where is shopdoor?"));
+            pline(_("Room at (%d,%d),(%d,%d)."), sroom->lx, sroom->ly, sroom->hx,
                   sroom->hy);
-            pline("doormax=%d doorct=%d fdoor=%d", doorindex, sroom->doorct,
+            pline(_("doormax=%d doorct=%d fdoor=%d"), doorindex, sroom->doorct,
                   sh);
             while (j--) {
-                pline("door [%d,%d]", doors[sh].x, doors[sh].y);
+                pline(_("door [%d,%d]"), doors[sh].x, doors[sh].y);
                 sh++;
             }
             display_nhwindow(WIN_MESSAGE, FALSE);
@@ -744,7 +744,7 @@ register struct mkroom *sroom;
             n--;
         else if (inside_shop(sx, sy - 1))
             n++;
-        Sprintf(buf, "Closed for inventory");
+        Sprintf(buf, _("Closed for inventory"));
         make_engr_at(m, n, buf, 0L, DUST);
     }
 
@@ -872,7 +872,7 @@ struct monst *mtmp;
         /* strip prefix if present */
         if (!letter(*shknm))
             ++shknm;
-        Strcpy(nam, shknm);
+        Strcpy(nam, _(shknm));
     }
     return nam;
 }

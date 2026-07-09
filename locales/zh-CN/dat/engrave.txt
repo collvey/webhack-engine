@@ -1,0 +1,78 @@
+# NetHack 3.6  engrave.txt (zh-CN)
+# 地面上的随机刻字。文化梗/专有名词/魔法词/代码保持原文；
+# 纯叙述性的引导与警示语译为中文。
+#
+Elbereth
+# trap engravings
+Vlad was here
+ad aerarium
+# take-offs and other famous engravings
+Owlbreath
+Galadriel
+Kilroy was here
+Frodo lives
+# Journey to the Center of the Earth
+A.S. ->
+<- A.S.
+# Adventure
+You won't get it up the steps
+# Inferno
+Lasciate ogni speranza o voi ch'entrate.
+# Prisoner
+Well Come
+# So Long...
+我们为造成的不便深表歉意。
+# Thriller
+See you next Wednesday
+# Smokey Stover
+notary sojak
+For a good time call 8?7-5309
+# Various zoos around the world
+请勿投喂动物。
+# A palindrome
+Madam, in Eden, I'm Adam.
+# Siskel & Ebert
+两个大拇指，赞！
+# The First C Program
+Hello, World!
+^?MAIL
+# AOL
+你有新邮件！
+^.
+# Clueless
+As if!
+# 200x incarnation of Dr.Who
+BAD WOLF
+# Gang tag
+嗷呜！雅顿的狼人们！
+# Strategy and pun
+在此掘地求胜
+# Pompeii
+盖乌斯·尤利乌斯·普里米格尼乌斯到此一游。你怎么迟到了？
+# Helpful guiding
+别走这条路
+向左走 --->
+<--- 向右走
+X 标记着宝藏所在
+X <--- 你在这里。
+此处有龙
+现在就存档，去做你的作业！
+这里本来有个洞。现在没了。
+振动的方块
+这是个坑！
+这不是你要找的那座地牢。
+当心，那扇门后有个拿着死亡魔杖的侏儒！
+# Misc fun
+此方块特意留白。
+# Viking graffiti
+海尔蒙德·硬斧刻下了这些符文
+# Advertising
+需要照明吗？欢迎光临伊兹夏克灯具店的矿镇分店！
+星界位面上的蛇——即将登陆你附近的地牢
+你是本地的第一百万位访客！请等候 200 回合领取你的祈愿魔杖。
+# DnD
+警告，爆炸符文！
+# "Whispers Underground" Ben Aaronovitch
+你若能读懂这些字，那你不仅是个书呆子，多半还已经死了。
+# Portal
+蛋糕是个谎言

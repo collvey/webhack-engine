@@ -124,34 +124,34 @@ int expltype;
     } else
         switch (abs(type) % 10) {
         case 0:
-            str = "magical blast";
+            str = _("magical blast");
             adtyp = AD_MAGM;
             break;
         case 1:
-            str = (olet == BURNING_OIL) ? "burning oil"
-                     : (olet == SCROLL_CLASS) ? "tower of flame" : "fireball";
+            str = (olet == BURNING_OIL) ? _("burning oil")
+                     : (olet == SCROLL_CLASS) ? _("tower of flame") : _("fireball");
             /* fire damage, not physical damage */
             adtyp = AD_FIRE;
             break;
         case 2:
-            str = "ball of cold";
+            str = _("ball of cold");
             adtyp = AD_COLD;
             break;
         case 4:
-            str = (olet == WAND_CLASS) ? "death field"
-                                       : "disintegration field";
+            str = (olet == WAND_CLASS) ? _("death field")
+                                       : _("disintegration field");
             adtyp = AD_DISN;
             break;
         case 5:
-            str = "ball of lightning";
+            str = _("ball of lightning");
             adtyp = AD_ELEC;
             break;
         case 6:
-            str = "poison gas cloud";
+            str = _("poison gas cloud");
             adtyp = AD_DRST;
             break;
         case 7:
-            str = "splash of acid";
+            str = _("splash of acid");
             adtyp = AD_ACID;
             break;
         default:
@@ -305,7 +305,7 @@ int expltype;
             generic = TRUE;
         }
         if (!Deaf && olet != SCROLL_CLASS)
-            You_hear("a blast.");
+            You_hear(_("a blast."));
     }
 
     if (dam)
@@ -334,10 +334,14 @@ int expltype;
                        for each target (we can't distinguish personal names
                        like "Barney" here in order to suppress "the" below,
                        so avoid any which begins with a capital letter) */
-                    do {
-                        Sprintf(hallu_buf, "%s explosion",
-                                s_suffix(rndmonnam((char *) 0)));
-                    } while (*hallu_buf != lowc(*hallu_buf));
+                    if (nhi18n_uses_articles()) {
+                        do {
+                            Sprintf(hallu_buf, _("%s explosion"),
+                                    s_suffix(rndmonnam((char *) 0)));
+                        } while (*hallu_buf != lowc(*hallu_buf));
+                    } else /* zh: possessive 的, no s_suffix / capital-avoid loop */
+                        Sprintf(hallu_buf, _("%s explosion"),
+                                rndmonnam((char *) 0));
                     str = hallu_buf;
                 }
                 if (u.uswallow && mtmp == u.ustuck) {
@@ -370,7 +374,7 @@ int expltype;
                             adj = "fried";
                             break;
                         }
-                        pline("%s gets %s!", Monnam(u.ustuck), adj);
+                        pline(_("%s gets %s!"), Monnam(u.ustuck), _(adj));
                     } else {
                         switch (adtyp) {
                         case AD_FIRE:
@@ -398,12 +402,12 @@ int expltype;
                             adj = "fried";
                             break;
                         }
-                        pline("%s gets slightly %s!", Monnam(u.ustuck), adj);
+                        pline(_("%s gets slightly %s!"), Monnam(u.ustuck), _(adj));
                     }
                 } else if (cansee(i + x - 1, j + y - 1)) {
                     if (mtmp->m_ap_type)
                         seemimic(mtmp);
-                    pline("%s is caught in the %s!", Monnam(mtmp), str);
+                    pline(_("%s is caught in the %s!"), Monnam(mtmp), str);
                 }
 
                 idamres += destroy_mitem(mtmp, SCROLL_CLASS, (int) adtyp);
@@ -425,7 +429,7 @@ int expltype;
                     if (resist(mtmp, olet, 0, FALSE)) {
                         /* inside_engulfer: <i+x-1,j+y-1> == <u.ux,u.uy> */
                         if (cansee(i + x - 1, j + y - 1) || inside_engulfer)
-                            pline("%s resists the %s!", Monnam(mtmp), str);
+                            pline(_("%s resists the %s!"), Monnam(mtmp), str);
                         mdam = (dam + 1) / 2;
                     }
                     /* if grabber is reaching into hero's spot and
@@ -461,10 +465,10 @@ int expltype;
                          * would be "you killed <mdef>" so give our own.
                          */
                         if (cansee(mtmp->mx, mtmp->my) || canspotmon(mtmp))
-                            pline("%s is %s!", Monnam(mtmp),
-                                  xkflg ? "burned completely"
-                                        : nonliving(mtmp->data) ? "destroyed"
-                                                                : "killed");
+                            pline(_("%s is %s!"), Monnam(mtmp),
+                                  xkflg ? _("burned completely")
+                                        : nonliving(mtmp->data) ? _("destroyed")
+                                                                : _("killed"));
                         xkilled(mtmp, XKILL_NOMSG | XKILL_NOCONDUCT | xkflg);
                     } else {
                         if (xkflg)
@@ -483,13 +487,17 @@ int expltype;
            or player-induced one other than scroll of fire */
         if (flags.verbose && (type < 0 || olet != SCROLL_CLASS)) {
             if (do_hallu) { /* (see explanation above) */
-                do {
-                    Sprintf(hallu_buf, "%s explosion",
-                            s_suffix(rndmonnam((char *) 0)));
-                } while (*hallu_buf != lowc(*hallu_buf));
+                if (nhi18n_uses_articles()) {
+                    do {
+                        Sprintf(hallu_buf, _("%s explosion"),
+                                s_suffix(rndmonnam((char *) 0)));
+                    } while (*hallu_buf != lowc(*hallu_buf));
+                } else /* zh: possessive 的, no s_suffix / capital-avoid loop */
+                    Sprintf(hallu_buf, _("%s explosion"),
+                            rndmonnam((char *) 0));
                 str = hallu_buf;
             }
-            You("are caught in the %s!", str);
+            You(_("are caught in the %s!"), str);
             iflags.last_msg = PLNMSG_CAUGHT_IN_EXPLOSION;
         }
         /* do property damage first, in case we end up leaving bones */
@@ -497,7 +505,7 @@ int expltype;
             burn_away_slime();
         if (Invulnerable) {
             damu = 0;
-            You("are unharmed!");
+            You(_("are unharmed!"));
         } else if (adtyp == AD_PHYS || physical_dmg)
             damu = Maybe_Half_Phys(damu);
         if (adtyp == AD_FIRE)
@@ -536,8 +544,11 @@ int expltype;
                     killer.format = KILLED_BY_AN;
                 } else if (type >= 0 && olet != SCROLL_CLASS) {
                     killer.format = NO_KILLER_PREFIX;
-                    Sprintf(killer.name, "caught %sself in %s own %s", uhim(),
-                            uhis(), str);
+                    if (nhi18n_uses_articles())
+                        Sprintf(killer.name, "caught %sself in %s own %s",
+                                uhim(), uhis(), str);
+                    else /* zh: 自己 covers the reflexive (no him/his) */
+                        Sprintf(killer.name, _("caught in one's own %s"), str);
                 } else {
                     killer.format = (!strcmpi(str, "tower of flame")
                                      || !strcmpi(str, "fireball"))
@@ -547,9 +558,9 @@ int expltype;
                 }
                 if (iflags.last_msg == PLNMSG_CAUGHT_IN_EXPLOSION
                     || iflags.last_msg == PLNMSG_TOWER_OF_FLAME) /*seffects()*/
-                    pline("It is fatal.");
+                    pline(_("It is fatal."));
                 else
-                    pline_The("%s is fatal.", str);
+                    pline_The(_("%s is fatal."), str);
                 /* Known BUG: BURNING suppresses corpse in bones data,
                    but done does not handle killer reason correctly */
                 done((adtyp == AD_FIRE) ? BURNING : DIED);
@@ -623,7 +634,7 @@ struct obj *obj; /* only scatter this obj        */
     while ((otmp = (individual_object ? obj : level.objects[sx][sy])) != 0) {
         if (otmp == uball || otmp == uchain) {
             boolean waschain = (otmp == uchain);
-            pline_The("chain shatters!");
+            pline_The(_("chain shatters!"));
             unpunish();
             if (waschain)
                 continue;
@@ -646,9 +657,9 @@ struct obj *obj; /* only scatter this obj        */
             && rn2(10)) {
             if (otmp->otyp == BOULDER) {
                 if (cansee(sx, sy))
-                    pline("%s apart.", Tobjnam(otmp, "break"));
+                    pline(_("%s apart."), Tobjnam(otmp, _("break")));
                 else
-                    You_hear("stone breaking.");
+                    You_hear(_("stone breaking."));
                 fracture_rock(otmp);
                 place_object(otmp, sx, sy);
                 if ((otmp = sobj_at(BOULDER, sx, sy)) != 0) {
@@ -662,9 +673,9 @@ struct obj *obj; /* only scatter this obj        */
                 if ((trap = t_at(sx, sy)) && trap->ttyp == STATUE_TRAP)
                     deltrap(trap);
                 if (cansee(sx, sy))
-                    pline("%s.", Tobjnam(otmp, "crumble"));
+                    pline(_("%s."), Tobjnam(otmp, _("crumble")));
                 else
-                    You_hear("stone crumbling.");
+                    You_hear(_("stone crumbling."));
                 (void) break_statue(otmp);
                 place_object(otmp, sx, sy); /* put fragments on floor */
             }

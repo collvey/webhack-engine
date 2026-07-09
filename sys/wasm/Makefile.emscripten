@@ -80,6 +80,7 @@ CORE_SRCS = ../../src/allmain.c \
             ../../src/mthrowu.c \
             ../../src/muse.c \
             ../../src/music.c \
+            ../../src/nhi18n.c \
             ../../src/o_init.c \
             ../../src/objects.c \
             ../../src/objnam.c \

@@ -140,7 +140,7 @@ NhRect *r;
 {
     if (rect_cnt >= MAXRECT) {
         if (wizard)
-            pline("MAXRECT may be too small.");
+            pline(_("MAXRECT may be too small."));
         return;
     }
     /* Check that this NhRect is not included in another one */

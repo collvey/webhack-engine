@@ -871,15 +871,15 @@ genericptr_t p2;
 
     if (p2 == (genericptr_t) 0) { /* That means the player */
         if (!Blind)
-            You("bump into %s.  Ouch!",
-                Hallucination ? "an invisible tree"
-                              : "some kind of invisible wall");
+            You(_("bump into %s.  Ouch!"),
+                Hallucination ? _("an invisible tree")
+                              : _("some kind of invisible wall"));
         else
-            pline("Ouch!");
+            pline(_("Ouch!"));
     } else {
         mtmp = (struct monst *) p2;
         if (canseemon(mtmp))
-            pline("%s bumps into %s!", Monnam(mtmp), something);
+            pline(_("%s bumps into %s!"), Monnam(mtmp), something);
     }
     return FALSE;
 }
@@ -973,17 +973,17 @@ genericptr_t p2;
             || Underwater)
             return FALSE;
         if (!Blind) {
-            Your("%s sting.", makeplural(body_part(EYE)));
+            Your(_("%s sting."), makeplural(body_part(EYE)));
             make_blinded(1L, FALSE);
         }
         if (!Poison_resistance) {
-            pline("%s is burning your %s!", Something,
+            pline(_("%s is burning your %s!"), Something,
                   makeplural(body_part(LUNG)));
-            You("cough and spit blood!");
-            losehp(Maybe_Half_Phys(rnd(dam) + 5), "gas cloud", KILLED_BY_AN);
+            You(_("cough and spit blood!"));
+            losehp(Maybe_Half_Phys(rnd(dam) + 5), _("gas cloud"), KILLED_BY_AN);
             return FALSE;
         } else {
-            You("cough!");
+            You(_("cough!"));
             return FALSE;
         }
     } else { /* A monster is inside the cloud */
@@ -1004,7 +1004,7 @@ genericptr_t p2;
             && !(attacktype_fordmg(mtmp->data, AT_BREA, AD_DRST)
                  || attacktype_fordmg(mtmp->data, AT_BREA, AD_RBRE))) {
             if (cansee(mtmp->mx, mtmp->my))
-                pline("%s coughs!", Monnam(mtmp));
+                pline(_("%s coughs!"), Monnam(mtmp));
             if (heros_fault(reg))
                 setmangry(mtmp, TRUE);
             if (haseyes(mtmp->data) && mtmp->mcansee) {
@@ -1018,7 +1018,7 @@ genericptr_t p2;
                 if (heros_fault(reg))
                     killed(mtmp);
                 else
-                    monkilled(mtmp, "gas cloud", AD_DRST);
+                    monkilled(mtmp, _("gas cloud"), AD_DRST);
                 if (DEADMONSTER(mtmp)) { /* not lifesaved */
                     return TRUE;
                 }
@@ -1115,10 +1115,10 @@ region_safety()
         safe_teleds(FALSE);
     } else if (r) {
         remove_region(r);
-        pline_The("gas cloud enveloping you dissipates.");
+        pline_The(_("gas cloud enveloping you dissipates."));
     } else {
         /* cloud dissipated on its own, so nothing needs to be done */
-        pline_The("gas cloud has dissipated.");
+        pline_The(_("gas cloud has dissipated."));
     }
     /* maybe cure blindness too */
     if ((Blinded & TIMEOUT) == 1L)

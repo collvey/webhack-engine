@@ -999,7 +999,7 @@ const char *drop_fmt, *drop_arg, *hold_msg;
         } else if (wasUpolyd && !Upolyd) {
             /* loose your grip if you revert your form */
             if (drop_fmt)
-                pline(drop_fmt, drop_arg);
+                pline(_(drop_fmt), drop_arg);
             obj_extract_self(obj);
             dropy(obj);
             return obj;
@@ -1047,7 +1047,7 @@ const char *drop_fmt, *drop_arg, *hold_msg;
 
  drop_it:
     if (drop_fmt)
-        pline(drop_fmt, drop_arg);
+        pline(_(drop_fmt), drop_arg);
     obj->nomerge = 0;
     if (can_reach_floor(TRUE)) {
         dropx(obj);
@@ -1288,8 +1288,8 @@ long amount;
 {
     const char *res;
 
-    res = Hallucination ? currencies[rn2(SIZE(currencies))] : "zorkmid";
-    if (amount != 1L)
+    res = Hallucination ? _(currencies[rn2(SIZE(currencies))]) : _("zorkmid");
+    if (amount != 1L && nhi18n_uses_plurals()) /* zh: 佐克金币 has no plural */
         res = makeplural(res);
     return res;
 }
@@ -1651,7 +1651,7 @@ register const char *let, *word;
     *ap = '\0';
 
     if (!foo && !allowall && !allownone) {
-        You("don't have anything %sto %s.", foox ? "else " : "", word);
+        You(_("don't have anything %sto %s."), foox ? _("else ") : "", _(word));
         return (struct obj *) 0;
     } else if (!strcmp(word, "write on")) { /* ugly check for magic marker */
         /* we wanted all scrolls and books in altlets[], but that came with
@@ -1662,7 +1662,7 @@ register const char *let, *word;
     for (;;) {
         cnt = 0;
         cntgiven = FALSE;
-        Sprintf(qbuf, "What do you want to %s?", word);
+        Sprintf(qbuf, _("What do you want to %s?"), _(word));
         if (in_doagain)
             ilet = readchar();
         else if (iflags.force_invmenu) {
@@ -1677,14 +1677,14 @@ register const char *let, *word;
             if (!buf[0])
                 Strcat(qbuf, " [*]");
             else
-                Sprintf(eos(qbuf), " [%s or ?*]", buf);
+                Sprintf(eos(qbuf), _(" [%s or ?*]"), buf);
             ilet = yn_function(qbuf, (char *) 0, '\0');
         }
         if (digit(ilet)) {
             long tmpcnt = 0;
 
             if (!allowcnt) {
-                pline("No count allowed with this command.");
+                pline(_("No count allowed with this command."));
                 continue;
             }
             ilet = get_count(NULL, ilet, LARGEST_INT, &tmpcnt, TRUE);
@@ -1713,7 +1713,7 @@ register const char *let, *word;
                     bp = (rn2(2) ? buf : (bp + 4));
                 } else
                     bp = buf;
-                You("mime %s something%s%s.", ing_suffix(bp), suf ? " " : "",
+                You(_("mime %s something%s%s."), ing_suffix(bp), suf ? " " : "",
                     suf ? suf : "");
             }
             return (allownone ? (struct obj *) &zeroobj : (struct obj *) 0);
@@ -1728,18 +1728,18 @@ register const char *let, *word;
 
             menuquery[0] = qbuf[0] = '\0';
             if (iflags.force_invmenu)
-                Sprintf(menuquery, "What do you want to %s?", word);
+                Sprintf(menuquery, _("What do you want to %s?"), _(word));
             if (!strcmp(word, "grease"))
-                Sprintf(qbuf, "your %s", fingers_or_gloves(FALSE));
+                Sprintf(qbuf, _("your %s"), _(fingers_or_gloves(FALSE)));
             else if (!strcmp(word, "write with"))
-                Sprintf(qbuf, "your %s", body_part(FINGERTIP));
+                Sprintf(qbuf, _("your %s"), _(body_part(FINGERTIP)));
             else if (!strcmp(word, "wield"))
-                Sprintf(qbuf, "your %s %s%s", uarmg ? "gloved" : "bare",
-                        makeplural(body_part(HAND)),
-                        !uwep ? " (wielded)" : "");
+                Sprintf(qbuf, _("your %s %s%s"), _(uarmg ? "gloved" : "bare"),
+                        _(makeplural(body_part(HAND))),
+                        !uwep ? _(" (wielded)") : "");
             else if (!strcmp(word, "ready"))
-                Sprintf(qbuf, "empty quiver%s",
-                        !uquiver ? " (nothing readied)" : "");
+                Sprintf(qbuf, _("empty quiver%s"),
+                        !uquiver ? _(" (nothing readied)") : "");
 
             if (ilet == '?' && !*lets && *altlets)
                 allowed_choices = altlets;
@@ -1773,7 +1773,7 @@ register const char *let, *word;
                than one invent slot of gold and picking the non-'$' one */
             || (otmp && otmp->oclass == COIN_CLASS)) {
             if (!usegold) {
-                You("cannot %s gold.", word);
+                You(_("cannot %s gold."), _(word));
                 return (struct obj *) 0;
             }
             /* Historic note: early Nethack had a bug which was
@@ -1785,7 +1785,7 @@ register const char *let, *word;
             if (cntgiven && cnt <= 0) {
                 if (cnt < 0)
                     pline_The(
-                  "LRS would be very interested to know you have that much.");
+                  _("LRS would be very interested to know you have that much."));
                 return (struct obj *) 0;
             }
         }
@@ -1797,7 +1797,7 @@ register const char *let, *word;
                 return (struct obj *) 0;
             if (cnt > 1 && (ilet != def_oc_syms[COIN_CLASS].sym
                 && !(otmp && otmp->oclass == COIN_CLASS))) {
-                You("can only throw one item at a time.");
+                You(_("can only throw one item at a time."));
                 continue;
             }
         }
@@ -1807,12 +1807,12 @@ register const char *let, *word;
            that's been moved above so that otmp can be checked earlier] */
         /* verify the chosen object */
         if (!otmp) {
-            You("don't have that object.");
+            You(_("don't have that object."));
             if (in_doagain)
                 return (struct obj *) 0;
             continue;
         } else if (cnt < 0 || otmp->quan < cnt) {
-            You("don't have that many!  You have only %ld.", otmp->quan);
+            You(_("don't have that many!  You have only %ld."), otmp->quan);
             if (in_doagain)
                 return (struct obj *) 0;
             continue;
@@ -1867,11 +1867,11 @@ struct obj *otmp;
             s1 = "R", s2 = "remove", s3 = "";
     }
     if (s1)
-        pline("Use the '%s' command to %s %s%s.", s1, s2,
-              !(is_plural(otmp) || pair_of(otmp)) ? "that" : "those", s3);
+        pline(_("Use the '%s' command to %s %s%s."), s1, s2,
+              !(is_plural(otmp) || pair_of(otmp)) ? _("that") : _("those"), s3);
     else
 #endif
-        pline(silly_thing_to, word);
+        pline(_(silly_thing_to), _(word));
 }
 
 STATIC_PTR int
@@ -1953,7 +1953,7 @@ unsigned *resultflags;
     char buf[BUFSZ] = DUMMY, qbuf[QBUFSZ];
 
     if (!invent) {
-        You("have nothing to %s.", word);
+        You(_("have nothing to %s."), _(word));
         if (resultflags)
             *resultflags = ALL_FINISHED;
         return 0;
@@ -1995,8 +1995,8 @@ unsigned *resultflags;
     ilets[iletct] = '\0';
 
     for (;;) {
-        Sprintf(qbuf, "What kinds of thing do you want to %s? [%s]",
-                word, ilets);
+        Sprintf(qbuf, _("What kinds of thing do you want to %s? [%s]"),
+                _(word), ilets);
         getlin(qbuf, buf);
         if (buf[0] == '\033')
             return 0;
@@ -2039,23 +2039,23 @@ unsigned *resultflags;
             if (index(extra_removeables, oc_of_sym)) {
                 ; /* skip rest of takeoff checks */
             } else if (!index(removeables, oc_of_sym)) {
-                pline("Not applicable.");
+                pline(_("Not applicable."));
                 return 0;
             } else if (oc_of_sym == ARMOR_CLASS && !wearing_armor()) {
                 noarmor(FALSE);
                 return 0;
             } else if (oc_of_sym == WEAPON_CLASS && !uwep && !uswapwep
                        && !uquiver) {
-                You("are not wielding anything.");
+                You(_("are not wielding anything."));
                 return 0;
             } else if (oc_of_sym == RING_CLASS && !uright && !uleft) {
-                You("are not wearing rings.");
+                You(_("are not wearing rings."));
                 return 0;
             } else if (oc_of_sym == AMULET_CLASS && !uamul) {
-                You("are not wearing an amulet.");
+                You(_("are not wearing an amulet."));
                 return 0;
             } else if (oc_of_sym == TOOL_CLASS && !ublindf) {
-                You("are not wearing a blindfold.");
+                You(_("are not wearing a blindfold."));
                 return 0;
             }
         }
@@ -2075,7 +2075,7 @@ unsigned *resultflags;
         } else if (sym == 'm') {
             m_seen = TRUE;
         } else if (oc_of_sym == MAXOCLASSES) {
-            You("don't have any %c's.", sym);
+            You(_("don't have any %c's."), sym);
         } else if (oc_of_sym != VENOM_CLASS) { /* suppress venom */
             if (!index(olets, oc_of_sym)) {
                 add_valid_menu_class(oc_of_sym);
@@ -2202,7 +2202,7 @@ int FDECL((*fn), (OBJ_P)), FDECL((*ckfn), (OBJ_P));
             (void) safe_qbuf(qbuf, qpfx, "?", otmp,
                              ininv ? safeq_xprname : doname,
                              ininv ? safeq_shortxprname : ansimpleoname,
-                             "item");
+                             _("item"));
             sym = (takeoff || ident || otmp->quan < 2L) ? nyaq(qbuf)
                                                         : nyNaq(qbuf);
         } else
@@ -2260,9 +2260,9 @@ int FDECL((*fn), (OBJ_P)), FDECL((*ckfn), (OBJ_P));
         goto nextclass;
 
     if (!takeoff && (dud || cnt))
-        pline("That was all.");
+        pline(_("That was all."));
     else if (!dud && !cnt)
-        pline("No applicable objects.");
+        pline(_("No applicable objects."));
  ret:
     unsortloot(&sortedchn);
     bypass_objlist(*objchn, FALSE);
@@ -2309,8 +2309,8 @@ int id_limit;
     /* assumptions:  id_limit > 0 and at least one unID'd item is present */
 
     while (id_limit) {
-        Sprintf(buf, "What would you like to identify %s?",
-                first ? "first" : "next");
+        Sprintf(buf, _("What would you like to identify %s?"),
+                first ? _("first") : _("next"));
         n = query_objlist(buf, &invent, (SIGNAL_NOMENU | SIGNAL_ESCAPE
                                          | USE_INVLET | INVORDER_SORT),
                           &pick_list, PICK_ANY, not_fully_identified);
@@ -2326,13 +2326,13 @@ int id_limit;
         } else if (n == -2) { /* player used ESC to quit menu */
             break;
         } else if (n == -1) { /* no eligible items found */
-            pline("That was all.");
+            pline(_("That was all."));
             break;
         } else if (!--tryct) { /* stop re-prompting */
             pline1(thats_enough_tries);
             break;
         } else { /* try again */
-            pline("Choose an item; use ESC to decline.");
+            pline(_("Choose an item; use ESC to decline."));
         }
     }
 }
@@ -2360,8 +2360,8 @@ boolean learning_id; /* true if we just read unknown identify scroll */
     int n, unid_cnt = count_unidentified(invent);
 
     if (!unid_cnt) {
-        You("have already identified all %sof your possessions.",
-            learning_id ? "the rest " : "");
+        You(_("have already identified all %sof your possessions."),
+            learning_id ? _("the rest ") : "");
     } else if (!id_limit || id_limit >= unid_cnt) {
         /* identify everything */
         /* TODO:  use fully_identify_obj and cornline/menu/whatever here */
@@ -2455,7 +2455,7 @@ long quan;
 {
     if (!prefix)
         prefix = "";
-    pline("%s%s%s", prefix, *prefix ? " " : "",
+    pline(_("%s%s%s"), _(prefix), *prefix ? " " : "",
           xprname(obj, (char *) 0, obj_to_let(obj), TRUE, 0L, quan));
 }
 
@@ -2510,7 +2510,7 @@ long quan;       /* if non-0, print this quantity, not obj->quan */
         /* ordinary inventory display or pickup message */
         if (use_invlet)
             let = obj->invlet;
-        Strcpy(suffix, dot ? "." : "");
+        Strcpy(suffix, dot ? _(".") : "");
     }
     sfxlen = (int) strlen(suffix);
     if (txtlen > BUFSZ - 1 - (4 + sfxlen)) /* 4: "c - " prefix */
@@ -2641,7 +2641,7 @@ long *out_cnt;
         ++n;
 
     if (n == 0) {
-        pline("%s.", not_carrying_anything);
+        pline(_("%s."), _(not_carrying_anything));
         return 0;
     }
 
@@ -2696,7 +2696,7 @@ long *out_cnt;
         add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE, prompt, MENU_UNSELECTED);
         if (!unid_cnt) {
             add_menu(win, NO_GLYPH, &any, 0, 0, ATR_NONE,
-                     "(all items are permanently identified already)",
+                     _("(all items are permanently identified already)"),
                      MENU_UNSELECTED);
             gotsomething = TRUE;
         } else {
@@ -2719,7 +2719,7 @@ long *out_cnt;
         /* wizard override ID and xtra_choice are mutually exclusive */
         if (flags.sortpack)
             add_menu(win, NO_GLYPH, &any, 0, 0, iflags.menu_headings,
-                     "Miscellaneous", MENU_UNSELECTED);
+                     _("Miscellaneous"), MENU_UNSELECTED);
         any.a_char = HANDS_SYM; /* '-' */
         add_menu(win, NO_GLYPH, &any, HANDS_SYM, 0, ATR_NONE,
                  xtra_choice, MENU_UNSELECTED);
@@ -2763,10 +2763,10 @@ long *out_cnt;
     if (iflags.force_invmenu && lets && want_reply) {
         any = zeroany;
         add_menu(win, NO_GLYPH, &any, 0, 0, iflags.menu_headings,
-                 "Special", MENU_UNSELECTED);
+                 _("Special"), MENU_UNSELECTED);
         any.a_char = '*';
         add_menu(win, NO_GLYPH, &any, '*', 0, ATR_NONE,
-                 "(list everything)", MENU_UNSELECTED);
+                 _("(list everything)"), MENU_UNSELECTED);
         gotsomething = TRUE;
     }
     unsortloot(&sortedinvent);
@@ -2777,7 +2777,7 @@ long *out_cnt;
     if (iflags.perm_invent && !lets && !gotsomething) {
         any = zeroany;
         add_menu(win, NO_GLYPH, &any, 0, 0, 0,
-                 not_carrying_anything, MENU_UNSELECTED);
+                 _(not_carrying_anything), MENU_UNSELECTED);
         want_reply = FALSE;
     }
     end_menu(win, query && *query ? query : (char *) 0);
@@ -2876,7 +2876,7 @@ char avoidlet;
                 continue;
             invdone = 1;
         }
-        end_menu(win, "Inventory letters used:");
+        end_menu(win, _("Inventory letters used:"));
 
         n = select_menu(win, PICK_ONE, &selected);
         if (n > 0) {
@@ -3107,7 +3107,7 @@ dounpaid()
                     char contbuf[BUFSZ];
 
                     /* Shopkeeper knows what to charge for contents */
-                    Sprintf(contbuf, "%s contents", s_suffix(xname(otmp)));
+                    Sprintf(contbuf, _("%s contents"), s_suffix(xname(otmp)));
                     putstr(win, 0,
                            xprname((struct obj *) 0, contbuf, CONTAINED_SYM,
                                    TRUE, contcost, 0L));
@@ -3118,7 +3118,7 @@ dounpaid()
 
     putstr(win, 0, "");
     putstr(win, 0,
-           xprname((struct obj *) 0, "Total:", '*', FALSE, totcost, 0L));
+           xprname((struct obj *) 0, _("Total:"), '*', FALSE, totcost, 0L));
     display_nhwindow(win, FALSE);
     destroy_nhwindow(win);
 }
@@ -3170,10 +3170,10 @@ dotypeinv()
     boolean billx = *u.ushops && doinvbill(0);
     menu_item *pick_list;
     boolean traditional = TRUE;
-    const char *prompt = "What type of object do you want an inventory of?";
+    const char *prompt = _("What type of object do you want an inventory of?");
 
     if (!invent && !billx) {
-        You("aren't carrying anything.");
+        You(_("aren't carrying anything."));
         return 0;
     }
     unpaid_count = count_unpaid(invent);
@@ -3266,15 +3266,15 @@ dotypeinv()
         if (billx)
             (void) doinvbill(1);
         else
-            pline("No used-up objects%s.",
-                  unpaid_count ? " on your shopping bill" : "");
+            pline(_("No used-up objects%s."),
+                  unpaid_count ? _(" on your shopping bill") : "");
         return 0;
     }
     if (c == 'u' || (c == 'U' && unpaid_count && !ucnt)) {
         if (unpaid_count)
             dounpaid();
         else
-            You("are not carrying any unpaid objects.");
+            You(_("are not carrying any unpaid objects."));
         return 0;
     }
     if (traditional) {
@@ -3291,16 +3291,16 @@ dotypeinv()
 
             switch (c) {
             case 'B':
-                before = "known to be blessed ";
+                before = _("known to be blessed ");
                 break;
             case 'U':
-                before = "known to be uncursed ";
+                before = _("known to be uncursed ");
                 break;
             case 'C':
-                before = "known to be cursed ";
+                before = _("known to be cursed ");
                 break;
             case 'X':
-                after = " whose blessed/uncursed/cursed status is unknown";
+                after = _(" whose blessed/uncursed/cursed status is unknown");
                 break; /* better phrasing is desirable */
             default:
                 /* 'c' is an object class, because we've already handled
@@ -3309,10 +3309,10 @@ dotypeinv()
                    to somewhere above so that we can access it here (via
                    lcase(strcpy(classnamebuf, names[(int) c]))), but the
                    game-play value of doing so is low... */
-                before = "such ";
+                before = _("such ");
                 break;
             }
-            You("have no %sobjects%s.", before, after);
+            You(_("have no %sobjects%s."), before, after);
             return 0;
         }
         this_type = oclass;
@@ -3368,10 +3368,10 @@ char *buf;
     else if (IS_SINK(ltyp))
         cmap = S_sink; /* "sink" */
     else if (IS_ALTAR(ltyp)) {
-        Sprintf(altbuf, "%saltar to %s (%s)",
+        Sprintf(altbuf, _("%saltar to %s (%s)"),
                 ((lev->altarmask & AM_SHRINE)
                  && (Is_astralevel(&u.uz) || Is_sanctum(&u.uz)))
-                    ? "high "
+                    ? _("high ")
                     : "",
                 a_gname(),
                 align_str(Amask2align(lev->altarmask & ~AM_SHRINE)));
@@ -3413,7 +3413,7 @@ boolean picked_some;
 {
     struct obj *otmp;
     struct trap *trap;
-    const char *verb = Blind ? "feel" : "see";
+    const char *verb = Blind ? _("feel") : _("see");
     const char *dfeature = (char *) 0;
     char fbuf[BUFSZ], fbuf2[BUFSZ];
     winid tmpwin;
@@ -3440,10 +3440,10 @@ boolean picked_some;
          *  something along the lines of "because it's worn on the outside
          *  so is unreachable from in here...").
          */
-        Sprintf(fbuf, "Contents of %s %s", s_suffix(mon_nam(mtmp)),
+        Sprintf(fbuf, _("Contents of %s %s"), s_suffix(mon_nam(mtmp)),
                 mbodypart(mtmp, STOMACH));
         /* Skip "Contents of " by using fbuf index 12 */
-        You("%s to %s what is lying in %s.", Blind ? "try" : "look around",
+        You(_("%s to %s what is lying in %s."), Blind ? _("try") : _("look around"),
             verb, &fbuf[12]);
         otmp = mtmp->minvent;
         if (otmp) {
@@ -3454,17 +3454,17 @@ boolean picked_some;
                     feel_cockatrice(otmp, FALSE);
             }
             if (Blind)
-                Strcpy(fbuf, "You feel");
+                Strcpy(fbuf, _("You feel"));
             Strcat(fbuf, ":");
             (void) display_minventory(mtmp, MINV_ALL | PICK_NONE, fbuf);
         } else {
-            You("%s no objects here.", verb);
+            You(_("%s no objects here."), verb);
         }
         return !!Blind;
     }
     if (!skip_objects && (trap = t_at(u.ux, u.uy)) && trap->tseen)
-        There("is %s here.",
-              an(defsyms[trap_to_defsym(trap->ttyp)].explanation));
+        There(_("is %s here."),
+              an(_(defsyms[trap_to_defsym(trap->ttyp)].explanation)));
 
     otmp = level.objects[u.ux][u.uy];
     dfeature = dfeature_at(u.ux, u.uy, fbuf2);
@@ -3476,28 +3476,30 @@ boolean picked_some;
 
         if (dfeature && !strncmp(dfeature, "altar ", 6)) {
             /* don't say "altar" twice, dfeature has more info */
-            You("try to feel what is here.");
+            You(_("try to feel what is here."));
         } else {
             const char *where = (Blind && !can_reach_floor(TRUE))
-                                    ? "lying beneath you"
-                                    : "lying here on the ",
+                                    ? _("lying beneath you")
+                                    : _("lying here on the "),
                        *onwhat = (Blind && !can_reach_floor(TRUE))
                                      ? ""
                                      : surface(u.ux, u.uy);
 
-            You("try to feel what is %s%s.", drift ? "floating here" : where,
+            You(_("try to feel what is %s%s."), drift ? _("floating here") : where,
                 drift ? "" : onwhat);
         }
         if (dfeature && !drift && !strcmp(dfeature, surface(u.ux, u.uy)))
             dfeature = 0; /* ice already identified */
         if (!can_reach_floor(TRUE)) {
-            pline("But you can't reach it!");
+            pline(_("But you can't reach it!"));
             return 0;
         }
     }
 
     if (dfeature)
-        Sprintf(fbuf, "There is %s here.", an(dfeature));
+        /* dfeature stays English for the strcmp() logic above; localize only
+           here for display (runtime gettext on the English feature name) */
+        Sprintf(fbuf, _("There is %s here."), an(_(dfeature)));
 
     if (!otmp || is_lava(u.ux, u.uy)
         || (is_pool(u.ux, u.uy) && !Underwater)) {
@@ -3505,7 +3507,7 @@ boolean picked_some;
             pline1(fbuf);
         read_engr_at(u.ux, u.uy); /* Eric Backus */
         if (!skip_objects && (Blind || !dfeature))
-            You("%s no objects here.", verb);
+            You(_("%s no objects here."), verb);
         return !!Blind;
     }
     /* we know there is something here */
@@ -3515,27 +3517,27 @@ boolean picked_some;
             pline1(fbuf);
         read_engr_at(u.ux, u.uy); /* Eric Backus */
         if (obj_cnt == 1 && otmp->quan == 1L)
-            There("is %s object here.", picked_some ? "another" : "an");
+            There(_("is %s object here."), picked_some ? _("another") : _("an"));
         else
-            There("are %s%s objects here.",
+            There(_("are %s%s objects here."),
                   (obj_cnt < 5)
-                      ? "a few"
+                      ? _("a few")
                       : (obj_cnt < 10)
-                          ? "several"
-                          : "many",
-                  picked_some ? " more" : "");
+                          ? _("several")
+                          : _("many"),
+                  picked_some ? _(" more") : "");
         for (; otmp; otmp = otmp->nexthere)
             if (otmp->otyp == CORPSE && will_feel_cockatrice(otmp, FALSE)) {
-                pline("%s %s%s.",
+                pline(_("%s %s%s."),
                       (obj_cnt > 1)
-                          ? "Including"
+                          ? _("Including")
                           : (otmp->quan > 1L)
-                              ? "They're"
-                              : "It's",
+                              ? _("They're")
+                              : _("It's"),
                       corpse_xname(otmp, (const char *) 0, CXN_ARTICLE),
                       poly_when_stoned(youmonst.data)
                           ? ""
-                          : ", unfortunately");
+                          : _(", unfortunately"));
                 feel_cockatrice(otmp, FALSE);
                 break;
             }
@@ -3544,7 +3546,7 @@ boolean picked_some;
         if (dfeature)
             pline1(fbuf);
         read_engr_at(u.ux, u.uy); /* Eric Backus */
-        You("%s here %s.", verb, doname_with_price(otmp));
+        You(_("%s here %s."), verb, doname_with_price(otmp));
         iflags.last_msg = PLNMSG_ONE_ITEM_HERE;
         if (otmp->otyp == CORPSE)
             feel_cockatrice(otmp, FALSE);
@@ -3557,9 +3559,8 @@ boolean picked_some;
             putstr(tmpwin, 0, fbuf);
             putstr(tmpwin, 0, "");
         }
-        Sprintf(buf, "%s that %s here:",
-                picked_some ? "Other things" : "Things",
-                Blind ? "you feel" : "are");
+        Sprintf(buf, Blind ? _("%s that you feel here:") : _("%s that are here:"),
+                picked_some ? _("Other things") : _("Things"));
         putstr(tmpwin, 0, buf);
         for (; otmp; otmp = otmp->nexthere) {
             if (otmp->otyp == CORPSE && will_feel_cockatrice(otmp, FALSE)) {
@@ -3618,12 +3619,12 @@ boolean force_touch;
         Strcpy(kbuf, corpse_xname(otmp, (const char *) 0, CXN_PFX_THE));
 
         if (poly_when_stoned(youmonst.data))
-            You("touched %s with your bare %s.", kbuf,
+            You(_("touched %s with your bare %s."), kbuf,
                 makeplural(body_part(HAND)));
         else
-            pline("Touching %s is a fatal mistake...", kbuf);
+            pline(_("Touching %s is a fatal mistake..."), kbuf);
         /* normalize body shape here; hand, not body_part(HAND) */
-        Sprintf(kbuf, "touching %s bare-handed", killer_xname(otmp));
+        Sprintf(kbuf, _("touching %s bare-handed"), killer_xname(otmp));
         /* will call polymon() for the poly_when_stoned() case */
         instapetrify(kbuf);
     }
@@ -3744,9 +3745,9 @@ doprgold()
     long umoney = money_cnt(invent);
 
     if (!umoney)
-        Your("wallet is empty.");
+        Your(_("wallet is empty."));
     else
-        Your("wallet contains %ld %s.", umoney, currency(umoney));
+        Your(_("wallet contains %ld %s."), umoney, currency(umoney));
     shopper_financial_report();
     return 0;
 }
@@ -3756,7 +3757,7 @@ int
 doprwep()
 {
     if (!uwep) {
-        You("are empty %s.", body_part(HANDED));
+        You(_("are empty %s."), body_part(HANDED));
     } else {
         prinv((char *) 0, uwep, 0L);
         if (u.twoweap)
@@ -3771,7 +3772,7 @@ noarmor(report_uskin)
 boolean report_uskin;
 {
     if (!uskin || !report_uskin) {
-        You("are not wearing any armor.");
+        You(_("are not wearing any armor."));
     } else {
         char *p, *uskinname, buf[BUFSZ];
 
@@ -3784,7 +3785,7 @@ boolean report_uskin;
             while ((p[1] = p[8]) != '\0')
                 ++p;
 
-        You("are not wearing armor but have %s embedded in your skin.",
+        You(_("are not wearing armor but have %s embedded in your skin."),
             uskinname);
     }
 }
@@ -3829,7 +3830,7 @@ int
 doprring()
 {
     if (!uleft && !uright)
-        You("are not wearing any rings.");
+        You(_("are not wearing any rings."));
     else {
         char lets[3];
         register int ct = 0;
@@ -3849,7 +3850,7 @@ int
 dopramulet()
 {
     if (!uamul)
-        You("are not wearing an amulet.");
+        You(_("are not wearing an amulet."));
     else
         prinv((char *) 0, uamul, 0L);
     return 0;
@@ -3880,7 +3881,7 @@ doprtool()
             lets[ct++] = obj_to_let(otmp);
     lets[ct] = '\0';
     if (!ct)
-        You("are not using any tools.");
+        You(_("are not using any tools."));
     else
         (void) display_inventory(lets, FALSE);
     return 0;
@@ -3900,7 +3901,7 @@ doprinuse()
             lets[ct++] = obj_to_let(otmp);
     lets[ct] = '\0';
     if (!ct)
-        You("are not wearing or wielding anything.");
+        You(_("are not wearing or wielding anything."));
     else
         (void) display_inventory(lets, FALSE);
     return 0;
@@ -3962,24 +3963,31 @@ boolean unpaid, showsym;
     unsigned len;
 
     if (oclass)
-        class_name = names[oclass];
+        class_name = _(names[oclass]);
     else if ((pos = index(oth_symbols, let)) != 0)
-        class_name = oth_names[pos - oth_symbols];
+        class_name = _(oth_names[pos - oth_symbols]);
     else
-        class_name = names[0];
+        class_name = _(names[0]);
+    /* localize the class header (display only); buffer sizing below uses the
+       translated strings so multibyte names never overflow */
+    class_name = _(class_name);
 
-    len = strlen(class_name) + (unpaid ? sizeof "unpaid_" : sizeof "")
-          + (oclass ? (strlen(ocsymfmt) + invbuf_sympadding) : 0);
-    if (len > invbufsiz) {
-        if (invbuf)
-            free((genericptr_t) invbuf);
-        invbufsiz = len + 10; /* add slop to reduce incremental realloc */
-        invbuf = (char *) alloc(invbufsiz);
+    {
+        const char *unpaid_pfx = _("Unpaid ");
+
+        len = strlen(class_name) + (unpaid ? strlen(unpaid_pfx) + 1 : 1)
+              + (oclass ? (strlen(ocsymfmt) + invbuf_sympadding) : 0);
+        if (len > invbufsiz) {
+            if (invbuf)
+                free((genericptr_t) invbuf);
+            invbufsiz = len + 10; /* add slop to reduce incremental realloc */
+            invbuf = (char *) alloc(invbufsiz);
+        }
+        if (unpaid)
+            Strcat(strcpy(invbuf, unpaid_pfx), class_name);
+        else
+            Strcpy(invbuf, class_name);
     }
-    if (unpaid)
-        Strcat(strcpy(invbuf, "Unpaid "), class_name);
-    else
-        Strcpy(invbuf, class_name);
     if ((oclass != 0) && showsym) {
         char *bp = eos(invbuf);
         int mlen = invbuf_sympadding - strlen(class_name);
@@ -4096,8 +4104,8 @@ doorganize() /* inventory organizer by Del Lamb */
     /* when no invent, or just gold in '$' slot, there's nothing to adjust */
     if (!invent || (invent->oclass == COIN_CLASS
                     && invent->invlet == GOLD_SYM && !invent->nobj)) {
-        You("aren't carrying anything %s.",
-            !invent ? "to adjust" : "adjustable");
+        You(_("aren't carrying anything %s."),
+            !invent ? _("to adjust") : _("adjustable"));
         return 0;
     }
 
@@ -4170,8 +4178,8 @@ doorganize() /* inventory organizer by Del Lamb */
         compactify(lets);
 
     /* get 'to' slot to use as destination */
-    Sprintf(qbuf, "Adjust letter to what [%s]%s?", lets,
-            invent ? " (? see used letters)" : "");
+    Sprintf(qbuf, _("Adjust letter to what [%s]%s?"), lets,
+            invent ? _(" (? see used letters)") : "");
     for (trycnt = 1; ; ++trycnt) {
         let = yn_function(qbuf, (char *) 0, '\0');
         if (let == '?' || let == '*') {
@@ -4193,7 +4201,7 @@ doorganize() /* inventory organizer by Del Lamb */
                 pline1(Never_mind);
             return 0;
         } else if (let == GOLD_SYM && obj->oclass != COIN_CLASS) {
-            pline("Only gold coins may be moved into the '%c' slot.",
+            pline(_("Only gold coins may be moved into the '%c' slot."),
                   GOLD_SYM);
             ever_mind = TRUE;
             goto noadjust;
@@ -4205,7 +4213,7 @@ doorganize() /* inventory organizer by Del Lamb */
             break; /* got one */
         if (trycnt == 5)
             goto noadjust;
-        pline("Select an inventory slot letter."); /* else try again */
+        pline(_("Select an inventory slot letter.")); /* else try again */
     }
 
     collect = (let == obj->invlet);
@@ -4267,7 +4275,7 @@ doorganize() /* inventory organizer by Del Lamb */
                 } else if (inv_cnt(FALSE) >= 52) {
                     (void) merged(&splitting, &obj); /* undo split */
                     /* "knapsack cannot accommodate any more items" */
-                    Your("pack is too full.");
+                    Your(_("pack is too full."));
                     return 0;
                 } else {
                     bumped = otmp;
@@ -4299,7 +4307,7 @@ doorganize() /* inventory organizer by Del Lamb */
     /* messages deferred until inventory has been fully reestablished */
     prinv(adj_type, obj, 0L);
     if (bumped)
-        prinv("Moving:", bumped, 0L);
+        prinv(_("Moving:"), bumped, 0L);
     if (splitting)
         clear_splitobjs(); /* reset splitobj context */
     update_inventory();
@@ -4379,7 +4387,7 @@ char *title;
         pickings = (dflags & MINV_PICKMASK);
 
     Sprintf(tmp, "%s %s:", s_suffix(noit_Monnam(mon)),
-            do_all ? "possessions" : "armament");
+            do_all ? _("possessions") : _("armament"));
 
     if (do_all ? have_any : (mon->misc_worn_check || MON_WEP(mon))) {
         /* Fool the 'weapon in hand' routine into
@@ -4398,7 +4406,7 @@ char *title;
         /* was 'set_uasmon();' but that potentially has side-effects */
         youmonst.data = &mons[u.umonnum]; /* most basic part of set_uasmon */
     } else {
-        invdisp_nothing(title ? title : tmp, "(none)");
+        invdisp_nothing(title ? title : tmp, _("(none)"));
         n = 0;
     }
 
@@ -4423,14 +4431,14 @@ register struct obj *obj;
     int n;
     menu_item *selected = 0;
 
-    (void) safe_qbuf(qbuf, "Contents of ", ":", obj, doname, ansimpleoname,
-                     "that");
+    (void) safe_qbuf(qbuf, _("Contents of "), ":", obj, doname, ansimpleoname,
+                     _("that"));
 
     if (obj->cobj) {
         n = query_objlist(qbuf, &(obj->cobj), INVORDER_SORT,
                           &selected, PICK_NONE, allow_all);
     } else {
-        invdisp_nothing(qbuf, "(empty)");
+        invdisp_nothing(qbuf, _("(empty)"));
         n = 0;
     }
     if (n > 0) {
@@ -4478,7 +4486,7 @@ boolean as_if_seen;
     if (n) {
         only.x = x;
         only.y = y;
-        if (query_objlist("Things that are buried here:",
+        if (query_objlist(_("Things that are buried here:"),
                           &level.buriedobjlist, INVORDER_SORT,
                           &selected, PICK_NONE, only_here) > 0)
             free((genericptr_t) selected);

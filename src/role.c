@@ -1503,12 +1503,12 @@ int buflen, rolenum, racenum, gendnum, alignnum;
         if ((racenum >= 0) && (aligncount > 1)) {
             if (donefirst)
                 Strcat(buf, " ");
-            Strcat(buf, aligns[alignnum].adj);
+            Strcat(buf, _(aligns[alignnum].adj));
             donefirst = TRUE;
         } else {
             if (donefirst)
                 Strcat(buf, " ");
-            Strcat(buf, aligns[alignnum].adj);
+            Strcat(buf, _(aligns[alignnum].adj));
             donefirst = TRUE;
         }
     } else {
@@ -1540,13 +1540,13 @@ int buflen, rolenum, racenum, gendnum, alignnum;
                 && !roles[rolenum].name.f) {
                 if (donefirst)
                     Strcat(buf, " ");
-                Strcat(buf, genders[gendnum].adj);
+                Strcat(buf, _(genders[gendnum].adj));
                 donefirst = TRUE;
             }
         } else {
             if (donefirst)
                 Strcat(buf, " ");
-            Strcat(buf, genders[gendnum].adj);
+            Strcat(buf, _(genders[gendnum].adj));
             donefirst = TRUE;
         }
     } else {
@@ -1566,13 +1566,13 @@ int buflen, rolenum, racenum, gendnum, alignnum;
             && ok_race(rolenum, racenum, gendnum, alignnum)) {
             if (donefirst)
                 Strcat(buf, " ");
-            Strcat(buf, (rolenum == ROLE_NONE) ? races[racenum].noun
-                                               : races[racenum].adj);
+            Strcat(buf, _((rolenum == ROLE_NONE) ? races[racenum].noun
+                                               : races[racenum].adj));
             donefirst = TRUE;
         } else if (!validrole(rolenum)) {
             if (donefirst)
                 Strcat(buf, " ");
-            Strcat(buf, races[racenum].noun);
+            Strcat(buf, _(races[racenum].noun));
             donefirst = TRUE;
         } else {
             pa[BP_RACE] = 1;
@@ -1628,16 +1628,16 @@ build_plselection_prompt(buf, buflen, rolenum, racenum, gendnum, alignnum)
 char *buf;
 int buflen, rolenum, racenum, gendnum, alignnum;
 {
-    const char *defprompt = "Shall I pick a character for you? [ynaq] ";
+    const char *defprompt = _("Shall I pick a character for you? [ynaq] ");
     int num_post_attribs = 0;
     char tmpbuf[BUFSZ], *p;
 
     if (buflen < QBUFSZ)
         return (char *) defprompt;
 
-    Strcpy(tmpbuf, "Shall I pick ");
+    Strcpy(tmpbuf, _("Shall I pick "));
     if (racenum != ROLE_NONE || validrole(rolenum))
-        Strcat(tmpbuf, "your ");
+        Strcat(tmpbuf, _("your "));
     else
         Strcat(tmpbuf, "a ");
     /* <your> */
@@ -1692,10 +1692,10 @@ int buflen, rolenum, racenum, gendnum, alignnum;
         }
         if (pa[BP_ALIGN]) {
             (void) promptsep(eos(buf), num_post_attribs);
-            Strcat(buf, "alignment");
+            Strcat(buf, _("alignment"));
         }
     }
-    Strcat(buf, " for you? [ynaq] ");
+    Strcat(buf, _(" for you? [ynaq] "));
     return buf;
 }
 
@@ -1803,10 +1803,10 @@ winid where;
     /* [g and a don't constrain anything sufficiently
        to narrow something done to a single choice] */
 
-    Sprintf(buf, "%12s ", "name:");
+    Sprintf(buf, "%12s ", _("name:"));
     Strcat(buf, (which == RS_NAME) ? choosing : !*plname ? not_yet : plname);
     putstr(where, 0, buf);
-    Sprintf(buf, "%12s ", "role:");
+    Sprintf(buf, "%12s ", _("role:"));
     Strcat(buf, (which == RS_ROLE) ? choosing : (r == ROLE_NONE)
                                                     ? not_yet
                                                     : (r == ROLE_RANDOM)
@@ -1822,26 +1822,26 @@ winid where;
             Sprintf(eos(buf), "/%s", roles[r].name.f);
     }
     putstr(where, 0, buf);
-    Sprintf(buf, "%12s ", "race:");
+    Sprintf(buf, "%12s ", _("race:"));
     Strcat(buf, (which == RS_RACE) ? choosing : (c == ROLE_NONE)
                                                     ? not_yet
                                                     : (c == ROLE_RANDOM)
                                                           ? rand_choice
                                                           : races[c].noun);
     putstr(where, 0, buf);
-    Sprintf(buf, "%12s ", "gender:");
+    Sprintf(buf, "%12s ", _("gender:"));
     Strcat(buf, (which == RS_GENDER) ? choosing : (g == ROLE_NONE)
                                                       ? not_yet
                                                       : (g == ROLE_RANDOM)
                                                             ? rand_choice
                                                             : genders[g].adj);
     putstr(where, 0, buf);
-    Sprintf(buf, "%12s ", "alignment:");
+    Sprintf(buf, "%12s ", _("alignment:"));
     Strcat(buf, (which == RS_ALGNMNT) ? choosing : (a == ROLE_NONE)
                                                        ? not_yet
                                                        : (a == ROLE_RANDOM)
                                                              ? rand_choice
-                                                             : aligns[a].adj);
+                                                             : _(aligns[a].adj));
     putstr(where, 0, buf);
 }
 
@@ -1965,25 +1965,25 @@ boolean preselect;
     if (constrainer) {
         any.a_int = 0;
         /* use four spaces of padding to fake a grayed out menu choice */
-        Sprintf(buf, "%4s%s forces %s", "", constrainer, forcedvalue);
+        Sprintf(buf, _("%4s%s forces %s"), "", constrainer, forcedvalue);
         add_menu(where, NO_GLYPH, &any, 0, 0, ATR_NONE, buf,
                  MENU_UNSELECTED);
     } else if (what) {
         any.a_int = RS_menu_arg(which);
-        Sprintf(buf, "Pick%s %s first", (f >= 0) ? " another" : "", what);
+        Sprintf(buf, _("Pick%s %s first"), (f >= 0) ? _(" another") : "", what);
         add_menu(where, NO_GLYPH, &any, RS_menu_let[which], 0, ATR_NONE, buf,
                  MENU_UNSELECTED);
     } else if (which == RS_filter) {
         any.a_int = RS_menu_arg(RS_filter);
         add_menu(where, NO_GLYPH, &any, '~', 0, ATR_NONE,
-                 "Reset role/race/&c filtering", MENU_UNSELECTED);
+                 _("Reset role/race/&c filtering"), MENU_UNSELECTED);
     } else if (which == ROLE_RANDOM) {
         any.a_int = ROLE_RANDOM;
-        add_menu(where, NO_GLYPH, &any, '*', 0, ATR_NONE, "Random",
+        add_menu(where, NO_GLYPH, &any, '*', 0, ATR_NONE, _("Random"),
                  preselect ? MENU_SELECTED : MENU_UNSELECTED);
     } else if (which == ROLE_NONE) {
         any.a_int = ROLE_NONE;
-        add_menu(where, NO_GLYPH, &any, 'q', 0, ATR_NONE, "Quit",
+        add_menu(where, NO_GLYPH, &any, 'q', 0, ATR_NONE, _("Quit"),
                  preselect ? MENU_SELECTED : MENU_UNSELECTED);
     } else {
         impossible("role_menu_extra: bad arg (%d)", which);
@@ -2142,21 +2142,21 @@ struct monst *mtmp;
 {
     switch (Role_switch) {
     case PM_KNIGHT:
-        return "Salutations"; /* Olde English */
+        return _("Salutations"); /* Olde English */
     case PM_SAMURAI:
         return (mtmp && mtmp->data == &mons[PM_SHOPKEEPER])
-                    ? "Irasshaimase"
-                    : "Konnichi wa"; /* Japanese */
+                    ? _("Irasshaimase")
+                    : _("Konnichi wa"); /* Japanese */
     case PM_TOURIST:
-        return "Aloha"; /* Hawaiian */
+        return _("Aloha"); /* Hawaiian */
     case PM_VALKYRIE:
         return
 #ifdef MAIL
-               (mtmp && mtmp->data == &mons[PM_MAIL_DAEMON]) ? "Hallo" :
+               (mtmp && mtmp->data == &mons[PM_MAIL_DAEMON]) ? _("Hallo") :
 #endif
-               "Velkommen"; /* Norse */
+               _("Velkommen"); /* Norse */
     default:
-        return "Hello";
+        return _("Hello");
     }
 }
 
@@ -2165,15 +2165,15 @@ Goodbye()
 {
     switch (Role_switch) {
     case PM_KNIGHT:
-        return "Fare thee well"; /* Olde English */
+        return _("Fare thee well"); /* Olde English */
     case PM_SAMURAI:
-        return "Sayonara"; /* Japanese */
+        return _("Sayonara"); /* Japanese */
     case PM_TOURIST:
-        return "Aloha"; /* Hawaiian */
+        return _("Aloha"); /* Hawaiian */
     case PM_VALKYRIE:
-        return "Farvel"; /* Norse */
+        return _("Farvel"); /* Norse */
     default:
-        return "Goodbye";
+        return _("Goodbye");
     }
 }
 
