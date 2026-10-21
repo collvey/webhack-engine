@@ -1,0 +1,57 @@
+# webhack-engine
+
+The game engine behind [WebHack](https://github.com/collvey/WebHack) (roguelike.run) and
+[WebHack-Steam](https://github.com/collvey/WebHack-Steam): NetHack 3.6.7 plus a headless
+window port, compiled to WebAssembly. This repository owns the C source, the WebAssembly
+build and the in-game text translations; the two clients own their user interfaces and
+consume the engine as a versioned dependency.
+
+NetHack is © 1985–2020 Stichting Mathematisch Centrum, Amsterdam, and the NetHack
+DevTeam, distributed under the NetHack General Public License (NGPL); see
+[`dat/license`](dat/license). This repository is a modified version released under the
+same license. The upstream NetHack release notes are in [`README`](README).
+
+## What a release contains
+
+Every tag `v*` publishes a GitHub Release with exactly these files:
+
+| File | What it is |
+|---|---|
+| `nethack.js` | Emscripten loader (`MODULARIZE`, export name `NetHackModule`) |
+| `nethack.wasm` | the compiled engine |
+| `nethack.data` | preloaded virtual filesystem: `.nethackrc`, `sysconf`, `nhdat`, `nhdat.zh-CN`, `dungeon` |
+| `SHA256SUMS` | checksums of the three files above |
+| `manifest.json` | version, source commit, Emscripten version, per-file size and checksum |
+
+The clients copy the three engine files into `webhack-client/public/` and run them in a
+Web Worker (`nethack.worker.js`, which lives in the clients). The engine's exported
+functions and the message protocol are defined in `win/headless/`.
+
+## Building
+
+```sh
+scripts/build-wasm.sh            # output in dist/
+OUT_DIR=/tmp/out scripts/build-wasm.sh
+EMCC=/path/to/emcc scripts/build-wasm.sh
+```
+
+Requires Emscripten. Releases are built with the version pinned in
+`.github/workflows/build.yml`; building with the same version reproduces the released
+files byte for byte. `scripts/build_wasm_simple.cmd` is the original Windows script with
+identical flags, kept for reference.
+
+## Layout
+
+- `src/`, `include/`, `dat/` — NetHack 3.6.7 engine (with WebHack modifications, e.g. `nhi18n.c` for runtime translation)
+- `win/headless/` — the window port that talks JSON over stdout/stdin to the web client, the save-slot API, and the JS library the engine imports
+- `sys/wasm/` — WASM configuration and the preloaded files (`nhdat*`, `sysconf`, `dungeon`, `.nethackrc`)
+- `sys/`, `win/` (other ports), `util/`, `doc/`, `DEVEL/` — upstream NetHack, unchanged
+- `locales/` — in-game text translations: `webhack.pot` (template), `zh-CN/webhack.po`, and the translated data files compiled into `nhdat.zh-CN`; see `locales/README.md`
+- `scripts/` — the build script, the i18n tooling that generates the C catalog and `nhdat.zh-CN` from the `.po` files, and data-extraction helpers used when the clients' game-data tables were first derived from the C sources
+
+## Releasing a new engine version
+
+1. Merge the change to `main` (CI builds it and uploads the files as a workflow artifact).
+2. Tag and push: `git tag v3.6.7-webhack.N && git push origin v3.6.7-webhack.N`.
+3. CI creates the Release. Each client then bumps the version it pins and reviews the
+   change in its own pull request.

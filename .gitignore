@@ -1,0 +1,9 @@
+# build output (published as GitHub Release assets, never committed)
+dist/
+release-notes.md
+
+# editor / OS noise
+.vscode/
+.vs/
+.DS_Store
+Thumbs.db
