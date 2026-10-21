@@ -15,3 +15,7 @@ README NHSUBST
 .git* NH_header=no
 * NH_filestag=(file%s_in_top_directory)
 NetHack.dsw NH_filestag=(file%s_for_win32_that_are_moved_into_._at_compile_time)
+
+# Files preloaded into nethack.data must be byte-identical on every platform:
+# never convert their line endings on checkout.
+sys/wasm/** -text
