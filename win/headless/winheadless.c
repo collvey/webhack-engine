@@ -531,54 +531,43 @@ int apply_character_options_from_js(void)
         free(name);
     }
     
-    /* Map role string to index */
+    /* Map role/race/gender/alignment strings to indices using NetHack's own
+     * lookups (role.c), so the indices can never drift from the engine's
+     * tables. A hard-coded alphabetical table previously swapped Rogue (7)
+     * and Ranger (8). Unrecognized strings return ROLE_NONE and leave the
+     * current value alone; headless_player_selection() turns any remaining
+     * ROLE_NONE into ROLE_RANDOM. */
     if (roleStr) {
-        if (strcmp(roleStr, "archeologist") == 0) flags.initrole = 0;
-        else if (strcmp(roleStr, "barbarian") == 0) flags.initrole = 1;
-        else if (strcmp(roleStr, "caveman") == 0) flags.initrole = 2;
-        else if (strcmp(roleStr, "healer") == 0) flags.initrole = 3;
-        else if (strcmp(roleStr, "knight") == 0) flags.initrole = 4;
-        else if (strcmp(roleStr, "monk") == 0) flags.initrole = 5;
-        else if (strcmp(roleStr, "priest") == 0) flags.initrole = 6;
-        else if (strcmp(roleStr, "ranger") == 0) flags.initrole = 7;
-        else if (strcmp(roleStr, "rogue") == 0) flags.initrole = 8;
-        else if (strcmp(roleStr, "samurai") == 0) flags.initrole = 9;
-        else if (strcmp(roleStr, "tourist") == 0) flags.initrole = 10;
-        else if (strcmp(roleStr, "valkyrie") == 0) flags.initrole = 11;
-        else if (strcmp(roleStr, "wizard") == 0) flags.initrole = 12;
+        int idx = str2role(roleStr);
+        if (idx != ROLE_NONE)
+            flags.initrole = idx;
         free(roleStr);
     }
-    
-    /* Map race string to index */
+
     if (raceStr) {
-        if (strcmp(raceStr, "human") == 0) flags.initrace = 0;
-        else if (strcmp(raceStr, "elf") == 0) flags.initrace = 1;
-        else if (strcmp(raceStr, "dwarf") == 0) flags.initrace = 2;
-        else if (strcmp(raceStr, "gnome") == 0) flags.initrace = 3;
-        else if (strcmp(raceStr, "orc") == 0) flags.initrace = 4;
+        int idx = str2race(raceStr);
+        if (idx != ROLE_NONE)
+            flags.initrace = idx;
         free(raceStr);
     }
-    
-    /* Map gender string to index */
+
     if (genderStr) {
-        if (strcmp(genderStr, "male") == 0) {
-            flags.initgend = 0;
-            flags.female = 0;
-        } else if (strcmp(genderStr, "female") == 0) {
-            flags.initgend = 1;
-            flags.female = 1;
+        int idx = str2gend(genderStr);
+        if (idx != ROLE_NONE) {
+            flags.initgend = idx;
+            if (idx >= 0)
+                flags.female = (idx == 1);
         }
         free(genderStr);
     }
-    
-    /* Map alignment string to index */
+
     if (alignStr) {
-        if (strcmp(alignStr, "lawful") == 0) flags.initalign = 0;
-        else if (strcmp(alignStr, "neutral") == 0) flags.initalign = 1;
-        else if (strcmp(alignStr, "chaotic") == 0) flags.initalign = 2;
+        int idx = str2align(alignStr);
+        if (idx != ROLE_NONE)
+            flags.initalign = idx;
         free(alignStr);
     }
-    
+
     /* Set beginner flag based on game mode
      * first-time: beginner = 1 (gives +5000 gold and magic whistle)
      * classic: beginner = 0 (standard NetHack experience) */
