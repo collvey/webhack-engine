@@ -1306,7 +1306,7 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
                  "\"gold\":%ld,\"hp\":%d,\"hpmax\":%d,\"pw\":%d,\"pwmax\":%d,"
                  "\"ac\":%d,\"xlvl\":%d,\"dlvl\":%d,\"exp\":%ld,"
                  "\"enc\":%d,\"hunger\":%d,\"cond\":%lu,\"turn\":%ld,\"score\":%ld,"
-                 "\"mode\":\"%s\"}",
+                 "\"mode\":\"%s\",\"wt\":%d,\"wtcap\":%d}",
                  escaped_title, escaped_str, escaped_dex, escaped_con,
                  escaped_int, escaped_wis, escaped_cha, escaped_align,
                  g_status.gold, g_status.hp, g_status.hpmax,
@@ -1316,7 +1316,11 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
                  g_status.cond, g_status.turn, g_status.score,
                  /* play mode: clients use it to label non-scoring games
                     and to withhold achievements outside normal play */
-                 wizard ? "debug" : discover ? "explore" : "normal");
+                 wizard ? "debug" : discover ? "explore" : "normal",
+                 /* carried weight and carrying capacity, for the
+                    inventory panel's weight bar (inv_weight() is the
+                    excess over the capacity, so add it back) */
+                 inv_weight() + weight_cap(), weight_cap());
         // fprintf(stdout, "[STATUS] BL_FLUSH: turn=%ld\n", g_status.turn);
         emit_event("STATUS", buf);
         return;
