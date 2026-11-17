@@ -248,8 +248,33 @@ emit_map_frame_ex(int force)
         }
     }
     
+    pos += snprintf(buf + pos, sizeof(buf) - pos, "]");
+
+    /* Hit points of the monsters the hero can see that have taken damage
+     * ("mons":[{"x","y","hp","max"}]).  The client draws a thin health bar
+     * over a monster once it has been hurt and floats the damage dealt
+     * (hp difference between frames).  Unhurt monsters are left out, and
+     * nothing is sent while hallucinating (the hero cannot tell them apart). */
+    pos += snprintf(buf + pos, sizeof(buf) - pos, ",\"mons\":[");
+    first = 1;
+    if (!Hallucination) {
+        for (y = 0; y < MAP_ROWS; y++) {
+            for (x = 1; x < MAP_COLS && x < COLNO; x++) {
+                struct monst *mtmp;
+                if (!glyph_is_monster(g_map[y][x].glyph) || !isok(x, y)) continue;
+                mtmp = m_at(x, y);
+                if (!mtmp || DEADMONSTER(mtmp) || !canspotmon(mtmp)) continue;
+                if (mtmp->mhp >= mtmp->mhpmax || mtmp->mhpmax <= 0) continue;
+                if (sizeof(buf) - pos < 64) break;
+                pos += snprintf(buf + pos, sizeof(buf) - pos,
+                                "%s{\"x\":%d,\"y\":%d,\"hp\":%d,\"max\":%d}",
+                                first ? "" : ",", x, y, mtmp->mhp, mtmp->mhpmax);
+                first = 0;
+            }
+        }
+    }
     pos += snprintf(buf + pos, sizeof(buf) - pos, "]}");
-    
+
     emit_event("MAP_FRAME", buf);
     g_map_dirty = 0;
     
@@ -1281,7 +1306,7 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
                  "\"gold\":%ld,\"hp\":%d,\"hpmax\":%d,\"pw\":%d,\"pwmax\":%d,"
                  "\"ac\":%d,\"xlvl\":%d,\"dlvl\":%d,\"exp\":%ld,"
                  "\"enc\":%d,\"hunger\":%d,\"cond\":%lu,\"turn\":%ld,\"score\":%ld,"
-                 "\"mode\":\"%s\"}",
+                 "\"mode\":\"%s\",\"wt\":%d,\"wtcap\":%d}",
                  escaped_title, escaped_str, escaped_dex, escaped_con,
                  escaped_int, escaped_wis, escaped_cha, escaped_align,
                  g_status.gold, g_status.hp, g_status.hpmax,
@@ -1291,7 +1316,11 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
                  g_status.cond, g_status.turn, g_status.score,
                  /* play mode: clients use it to label non-scoring games
                     and to withhold achievements outside normal play */
-                 wizard ? "debug" : discover ? "explore" : "normal");
+                 wizard ? "debug" : discover ? "explore" : "normal",
+                 /* carried weight and carrying capacity, for the
+                    inventory panel's weight bar (inv_weight() is the
+                    excess over the capacity, so add it back) */
+                 inv_weight() + weight_cap(), weight_cap());
         // fprintf(stdout, "[STATUS] BL_FLUSH: turn=%ld\n", g_status.turn);
         emit_event("STATUS", buf);
         return;
