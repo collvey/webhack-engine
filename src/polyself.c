@@ -602,7 +602,7 @@ int mntmp;
     int mlvl;
 
     if (mvitals[mntmp].mvflags & G_GENOD) { /* allow G_EXTINCT */
-        You_feel(_("rather %s-ish."), mons[mntmp].mname);
+        You_feel(_("rather %s-ish."), PM_DISPLAY_NAME(mntmp));
         exercise(A_WIS, TRUE);
         return 0;
     }
@@ -654,9 +654,9 @@ int mntmp;
     if (dochange) {
         flags.female = !flags.female;
         Strcat(buf, (is_male(&mons[mntmp]) || is_female(&mons[mntmp]))
-                       ? "" : flags.female ? "female " : "male ");
+                       ? "" : flags.female ? _("female ") : _("male "));
     }
-    Strcat(buf, mons[mntmp].mname);
+    Strcat(buf, PM_DISPLAY_NAME(mntmp));
     You(_("%s %s!"), (u.umonnum != mntmp) ? _("turn into") : _("feel like"), an(buf));
 
     if (Stoned && poly_when_stoned(&mons[mntmp])) {

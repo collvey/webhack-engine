@@ -1873,7 +1873,8 @@ int final;
     if (!urole.name.f
         && ((urole.allow & ROLE_GENDMASK) == (ROLE_MALE | ROLE_FEMALE)
             || innategend != flags.initgend))
-        Sprintf(tmpbuf, "%s ", _(genders[innategend].adj));
+        Sprintf(tmpbuf, nhi18n_uses_articles() ? "%s " : "%s",
+                _(genders[innategend].adj));
     buf[0] = '\0';
     if (Upolyd)
         Strcpy(buf, _("actually ")); /* "You are actually a ..." */
@@ -1925,7 +1926,7 @@ int final;
     if (u.ualign.type != A_CHAOTIC)
         Sprintf(eos(buf), _(" %s (%s)"), align_gname(A_CHAOTIC),
                 align_str(A_CHAOTIC));
-    Strcat(buf, "."); /* terminate sentence */
+    Strcat(buf, _(".")); /* terminate sentence */
     enlght_out(buf);
 
     /* show original alignment,gender,race,role if any have been changed;
@@ -2102,9 +2103,11 @@ int final;
     you_have(buf, "");
 
     /* low max energy is feasible, so handle couple of extra special cases */
-    if (pwmax == 0 || (pw == pwmax && pwmax == 2)) /* both: "all 2" is silly */
+    /* zh has no "both" form; it uses the "all N" sentence for N == 2 too */
+    if (pwmax == 0
+        || (pw == pwmax && pwmax == 2 && nhi18n_uses_articles()))
         Sprintf(buf, "%s%s", !pwmax ? _("no") : _("both"), _(Power));
-    else if (pw == pwmax && pwmax > 2)
+    else if (pw == pwmax && pwmax >= 2)
         Sprintf(buf, _("all %d %s"), pwmax, _(Power));
     else
         Sprintf(buf, _("%d out of %d %s"), pw, pwmax, _(Power));
@@ -2258,19 +2261,21 @@ int mode, final, attrindx;
             paren_pfx = ", ";
         }
         if (abase != apeak) {
-            Sprintf(eos(valubuf), _("%speak:%s"), paren_pfx,
+            Sprintf(eos(valubuf), _("%speak:%s"), _(paren_pfx),
                     attrval(attrindx, apeak, valstring));
             paren_pfx = ", ";
         }
         if (interesting_alimit) {
-            Sprintf(eos(valubuf), _("%s%slimit:%s"), paren_pfx,
+            Sprintf(eos(valubuf), _("%s%slimit:%s"), _(paren_pfx),
                     /* more verbose if exceeding 'limit' due to magic bonus */
                     (acurrent > alimit) ? _("innate ") : "",
                     attrval(attrindx, alimit, valstring));
             /* paren_pfx = ", "; */
         }
+        /* zh: the opening paren is full-width (from the catalog), so close
+           with a full-width one too */
         if (acurrent != abase || abase != apeak || interesting_alimit)
-            Strcat(valubuf, ")");
+            Strcat(valubuf, nhi18n_uses_articles() ? ")" : "\357\274\211");
     }
     enl_msg(subjbuf, _("is "), _("was "), valubuf, "");
 }
@@ -2595,8 +2600,12 @@ int final;
             (void) lcase(skill_level_name(wtype, sklvlbuf));
         /* "you have no/basic/expert/master/grand-master skill with <skill>"
            or "you are unskilled/skilled in <skill>" */
-        Sprintf(buf, _("%s %s %s"), sklvlbuf,
-                hav ? _("skill with") : _("in"), skill_name(wtype));
+        if (nhi18n_uses_articles())
+            Sprintf(buf, _("%s %s %s"), sklvlbuf,
+                    hav ? _("skill with") : _("in"), skill_name(wtype));
+        else /* zh: "你的长剑技能：初级" — name first, level last */
+            Sprintf(buf, _("'s %s skill: %s"), skill_name(wtype),
+                    (sklvl == P_ISRESTRICTED) ? _("restricted") : sklvlbuf);
         if (can_advance(wtype, FALSE))
             Sprintf(eos(buf), _(" and %s that"),
                     !final ? _("can enhance") : _("could have enhanced"));
@@ -2719,7 +2728,7 @@ int final;
     }
     if (Warn_of_mon && context.warntype.speciesidx >= LOW_PM) {
         Sprintf(buf, _("aware of the presence of %s"),
-                makeplural(mons[context.warntype.speciesidx].mname));
+                makeplural(PM_DISPLAY_NAME(context.warntype.speciesidx)));
         you_are(buf, from_what(WARN_OF_MON));
     }
     if (Undead_warning)
@@ -3328,8 +3337,17 @@ int final;
         you_have_X(_("used no wishes"));
     } else {
         Sprintf(buf, _("used %ld wish%s"), u.uconduct.wishes,
-                (u.uconduct.wishes > 1L) ? "es" : "");
-        if (u.uconduct.wisharti) {
+                (u.uconduct.wishes > 1L && nhi18n_uses_plurals()) ? "es" : "");
+        if (u.uconduct.wisharti && !nhi18n_uses_articles()) {
+            /* zh: whole phrases, full-width parens; no "both"/"all" forms */
+            if (u.uconduct.wisharti == u.uconduct.wishes)
+                Strcat(buf, (u.uconduct.wishes == 1L)
+                                ? _(" (for an artifact)")
+                                : _(" (all for artifacts)"));
+            else
+                Sprintf(eos(buf), _(" (%ld of them for artifacts)"),
+                        u.uconduct.wisharti);
+        } else if (u.uconduct.wisharti) {
             /* if wisharti == wishes
              *  1 wish (for an artifact)
              *  2 wishes (both for artifacts)

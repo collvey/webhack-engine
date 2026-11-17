@@ -1861,12 +1861,12 @@ struct obj *obj;
 
         if (poly_when_stoned(youmonst.data))
             You(_("tin %s without wearing gloves."),
-                an(mons[corpse->corpsenm].mname));
+                an(PM_DISPLAY_NAME(corpse->corpsenm)));
         else {
             pline(_("Tinning %s without wearing gloves is a fatal mistake..."),
-                  an(mons[corpse->corpsenm].mname));
+                  an(PM_DISPLAY_NAME(corpse->corpsenm)));
             Sprintf(kbuf, _("trying to tin %s without gloves"),
-                    an(mons[corpse->corpsenm].mname));
+                    an(PM_DISPLAY_NAME(corpse->corpsenm)));
         }
         instapetrify(kbuf);
     }
@@ -2858,7 +2858,7 @@ struct obj *obj;
                         char kbuf[BUFSZ];
 
                         Sprintf(kbuf, _("%s corpse"),
-                                an(mons[otmp->corpsenm].mname));
+                                an(PM_DISPLAY_NAME(otmp->corpsenm)));
                         pline(_("Snatching %s is a fatal mistake."), kbuf);
                         instapetrify(kbuf);
                     }

@@ -2245,7 +2245,10 @@ boolean tipping; /* caller emptying entire contents; affects shop handling */
                                            || levl[u.ux][u.uy].typ >= ICE)
                                           ? _("Oops!  %s away from you!")
                                           : _("Oops!  %s to the floor!"),
-                                      The(aobjnam(obj, _("slip"))), (char *) 0);
+                                      /* zh: the msgstr carries its own verb */
+                                      The(aobjnam(obj, nhi18n_uses_articles()
+                                                           ? _("slip") : (char *) 0)),
+                                      (char *) 0);
             nhUse(obj);
         } else {
             /* assumes this is taking place at hero's location */

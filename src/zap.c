@@ -5354,7 +5354,9 @@ makewish()
 
         /* The(aobjnam()) is safe since otmp is unidentified -dlc */
         (void) hold_another_object(otmp, oops_msg,
-                                   The(aobjnam(otmp, verb)),
+                                   /* zh: the msgstr carries its own verb */
+                                   The(aobjnam(otmp, nhi18n_uses_articles()
+                                                         ? verb : (char *) 0)),
                                    (const char *) 0);
         u.ublesscnt += rn1(100, 50); /* the gods take notice */
     }

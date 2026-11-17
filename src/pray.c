@@ -1024,7 +1024,8 @@ aligntyp g_align;
                 *repair_buf = '\0';
                 if (uwep->oeroded || uwep->oeroded2)
                     Sprintf(repair_buf, _(" and %s now as good as new"),
-                            otense(uwep, "are"));
+                            /* zh: no copula ("而现在焕然一新") */
+                            nhi18n_uses_plurals() ? otense(uwep, "are") : "");
 
                 if (uwep->cursed) {
                     if (!Blind) {

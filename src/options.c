@@ -3039,7 +3039,7 @@ boolean tinitial, tfrom_file;
 
                 use_menu = FALSE;
                 Sprintf(qbuf, _("New %s: [%s am] (%s)"), fullname, ocl,
-                        *tbuf ? tbuf : "all");
+                        *tbuf ? tbuf : _("all"));
                 abuf[0] = '\0';
                 getlin(qbuf, abuf);
                 wasspace = (abuf[0] == ' '); /* before mungspaces */
@@ -4581,10 +4581,10 @@ doset() /* changing options via menu by Per Liboriussen */
                 any.a_int = (pass == 0) ? 0 : i + 1;
                 if (!iflags.menu_tab_sep)
                     Sprintf(buf, fmtstr_doset, (pass == 0) ? "    " : "",
-                            name, *bool_p ? "true" : "false");
+                            name, *bool_p ? _("true") : _("false"));
                 else
                     Sprintf(buf, fmtstr_doset_tab,
-                            name, *bool_p ? "true" : "false");
+                            name, *bool_p ? _("true") : _("false"));
                 add_menu(tmpwin, NO_GLYPH, &any, 0, 0, ATR_NONE, buf,
                          MENU_UNSELECTED);
             }
@@ -5130,7 +5130,7 @@ boolean setinitial, setfromfile;
         add_menu(tmpwin, NO_GLYPH, &any, 'r', 0, ATR_NONE, "right",
                  MENU_UNSELECTED);
         Sprintf(abuf, _("Select %s window placement relative to the map:"),
-                msg ? "message" : "status");
+                msg ? _("message") : _("status"));
         end_menu(tmpwin, abuf);
         if (select_menu(tmpwin, PICK_ONE, &window_pick) > 0) {
             if (msg)
@@ -5624,7 +5624,7 @@ char *buf;
                     : (which == ALIGN_RIGHT) ? "right"
                       : defopt);
     } else if (!strcmp(optname, "align"))
-        Sprintf(buf, "%s", rolestring(flags.initalign, aligns, adj));
+        Sprintf(buf, "%s", _(rolestring(flags.initalign, aligns, adj)));
 #ifdef WIN32
     else if (!strcmp(optname, "altkeyhandler"))
         Sprintf(buf, "%s",
@@ -5698,7 +5698,7 @@ char *buf;
     } else if (!strcmp(optname, "fruit"))
         Sprintf(buf, "%s", pl_fruit);
     else if (!strcmp(optname, "gender"))
-        Sprintf(buf, "%s", rolestring(flags.initgend, genders, adj));
+        Sprintf(buf, "%s", _(rolestring(flags.initgend, genders, adj)));
     else if (!strcmp(optname, "horsename"))
         Sprintf(buf, "%s", horsename[0] ? horsename : none);
     else if (!strcmp(optname, "map_mode")) {
@@ -5827,20 +5827,20 @@ char *buf;
         Sprintf(buf, "%s", burdentype[flags.pickup_burden]);
     } else if (!strcmp(optname, "pickup_types")) {
         oc_to_str(flags.pickup_types, ocl);
-        Sprintf(buf, "%s", ocl[0] ? ocl : "all");
+        Sprintf(buf, "%s", ocl[0] ? ocl : _("all"));
     } else if (!strcmp(optname, "pile_limit")) {
         Sprintf(buf, "%d", flags.pile_limit);
     } else if (!strcmp(optname, "playmode")) {
-        Strcpy(buf, wizard ? "debug" : discover ? "explore" : "normal");
+        Strcpy(buf, wizard ? _("debug") : discover ? _("explore") : _("normal"));
     } else if (!strcmp(optname, "race")) {
-        Sprintf(buf, "%s", rolestring(flags.initrace, races, noun));
+        Sprintf(buf, "%s", _(rolestring(flags.initrace, races, noun)));
     } else if (!strcmp(optname, "roguesymset")) {
         Sprintf(buf, "%s",
                 symset[ROGUESET].name ? symset[ROGUESET].name : "default");
         if (currentgraphics == ROGUESET && symset[ROGUESET].name)
             Strcat(buf, _(", active"));
     } else if (!strcmp(optname, "role")) {
-        Sprintf(buf, "%s", rolestring(flags.initrole, roles, name.m));
+        Sprintf(buf, "%s", _(rolestring(flags.initrole, roles, name.m)));
     } else if (!strcmp(optname, "runmode")) {
         Sprintf(buf, "%s", runmodes[flags.runmode]);
     } else if (!strcmp(optname, "whatis_coord")) {
@@ -5991,7 +5991,7 @@ dotogglepickup()
     flags.pickup = !flags.pickup;
     if (flags.pickup) {
         oc_to_str(flags.pickup_types, ocl);
-        Sprintf(buf, _("ON, for %s objects%s"), ocl[0] ? ocl : "all",
+        Sprintf(buf, _("ON, for %s objects%s"), ocl[0] ? ocl : _("all"),
                 (apelist)
                     ? ((count_apes() == 1)
                            ? _(", with one exception")

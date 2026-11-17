@@ -2106,7 +2106,7 @@ do_class_genocide()
             if (mons[i].mlet == class) {
                 char nam[BUFSZ];
 
-                Strcpy(nam, makeplural(mons[i].mname));
+                Strcpy(nam, makeplural(PM_DISPLAY_NAME(i)));
                 /* Although "genus" is Latin for race, the hero benefits
                  * from both race and role; thus genocide affects either.
                  */

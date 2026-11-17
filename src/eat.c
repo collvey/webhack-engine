@@ -701,7 +701,7 @@ register int pm;
     case PM_LARGE_CAT:
         /* cannibals are allowed to eat domestic animals without penalty */
         if (!CANNIBAL_ALLOWED()) {
-            You_feel(_("that eating the %s was a bad idea."), mons[pm].mname);
+            You_feel(_("that eating the %s was a bad idea."), PM_DISPLAY_NAME(pm));
             HAggravate_monster |= FROMOUTSIDE;
         }
         break;
@@ -1263,9 +1263,9 @@ char *buf;
                 Strcpy(eos(buf), " of ");
             }
             if (vegetarian(&mons[mnum]))
-                Sprintf(eos(buf), "%s", mons[mnum].mname);
+                Sprintf(eos(buf), "%s", PM_DISPLAY_NAME(mnum));
             else
-                Sprintf(eos(buf), _("%s meat"), mons[mnum].mname);
+                Sprintf(eos(buf), _("%s meat"), PM_DISPLAY_NAME(mnum));
         }
     }
 }

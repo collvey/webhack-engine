@@ -522,7 +522,7 @@ unsigned cxn_flags; /* bitmask of CXN_xxx values */
             Strcpy(buf, cnoun ? cnoun : "amulet");
         else if (typ == AMULET_OF_YENDOR || typ == FAKE_AMULET_OF_YENDOR)
             /* each must be identified individually */
-            Strcpy(buf, known ? actualn : dn);
+            Strcpy(buf, known ? actualn : _(dn));
         else if (nn)
             Strcpy(buf, actualn);
         else if (un)
@@ -634,12 +634,13 @@ unsigned cxn_flags; /* bitmask of CXN_xxx values */
         }
         if (obj->globby) {
             Sprintf(buf, "%s%s",
+                    /* display only; readobjnam() parses the English words */
                     (obj->owt <= 100)
-                       ? "small "
+                       ? _("small ")
                        : (obj->owt > 500)
-                          ? "very large "
+                          ? _("very large ")
                           : (obj->owt > 300)
-                             ? "large "
+                             ? _("large ")
                              : "",
                     actualn);
             break;
@@ -871,7 +872,15 @@ unsigned cxn_flags; /* bitmask of CXN_xxx values */
     }
 
     if (has_oname(obj) && dknown) {
-        Strcat(buf, " named ");
+        /* zh: "银军刀「格雷斯万迪尔」" -- " named " is localized to the opening
+           corner bracket and the closing one is appended below */
+        Strcat(buf, nhi18n_uses_articles() ? " named " : "\343\200\214");
+        (void) strncat(buf, obj->oartifact ? artiname(obj->oartifact) : ONAME(obj),
+                       BUFSZ - 1 - PREFIX - (unsigned) strlen(buf));
+        if (!nhi18n_uses_articles())
+            (void) strncat(buf, "\343\200\215",
+                           BUFSZ - 1 - PREFIX - (unsigned) strlen(buf));
+    } else if (0) {
  nameit:
         /* An artifact's stored oname is its canonical English name (set by
            oname() at creation, artifact.c); show the localized form via
@@ -1320,8 +1329,11 @@ unsigned doname_flags;
 #endif
             if (omndx >= LOW_PM
                 && (known || (mvitals[omndx].mvflags & MV_KNOWS_EGG))) {
-                Strcat(prefix, mons[omndx].mname);
-                Strcat(prefix, " ");
+                /* zh: "巨蚁蛋" -- localized species, no separating space */
+                Strcat(prefix, nhi18n_monname(omndx) ? nhi18n_monname(omndx)
+                                                     : mons[omndx].mname);
+                if (nhi18n_uses_articles())
+                    Strcat(prefix, " ");
                 if (obj->spe)
                     Strcat(bp, _(" (laid by you)"));
             }
@@ -4352,7 +4364,7 @@ struct obj *suit;
         suitnm = OBJ_NAME(objects[suit->otyp]);
         esuitp = eos((char *) suitnm);
         if (strlen(suitnm) > 5 && !strcmp(esuitp - 5, " mail"))
-            return "mail"; /* most suits fall into this category */
+            return _("mail"); /* most suits fall into this category */
         else if (strlen(suitnm) > 7 && !strcmp(esuitp - 7, " jacket"))
             return _("jacket"); /* leather jacket */
     }
