@@ -198,7 +198,17 @@ int main(int argc, char* argv[]) {
             fd = restore_saved_game();
             
             if (fd >= 0 && dorecover(fd)) {
-                /* Sync extracted lock files to IndexedDB */
+                /* /nethack_data/save is only a one-shot handoff in the web
+                 * port (load_from_slot() and the in-game language switch
+                 * copy a slot here and reload the page); persistent saves
+                 * live in save_slots/. Upstream dorecover() keeps the file in
+                 * explore/debug mode (restore.c: "if (!wizard && !discover)"),
+                 * which here left a stale copy in IndexedDB that the worker
+                 * auto-restored on every later page load (WebHack #12).
+                 * Delete it in every mode; the sync below persists that. */
+                (void) delete_savefile();
+
+                /* Sync extracted lock files (and the deletion) to IndexedDB */
                 EM_ASM({
                     FS.syncfs(false, function(err) {
                         if (err) {
