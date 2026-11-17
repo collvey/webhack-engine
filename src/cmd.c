@@ -752,6 +752,9 @@ enter_explore_mode(VOID_ARGS)
             clear_nhwindow(WIN_MESSAGE);
             You(_("are now in non-scoring explore mode."));
             discover = TRUE;
+            /* redraw the status so window ports that report the play
+               mode (headless STATUS "mode") pick up the change at once */
+            context.botl = context.botlx = TRUE;
         } else {
             clear_nhwindow(WIN_MESSAGE);
             pline(_("Resuming normal game."));

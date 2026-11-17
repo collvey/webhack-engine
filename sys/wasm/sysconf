@@ -4,5 +4,10 @@
 # Wizards mode allowed (for testing)
 WIZARDS=*
 
+# Explore (discovery) mode allowed for every player: #exploremode, or
+# playMode "explore" when a new game starts. A single-player browser game
+# has no other users to keep off the scoreboard.
+EXPLORERS=*
+
 # Options
 OPTIONS=windowtype:headless,number_pad:0

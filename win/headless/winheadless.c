@@ -523,7 +523,17 @@ int apply_character_options_from_js(void)
         stringToUTF8(s, ptr, len);
         return ptr;
     });
-    
+
+    /* Read play mode ("normal" or "explore") */
+    char *playModeStr = (char*)EM_ASM_INT({
+        if (!Module.characterOptions.playMode) return 0;
+        var s = String(Module.characterOptions.playMode).toLowerCase();
+        var len = lengthBytesUTF8(s) + 1;
+        var ptr = _malloc(len);
+        stringToUTF8(s, ptr, len);
+        return ptr;
+    });
+
     /* Apply name */
     if (name && *name) {
         strncpy(plname, name, PL_NSIZ - 1);
@@ -579,7 +589,21 @@ int apply_character_options_from_js(void)
         }
         free(gameModeStr);
     }
-    
+
+    /* Play mode: "explore" starts the game in non-scoring explore
+     * (discovery) mode, subject to the same sysconf EXPLORERS check as
+     * #exploremode. Debug (wizard) mode is never granted from here. */
+    if (playModeStr) {
+        if (strcmp(playModeStr, "explore") == 0) {
+            if (sysopt.explorers && sysopt.explorers[0]
+                && check_user_string(sysopt.explorers))
+                wizard = FALSE, discover = TRUE;
+        } else if (strcmp(playModeStr, "normal") == 0) {
+            wizard = FALSE, discover = FALSE;
+        }
+        free(playModeStr);
+    }
+
     return 1;
 }
 #endif
@@ -1256,14 +1280,18 @@ headless_status_update(int idx, genericptr_t ptr, int chg, int percent, int colo
                  "\"int\":\"%s\",\"wis\":\"%s\",\"cha\":\"%s\",\"align\":\"%s\","
                  "\"gold\":%ld,\"hp\":%d,\"hpmax\":%d,\"pw\":%d,\"pwmax\":%d,"
                  "\"ac\":%d,\"xlvl\":%d,\"dlvl\":%d,\"exp\":%ld,"
-                 "\"enc\":%d,\"hunger\":%d,\"cond\":%lu,\"turn\":%ld,\"score\":%ld}",
+                 "\"enc\":%d,\"hunger\":%d,\"cond\":%lu,\"turn\":%ld,\"score\":%ld,"
+                 "\"mode\":\"%s\"}",
                  escaped_title, escaped_str, escaped_dex, escaped_con,
                  escaped_int, escaped_wis, escaped_cha, escaped_align,
                  g_status.gold, g_status.hp, g_status.hpmax,
                  g_status.pw, g_status.pwmax,
                  g_status.ac, g_status.xlvl, g_status.dlvl,
                  g_status.exp, g_status.enc, g_status.hunger,
-                 g_status.cond, g_status.turn, g_status.score);
+                 g_status.cond, g_status.turn, g_status.score,
+                 /* play mode: clients use it to label non-scoring games
+                    and to withhold achievements outside normal play */
+                 wizard ? "debug" : discover ? "explore" : "normal");
         // fprintf(stdout, "[STATUS] BL_FLUSH: turn=%ld\n", g_status.turn);
         emit_event("STATUS", buf);
         return;
