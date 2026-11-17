@@ -170,7 +170,7 @@ moverock()
                     char you_or_steed[BUFSZ];
 
                     Strcpy(you_or_steed,
-                           u.usteed ? y_monnam(u.usteed) : "you");
+                           u.usteed ? y_monnam(u.usteed) : _("you"));
                     pline(_("%s%s cannot move %s."),
                           deliver_part1
                               ? _("Perhaps that's why ")

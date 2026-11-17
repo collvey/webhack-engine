@@ -367,7 +367,7 @@ STATIC_OVL const char *
 e_nam(etmp)
 struct entity *etmp;
 {
-    return is_u(etmp) ? "you" : mon_nam(etmp->emon);
+    return is_u(etmp) ? _("you") : mon_nam(etmp->emon);
 }
 
 /*

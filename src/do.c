@@ -80,7 +80,11 @@ boolean pushing;
                 Strcpy(whobuf, "you");
                 if (u.usteed)
                     Strcpy(whobuf, y_monnam(u.usteed));
-                pline(_("%s %s %s into the %s."), upstart(whobuf),
+                /* whobuf stays English: vtense() picks the verb form by
+                   comparing it with "you"; only the printed subject is
+                   translated */
+                pline(_("%s %s %s into the %s."),
+                      u.usteed ? upstart(whobuf) : _("You"),
                       vtense(whobuf, _("push")), the(xname(otmp)), what);
                 if (flags.verbose && !Blind)
                     pline(_("Now you can cross it!"));
