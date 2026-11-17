@@ -593,7 +593,7 @@ time_t when;
                 topten_print("");
                 Sprintf(pbuf,
              _("Since you were in %s mode, the score list will not be checked."),
-                        wizard ? "wizard" : "discover");
+                        wizard ? _("wizard") : _("discover"));
                 topten_print(pbuf);
             }
         goto showwin;

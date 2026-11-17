@@ -555,7 +555,7 @@ register struct monst *mtmp;
                                            : _("disturbs you"));
         else /* see note about m_monnam() above */
             pline(_("Wait, %s!  That %s is really %s named %s!"), m_monnam(mtmp),
-                  mimic_obj_name(&youmonst), an(mons[u.umonnum].mname),
+                  mimic_obj_name(&youmonst), an(PM_DISPLAY_NAME(u.umonnum)),
                   plname);
         if (multi < 0) { /* this should always be the case */
             char buf[BUFSZ];
@@ -1300,8 +1300,10 @@ register struct attack *mattk;
                     pline(_("%s drowns you..."), Monnam(mtmp));
                     killer.format = KILLED_BY_AN;
                     Sprintf(killer.name, _("%s by %s"),
-                            moat ? "moat" : "pool of water",
-                            an(mtmp->data->mname));
+                            moat ? _("moat") : _("pool of water"),
+                            an(nhi18n_monname(monsndx(mtmp->data))
+                                   ? nhi18n_monname(monsndx(mtmp->data))
+                                   : mtmp->data->mname));
                     done(DROWNING);
                 } else if (mattk->aatyp == AT_HUGS)
                     You(_("are being crushed."));

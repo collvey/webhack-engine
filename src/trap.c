@@ -2798,7 +2798,7 @@ const char *arg;
         pline(_("%s touch the %s corpse."), arg,
               nhi18n_monname(uwep->corpsenm) ? nhi18n_monname(uwep->corpsenm)
                                              : mons[uwep->corpsenm].mname);
-        Sprintf(kbuf, _("%s corpse"), an(mons[uwep->corpsenm].mname));
+        Sprintf(kbuf, _("%s corpse"), an(PM_DISPLAY_NAME(uwep->corpsenm)));
         instapetrify(kbuf);
         /* life-saved; unwield the corpse if we can't handle it */
         if (!uarmg && !Stone_resistance)
@@ -2811,7 +2811,7 @@ const char *arg;
         pline(_("%s touch the %s corpse."), arg,
               nhi18n_monname(uswapwep->corpsenm) ? nhi18n_monname(uswapwep->corpsenm)
                                                  : mons[uswapwep->corpsenm].mname);
-        Sprintf(kbuf, _("%s corpse"), an(mons[uswapwep->corpsenm].mname));
+        Sprintf(kbuf, _("%s corpse"), an(PM_DISPLAY_NAME(uswapwep->corpsenm)));
         instapetrify(kbuf);
         /* life-saved; unwield the corpse */
         if (!uarmg && !Stone_resistance)
@@ -3629,7 +3629,7 @@ boolean force;
              */
             bufp = simpleonames(obj);
             pline(_("%s %s %s!"), /* "A potion explodes!" */
-                  !exploded ? (one ? "A" : _("Some"))
+                  !exploded ? (one ? _("A") : _("Some"))
                             : (one ? _("Another") : _("More")),
                   bufp, vtense(bufp, _("explode")));
             if (acid_ctx.ctx_valid) {

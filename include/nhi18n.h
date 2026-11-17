@@ -73,6 +73,10 @@ extern int nhi18n_uses_plurals(void);  /* 0 for zh-CN: skip English plurals */
    (caller keeps the stock mons[].mname). Display-path only: internal naming,
    wishing, and saves keep the English name. */
 extern const char *nhi18n_monname(int);
+/* Display name of monster type i: localized when available, else mons[i].mname.
+   Only for text shown to the player (never for keys, wishes or saves). */
+#define PM_DISPLAY_NAME(i) \
+    (nhi18n_monname(i) ? nhi18n_monname(i) : mons[(i)].mname)
 
 /* Translate an object's base name (OBJ_NAME) by its otyp. Returns the localized
    name for the active language, or NULL when untranslated / English. Display

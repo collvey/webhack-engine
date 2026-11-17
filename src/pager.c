@@ -57,8 +57,8 @@ append_str(buf, new_str)
 char *buf;
 const char *new_str;
 {
-    static const char sep[] = " or ";
-    size_t oldlen, space_left;
+    const char *sep = _(" or "); /* zh: " 或 " */
+    size_t oldlen, space_left, seplen = strlen(sep);
  
     if (strstri(buf, new_str))
         return 0; /* already present */
@@ -74,8 +74,8 @@ const char *new_str;
     /* some space available, but not necessarily enough for full append */
     space_left = BUFSZ - 1 - oldlen;  /* space remaining in buf */
     (void) strncat(buf, sep, space_left);
-    if (space_left > sizeof sep - 1)
-        (void) strncat(buf, new_str, space_left - (sizeof sep - 1));
+    if (space_left > seplen)
+        (void) strncat(buf, new_str, space_left - seplen);
     return 1; /* something was appended, possibly just part of " or " */
 }
 
@@ -89,11 +89,14 @@ char *outbuf;
     /* include race with role unless polymorphed */
     race[0] = '\0';
     if (!Upolyd)
-        Sprintf(race, "%s ", _(urace.adj));
+        Sprintf(race, nhi18n_uses_articles() ? "%s " : "%s", _(urace.adj));
     Sprintf(outbuf, _("%s%s%s called %s"),
             /* being blinded may hide invisibility from self */
             (Invis && (senseself() || !Blind)) ? _("invisible ") : "", race,
-            mons[u.umonnum].mname, plname);
+            /* zh: localized role/monster name (botl.c does the same) */
+            nhi18n_monname(u.umonnum) ? nhi18n_monname(u.umonnum)
+                                      : mons[u.umonnum].mname,
+            plname);
     if (u.usteed)
         Sprintf(eos(outbuf), _(", mounted on %s"), y_monnam(u.usteed));
     if (u.uundetected || (Upolyd && U_AP_TYPE))
@@ -140,7 +143,7 @@ char *outbuf;
     } else if (M_AP_TYPE(mon) == M_AP_MONSTER) {
         if (altmon)
             Sprintf(outbuf, _(", masquerading as %s"),
-                    an(mons[mon->mappearance].mname));
+                    an(PM_DISPLAY_NAME(mon->mappearance)));
     } else if (isyou ? u.uundetected : mon->mundetected) {
         Strcpy(outbuf, _(", hiding"));
         if (hides_under(mon->data)) {
@@ -928,7 +931,7 @@ struct permonst **for_supplement;
                        && cc.x == u.ux && cc.y == u.uy)
                     : (sym == def_monsyms[S_HUMAN].sym && !flags.showrace))
             && !(Race_if(PM_HUMAN) || Race_if(PM_ELF)) && !Upolyd)
-            found += append_str(out_str, "you"); /* tack on "or you" */
+            found += append_str(out_str, _("you")); /* tack on "or you" */
     }
 
     /* Now check for objects */
@@ -1068,11 +1071,11 @@ struct permonst **for_supplement;
             switch (j) {
             case SYM_BOULDER + SYM_OFF_X:
                 if (!found) {
-                    *firstmatch = "boulder";
-                    Sprintf(out_str, "%s%s", prefix, an(*firstmatch));
+                    *firstmatch = "boulder"; /* English: checkfile() key */
+                    Sprintf(out_str, "%s%s", prefix, an(_("boulder")));
                     found++;
                 } else {
-                    found += append_str(out_str, "boulder");
+                    found += append_str(out_str, _("boulder"));
                 }
                 break;
             case SYM_PET_OVERRIDE + SYM_OFF_X:

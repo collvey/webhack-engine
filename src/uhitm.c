@@ -969,7 +969,7 @@ int dieroll;
                         else /* zh: quantity precedes 蛋, target follows (arg order) */
                             You(_("hit with %s egg on %s."),
                                 (obj->corpsenm != NON_PM && obj->known)
-                                    ? the(mons[obj->corpsenm].mname)
+                                    ? the(PM_DISPLAY_NAME(obj->corpsenm))
                                     : (cnt > 1L) ? _("some") : "",
                                 mon_nam(mon));
                         if (touch_petrifies(mdat) && !stale_egg(obj)) {

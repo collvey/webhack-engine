@@ -615,7 +615,7 @@ register struct monst *mtmp;
                     verbl_msg = verbuf;
                 } else if (vampindex == 1) {
                     Sprintf(verbuf, _(vampmsg[vampindex]),
-                            Upolyd ? an(mons[u.umonnum].mname)
+                            Upolyd ? an(PM_DISPLAY_NAME(u.umonnum))
                                    : an(racenoun));
                     verbl_msg = verbuf;
                 } else

@@ -606,8 +606,12 @@ can_twoweapon()
             You_cant(_("use two weapons in your current form."));
         else
             pline(_("%s aren't able to use two weapons at once."),
-                  makeplural((flags.female && urole.name.f) ? urole.name.f
-                                                            : urole.name.m));
+                  /* zh: localized role name, no plural */
+                  nhi18n_uses_plurals()
+                      ? makeplural((flags.female && urole.name.f)
+                                       ? urole.name.f : urole.name.m)
+                      : _((flags.female && urole.name.f) ? urole.name.f
+                                                         : urole.name.m));
     } else if (!uwep || !uswapwep)
         Your(_("%s%s%s empty."), uwep ? _("left ") : uswapwep ? _("right ") : "",
              body_part(HAND), (!uwep && !uswapwep) ? _("s are") : _(" is"));

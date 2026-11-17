@@ -55,9 +55,12 @@ STATIC_VAR NEARDATA const char *const barehands_or_martial[] = {
     "bare handed combat", "martial arts"
 };
 
+/* zh: weapon skills are named after an object; use its localized base name */
 #define P_NAME(type)                                    \
     ((skill_names_indices[type] > 0)                    \
-         ? OBJ_NAME(objects[skill_names_indices[type]]) \
+         ? (nhi18n_objname(skill_names_indices[type])   \
+                ? nhi18n_objname(skill_names_indices[type]) \
+                : OBJ_NAME(objects[skill_names_indices[type]])) \
          : (type == P_BARE_HANDED_COMBAT)               \
                ? _(barehands_or_martial[martial_bonus()])  \
                : _(odd_skill_names[-skill_names_indices[type]]))
@@ -811,7 +814,9 @@ register struct monst *mon;
                 if (bimanual(mw_tmp))
                     mon_hand = makeplural(mon_hand);
                 Sprintf(welded_buf, _("%s welded to %s %s"),
-                        otense(mw_tmp, "are"), mhis(mon), mon_hand);
+                        /* zh: no copula ("焊在了它的手上") */
+                        nhi18n_uses_plurals() ? otense(mw_tmp, "are") : "",
+                        mhis(mon), mon_hand);
 
                 if (obj->otyp == PICK_AXE) {
                     pline(_("Since %s weapon%s %s,"), s_suffix(mon_nam(mon)),

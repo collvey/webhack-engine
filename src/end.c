@@ -1427,7 +1427,7 @@ int how;
              (u.ugrave_arise != PM_GREEN_SLIME)
                  ? _("body rises from the dead")
                  : _("revenant persists"),
-             an(mons[u.ugrave_arise].mname));
+             an(PM_DISPLAY_NAME(u.ugrave_arise)));
         display_nhwindow(WIN_MESSAGE, FALSE);
     }
 

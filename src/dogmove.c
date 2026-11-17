@@ -1422,7 +1422,7 @@ struct monst *mtmp;
                          && OBJ_NAME(objects[mtmp->mappearance]))
                             ? an(OBJ_NAME(objects[mtmp->mappearance]))
                             : (M_AP_TYPE(mtmp) == M_AP_MONSTER)
-                                  ? an(mons[mtmp->mappearance].mname)
+                                  ? an(PM_DISPLAY_NAME(mtmp->mappearance))
                                   : something,
             cansee(mtmp->mx, mtmp->my) ? "" : _("has "),
             cansee(mtmp->mx, mtmp->my) ? "" : _("ed"),
