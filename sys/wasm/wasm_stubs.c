@@ -2,12 +2,42 @@
 /* These are platform-specific functions needed by the core */
 
 #include "hack.h"
+#include <ctype.h>
 
-/* From unixmain.c - check if user string is safe */
+/* From unixmain.c - is the current player named in a sysconf user list?
+ * Only the EXPLORERS gate of enter_explore_mode() calls this. There are no
+ * Unix accounts in the browser, so "*" allows everyone (as upstream does)
+ * and any other value is matched against the character name, as upstream
+ * does with CHECK_PLNAME. Returning FALSE unconditionally made #exploremode
+ * answer "You cannot access explore mode." for every player. */
 boolean
 check_user_string(char *optstr)
 {
-    /* In WASM, we don't have shell access, so always return FALSE */
+    int pwlen;
+    char *eop, *w;
+
+    if (!optstr || !*optstr)
+        return FALSE;
+    if (optstr[0] == '*')
+        return TRUE; /* allow any user */
+    if (!*plname)
+        return FALSE;
+    pwlen = (int) strlen(plname);
+    eop = eos(optstr);
+    w = optstr;
+    while (w + pwlen <= eop) {
+        if (!*w)
+            break;
+        if (isspace((uchar) *w)) {
+            w++;
+            continue;
+        }
+        if (!strncmp(w, plname, pwlen)
+            && (!w[pwlen] || isspace((uchar) w[pwlen])))
+            return TRUE;
+        while (*w && !isspace((uchar) *w))
+            w++;
+    }
     return FALSE;
 }
 
