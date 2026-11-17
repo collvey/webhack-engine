@@ -248,8 +248,33 @@ emit_map_frame_ex(int force)
         }
     }
     
+    pos += snprintf(buf + pos, sizeof(buf) - pos, "]");
+
+    /* Hit points of the monsters the hero can see that have taken damage
+     * ("mons":[{"x","y","hp","max"}]).  The client draws a thin health bar
+     * over a monster once it has been hurt and floats the damage dealt
+     * (hp difference between frames).  Unhurt monsters are left out, and
+     * nothing is sent while hallucinating (the hero cannot tell them apart). */
+    pos += snprintf(buf + pos, sizeof(buf) - pos, ",\"mons\":[");
+    first = 1;
+    if (!Hallucination) {
+        for (y = 0; y < MAP_ROWS; y++) {
+            for (x = 1; x < MAP_COLS && x < COLNO; x++) {
+                struct monst *mtmp;
+                if (!glyph_is_monster(g_map[y][x].glyph) || !isok(x, y)) continue;
+                mtmp = m_at(x, y);
+                if (!mtmp || DEADMONSTER(mtmp) || !canspotmon(mtmp)) continue;
+                if (mtmp->mhp >= mtmp->mhpmax || mtmp->mhpmax <= 0) continue;
+                if (sizeof(buf) - pos < 64) break;
+                pos += snprintf(buf + pos, sizeof(buf) - pos,
+                                "%s{\"x\":%d,\"y\":%d,\"hp\":%d,\"max\":%d}",
+                                first ? "" : ",", x, y, mtmp->mhp, mtmp->mhpmax);
+                first = 0;
+            }
+        }
+    }
     pos += snprintf(buf + pos, sizeof(buf) - pos, "]}");
-    
+
     emit_event("MAP_FRAME", buf);
     g_map_dirty = 0;
     
