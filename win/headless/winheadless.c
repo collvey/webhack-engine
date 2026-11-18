@@ -1052,6 +1052,47 @@ headless_start_menu(winid window)
     emit_event("MENU_BEGIN", buf);
 }
 
+/* The object a menu entry stands for, for its "wt" field (collvey/WebHack-Steam#24).
+ * Menus identify objects either by pointer (a_obj: pickup, loot, take-out) or by
+ * inventory letter (a_char: the inventory and getobj lists). A pointer is only
+ * trusted when it is found among the hero's inventory or the objects on the
+ * hero's square, containers' contents included; fake objects match nothing. */
+static struct obj *
+menu_obj_in(struct obj *chain, const struct obj *want)
+{
+    struct obj *o, *found;
+
+    for (o = chain; o; o = o->nobj) {
+        if (o == want)
+            return o;
+        if (Has_contents(o) && (found = menu_obj_in(o->cobj, want)) != 0)
+            return found;
+    }
+    return (struct obj *) 0;
+}
+
+static struct obj *
+menu_obj(const ANY_P *identifier)
+{
+    struct obj *o;
+    long v;
+
+    if (!identifier || !identifier->a_obj)
+        return (struct obj *) 0;
+    if ((o = menu_obj_in(invent, identifier->a_obj)) != 0)
+        return o;
+    if (isok(u.ux, u.uy)
+        && (o = menu_obj_in(level.objects[u.ux][u.uy], identifier->a_obj)) != 0)
+        return o;
+    /* An inventory letter: set with zeroany then a_char, so a_long holds it. */
+    v = identifier->a_long;
+    if (v > 0 && v < 128 && (letter((char) v) || v == GOLD_SYM))
+        for (o = invent; o; o = o->nobj)
+            if (o->invlet == (char) v)
+                return o;
+    return (struct obj *) 0;
+}
+
 static void
 headless_add_menu(winid window, int glyph, const ANY_P *identifier,
                   CHAR_P accelerator, CHAR_P group_accel, int attr,
@@ -1099,11 +1140,21 @@ headless_add_menu(winid window, int glyph, const ANY_P *identifier,
         snprintf(group_accel_str, sizeof(group_accel_str), "%c", group_char);
     }
     
+    /* "wt": the object's actual weight (owt) for object entries: the whole
+       stack, a container with its contents (bag of holding rules applied).
+       Omitted when the entry is not an object. */
+    char wt_str[32] = "";
+    if (glyph != NO_GLYPH) {
+        struct obj *mobj = menu_obj(identifier);
+        if (mobj)
+            snprintf(wt_str, sizeof(wt_str), ",\"wt\":%d", (int) mobj->owt);
+    }
+
     char buf[2048];
     snprintf(buf, sizeof(buf),
              "{\"id\":%d,\"item_id\":%d,\"text\":\"%s\",\"accel\":\"%s\","
              "\"group_accel\":\"%s\",\"glyph\":%d,\"attr\":%d,"
-             "\"selectable\":%s,\"selected\":%s}",
+             "\"selectable\":%s,\"selected\":%s%s}",
              g_menu.menu_id,
              (int)(item - g_menu.items),  /* Use array index as item_id */
              escaped,
@@ -1112,7 +1163,8 @@ headless_add_menu(winid window, int glyph, const ANY_P *identifier,
              glyph,
              attr,
              item->selectable ? "true" : "false",
-             item->selected ? "true" : "false");
+             item->selected ? "true" : "false",
+             wt_str);
     emit_event("MENU_ITEM", buf);
 }
 
