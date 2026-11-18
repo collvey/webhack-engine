@@ -29,6 +29,7 @@ STATIC_PTR int FDECL(ckvalidcat, (struct obj *));
 STATIC_PTR int FDECL(ckunpaid, (struct obj *));
 STATIC_PTR char *FDECL(safeq_xprname, (struct obj *));
 STATIC_PTR char *FDECL(safeq_shortxprname, (struct obj *));
+STATIC_DCL void FDECL(getobj_query, (char *, const char *));
 STATIC_DCL char FDECL(display_pickinv, (const char *, const char *,
                                         const char *, BOOLEAN_P, long *));
 STATIC_DCL char FDECL(display_used_invlets, (CHAR_P));
@@ -1424,6 +1425,26 @@ const char *action;
     return !strcmp(action, "wear") || !strcmp(action, "put on");
 }
 
+/* "What do you want to <word>?" for getobj. A translation of the whole
+   question wins when the catalog has one (zh-CN "dip": the generic pattern
+   gives an ambiguous question, collvey/WebHack-Steam#24); otherwise the
+   generic pattern with the translated verb. */
+STATIC_OVL void
+getobj_query(buf, word)
+char *buf;
+const char *word;
+{
+    char en[BUFSZ];
+    const char *tr;
+
+    Sprintf(en, "What do you want to %s?", word);
+    tr = _(en);
+    if (tr != en && strlen(tr) < QBUFSZ)
+        Strcpy(buf, tr);
+    else
+        Sprintf(buf, _("What do you want to %s?"), _(word));
+}
+
 /*
  * getobj returns:
  *      struct obj *xxx:        object to do something with.
@@ -1662,7 +1683,7 @@ register const char *let, *word;
     for (;;) {
         cnt = 0;
         cntgiven = FALSE;
-        Sprintf(qbuf, _("What do you want to %s?"), _(word));
+        getobj_query(qbuf, word);
         if (in_doagain)
             ilet = readchar();
         else if (iflags.force_invmenu) {
@@ -1728,7 +1749,7 @@ register const char *let, *word;
 
             menuquery[0] = qbuf[0] = '\0';
             if (iflags.force_invmenu)
-                Sprintf(menuquery, _("What do you want to %s?"), _(word));
+                getobj_query(menuquery, word);
             if (!strcmp(word, "grease"))
                 Sprintf(qbuf, _("your %s"), _(fingers_or_gloves(FALSE)));
             else if (!strcmp(word, "write with"))
