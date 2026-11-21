@@ -4,6 +4,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "whinteract.h"
 
 /* at most one of `door' and `box' should be non-null at any given time */
 STATIC_VAR NEARDATA struct xlock_s {
@@ -410,7 +411,7 @@ struct obj *pick;
                                  ansimpleoname, _("a box"));
                 otmp->lknown = 1;
 
-                c = ynq(qbuf);
+                c = wh_presel_ynq(otmp, qbuf, 'q');
                 if (c == 'q')
                     return 0;
                 if (c == 'n')
@@ -574,6 +575,8 @@ doforce()
     xlock.box = (struct obj *) 0;
     for (otmp = level.objects[u.ux][u.uy]; otmp; otmp = otmp->nexthere)
         if (Is_box(otmp)) {
+            if (wh_presel_active() && !wh_presel_is(otmp))
+                continue;
             if (otmp->obroken || !otmp->olocked) {
                 /* force doname() to omit known "broken" or "unlocked"
                    prefix so that the message isn't worded redundantly;
@@ -589,7 +592,7 @@ doforce()
                              otmp, doname, ansimpleoname, _("a box"));
             otmp->lknown = 1;
 
-            c = ynq(qbuf);
+            c = wh_presel_ynq(otmp, qbuf, 'q');
             if (c == 'q')
                 return 0;
             if (c == 'n')

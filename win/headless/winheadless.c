@@ -4,6 +4,7 @@
 #include "hack.h"
 #include "dlb.h"
 #include "func_tab.h"  /* For extcmdlist[] */
+#include "whinteract.h" /* INTERACT / ACTION (WebHack-Steam#35) */
 
 #ifdef HEADLESS
 
@@ -64,10 +65,15 @@ typedef struct {
     char prompt[512];
     int how;               /* PICK_NONE, PICK_ONE, PICK_ANY */
     boolean active;
+    boolean deferred;      /* WebHack-Steam#35: held back while an ACTION's
+                              chosen objects may answer it */
 } MenuState;
 
 static MenuState g_menu = {0};
 static int g_next_menu_id = 1;
+static void emit_menu_begin(void);
+static void emit_menu_item(int idx);
+static void emit_menu_end(void);
 
 /* M4: Status field cache */
 typedef struct {
@@ -842,9 +848,28 @@ headless_raw_print_bold(const char *str)
 /* Declare the JS library function (BrowserHack pattern) */
 extern int headless_wait_for_input_blocking(void);
 
+/* WebHack-Steam#35: the keycode that announces an ACTION; its JSON is
+   fetched with headless_take_action_json() */
+#define WH_ACTION_KEYCODE 65536
+extern char *headless_take_action_json(void);
+
+/* Each time the engine waits for a command: what the hero can interact
+   with, for the interface (INTERACT). */
+static void
+emit_interact_if_command(void)
+{
+    if (program_state.in_moveloop && iflags.in_parse && !program_state.gameover) {
+        char *j = wh_interact_json();
+        if (j) {
+            emit_event("INTERACT", j);
+            free(j);
+        }
+    }
+}
+
 /* WASM version: Call library function that uses Asyncify.handleSleep */
 static int
-headless_nhgetch(void)
+headless_getkey(void)
 {
     /* Win32-style: Flush pending map/cursor updates before blocking for input.
      * This is where mswin_map_update() is called in Win32's mswin_main_loop().
@@ -857,8 +882,25 @@ headless_nhgetch(void)
         g_cursor_dirty = 0;
     }
     
+    emit_interact_if_command();
+
     /* Call the library function - it handles Asyncify internally */
     int keycode = headless_wait_for_input_blocking();
+    return keycode;
+}
+
+static int
+headless_nhgetch(void)
+{
+    int keycode = headless_getkey();
+
+    if (keycode == WH_ACTION_KEYCODE) {
+        /* an ACTION while the engine is not reading a command: drop it */
+        char *j = headless_take_action_json();
+        if (j)
+            free(j);
+        return '\033';
+    }
     return keycode;
 }
 #else
@@ -914,12 +956,30 @@ headless_nh_poskey(int *x, int *y, int *mod)
 {
     /* M2: Handle positional input (similar to nhgetch for now) */
     /* For M2, we don't handle mouse clicks, just keyboard */
+#ifdef __EMSCRIPTEN__
+    int ch = headless_getkey();
+
+    if (ch == WH_ACTION_KEYCODE) {
+        /* WebHack-Steam#35: an ACTION arrives as a click; click_to_cmd()
+           turns it into the #whaction command */
+        char *j = headless_take_action_json();
+
+        wh_action_set_json(j);
+        if (j)
+            free(j);
+        if (x) *x = u.ux;
+        if (y) *y = u.uy;
+        if (mod) *mod = WH_CLICK_ACTION;
+        return 0;
+    }
+#else
     int ch = headless_nhgetch();
-    
+#endif
+
     if (x) *x = -1;
     if (y) *y = -1;
     if (mod) *mod = 0;
-    
+
     return ch;
 }
 
@@ -1044,12 +1104,10 @@ headless_start_menu(winid window)
     g_menu.prompt[0] = '\0';
     g_menu.how = PICK_ANY;
     g_menu.active = TRUE;
-    
-    /* Emit MENU_BEGIN event */
-    char buf[256];
-    snprintf(buf, sizeof(buf), "{\"id\":%d,\"window\":%d}", 
-             g_menu.menu_id, window);
-    emit_event("MENU_BEGIN", buf);
+    g_menu.deferred = wh_presel_active();
+
+    if (!g_menu.deferred)
+        emit_menu_begin();
 }
 
 /* The object a menu entry stands for, for its "wt" field (collvey/WebHack-Steam#24).
@@ -1093,6 +1151,84 @@ menu_obj(const ANY_P *identifier)
     return (struct obj *) 0;
 }
 
+/* MENU_BEGIN / MENU_ITEM / MENU_END, from the stored menu (so a deferred
+   menu can be shown after all) */
+static void
+emit_menu_begin(void)
+{
+    char buf[256];
+    snprintf(buf, sizeof(buf), "{\"id\":%d,\"window\":%d}",
+             g_menu.menu_id, g_menu.window);
+    emit_event("MENU_BEGIN", buf);
+}
+
+static void
+emit_menu_item(int idx)
+{
+    MenuItem *item = &g_menu.items[idx];
+
+    char escaped[1024];
+    json_escape(item->text, escaped, sizeof(escaped));
+    
+    /* Escape special characters in accelerators for JSON */
+    char accel_str[16];
+    char group_accel_str[16];
+    char accel_char = item->accel ? item->accel : ' ';
+    char group_char = item->group_accel ? item->group_accel : ' ';
+    
+    if (accel_char == '"' || accel_char == '\\') {
+        snprintf(accel_str, sizeof(accel_str), "\\%c", accel_char);
+    } else {
+        snprintf(accel_str, sizeof(accel_str), "%c", accel_char);
+    }
+    
+    if (group_char == '"' || group_char == '\\') {
+        snprintf(group_accel_str, sizeof(group_accel_str), "\\%c", group_char);
+    } else {
+        snprintf(group_accel_str, sizeof(group_accel_str), "%c", group_char);
+    }
+    
+    /* "wt": the object's actual weight (owt) for object entries: the whole
+       stack, a container with its contents (bag of holding rules applied).
+       Omitted when the entry is not an object. */
+    char wt_str[32] = "";
+    if (item->glyph != NO_GLYPH) {
+        struct obj *mobj = menu_obj(&item->identifier);
+        if (mobj)
+            snprintf(wt_str, sizeof(wt_str), ",\"wt\":%d", (int) mobj->owt);
+    }
+
+    char buf[2048];
+    snprintf(buf, sizeof(buf),
+             "{\"id\":%d,\"item_id\":%d,\"text\":\"%s\",\"accel\":\"%s\","
+             "\"group_accel\":\"%s\",\"glyph\":%d,\"attr\":%d,"
+             "\"selectable\":%s,\"selected\":%s%s}",
+             g_menu.menu_id,
+             (int)(item - g_menu.items),  /* Use array index as item_id */
+             escaped,
+             accel_str,
+             group_accel_str,
+             item->glyph,
+             item->attr,
+             item->selectable ? "true" : "false",
+             item->selected ? "true" : "false",
+             wt_str);
+    emit_event("MENU_ITEM", buf);
+}
+
+static void
+emit_menu_end(void)
+{
+    char escaped[1024];
+    char buf[2048];
+
+    json_escape(g_menu.prompt, escaped, sizeof(escaped));
+    snprintf(buf, sizeof(buf),
+             "{\"id\":%d,\"prompt\":\"%s\",\"count\":%d}",
+             g_menu.menu_id, escaped, g_menu.item_count);
+    emit_event("MENU_END", buf);
+}
+
 static void
 headless_add_menu(winid window, int glyph, const ANY_P *identifier,
                   CHAR_P accelerator, CHAR_P group_accel, int attr,
@@ -1118,54 +1254,8 @@ headless_add_menu(winid window, int glyph, const ANY_P *identifier,
     item->selected = presel;
     item->count = 0;
     
-    /* Emit MENU_ITEM event */
-    char escaped[1024];
-    json_escape(item->text, escaped, sizeof(escaped));
-    
-    /* Escape special characters in accelerators for JSON */
-    char accel_str[16];
-    char group_accel_str[16];
-    char accel_char = accelerator ? accelerator : ' ';
-    char group_char = group_accel ? group_accel : ' ';
-    
-    if (accel_char == '"' || accel_char == '\\') {
-        snprintf(accel_str, sizeof(accel_str), "\\%c", accel_char);
-    } else {
-        snprintf(accel_str, sizeof(accel_str), "%c", accel_char);
-    }
-    
-    if (group_char == '"' || group_char == '\\') {
-        snprintf(group_accel_str, sizeof(group_accel_str), "\\%c", group_char);
-    } else {
-        snprintf(group_accel_str, sizeof(group_accel_str), "%c", group_char);
-    }
-    
-    /* "wt": the object's actual weight (owt) for object entries: the whole
-       stack, a container with its contents (bag of holding rules applied).
-       Omitted when the entry is not an object. */
-    char wt_str[32] = "";
-    if (glyph != NO_GLYPH) {
-        struct obj *mobj = menu_obj(identifier);
-        if (mobj)
-            snprintf(wt_str, sizeof(wt_str), ",\"wt\":%d", (int) mobj->owt);
-    }
-
-    char buf[2048];
-    snprintf(buf, sizeof(buf),
-             "{\"id\":%d,\"item_id\":%d,\"text\":\"%s\",\"accel\":\"%s\","
-             "\"group_accel\":\"%s\",\"glyph\":%d,\"attr\":%d,"
-             "\"selectable\":%s,\"selected\":%s%s}",
-             g_menu.menu_id,
-             (int)(item - g_menu.items),  /* Use array index as item_id */
-             escaped,
-             accel_str,
-             group_accel_str,
-             glyph,
-             attr,
-             item->selectable ? "true" : "false",
-             item->selected ? "true" : "false",
-             wt_str);
-    emit_event("MENU_ITEM", buf);
+    if (!g_menu.deferred)
+        emit_menu_item((int) (item - g_menu.items));
 }
 
 static void
@@ -1183,15 +1273,8 @@ headless_end_menu(winid window, const char *prompt)
         g_menu.prompt[0] = '\0';
     }
     
-    /* Emit MENU_END event */
-    char escaped[1024];
-    json_escape(g_menu.prompt, escaped, sizeof(escaped));
-    
-    char buf[2048];
-    snprintf(buf, sizeof(buf),
-             "{\"id\":%d,\"prompt\":\"%s\",\"count\":%d}",
-             g_menu.menu_id, escaped, g_menu.item_count);
-    emit_event("MENU_END", buf);
+    if (!g_menu.deferred)
+        emit_menu_end();
 }
 
 static int
@@ -1203,7 +1286,42 @@ headless_select_menu(winid window, int how, MENU_ITEM_P **selected)
     }
     
     g_menu.how = how;
-    
+
+    /* WebHack-Steam#35: an object menu answered by the objects the player
+       already chose (pickup, loot, tip); anything else is shown after all */
+    if (g_menu.deferred) {
+        int i, n = 0;
+        MENU_ITEM_P *pick;
+
+        g_menu.deferred = FALSE;
+        if (how != PICK_NONE)
+            for (i = 0; i < g_menu.item_count; i++)
+                if (g_menu.items[i].selectable
+                    && wh_presel_is(menu_obj(&g_menu.items[i].identifier)))
+                    n++;
+        if (n > 0) {
+            if (how == PICK_ONE)
+                n = 1;
+            pick = (MENU_ITEM_P *) alloc(n * sizeof(menu_item));
+            n = 0;
+            for (i = 0; i < g_menu.item_count; i++)
+                if (g_menu.items[i].selectable
+                    && wh_presel_is(menu_obj(&g_menu.items[i].identifier))) {
+                    pick[n].item = g_menu.items[i].identifier;
+                    pick[n].count = -1L;
+                    if (++n == 1 && how == PICK_ONE)
+                        break;
+                }
+            *selected = pick;
+            g_menu.active = FALSE;
+            return n;
+        }
+        emit_menu_begin();
+        for (i = 0; i < g_menu.item_count; i++)
+            emit_menu_item(i);
+        emit_menu_end();
+    }
+
     /* Send REQ:MENU_SELECT and block for response */
     char req_buf[512];
     snprintf(req_buf, sizeof(req_buf), "{\"id\":%d,\"how\":%d}", 

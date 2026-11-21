@@ -8,6 +8,7 @@
  */
 
 #include "hack.h"
+#include "whinteract.h"
 
 #define CONTAINED_SYM '>' /* from invent.c */
 
@@ -1858,9 +1859,10 @@ doloot()
                 nobj = cobj->nexthere;
 
                 if (Is_container(cobj)) {
-                    c = ynq(safe_qbuf(qbuf, _("There is "), _(" here, loot it?"),
+                    c = wh_presel_ynq(cobj,
+                                      safe_qbuf(qbuf, _("There is "), _(" here, loot it?"),
                                       cobj, doname, ansimpleoname,
-                                      _("a container")));
+                                      _("a container")), 'q');
                     if (c == 'q')
                         return timepassed;
                     if (c == 'n')
@@ -3041,9 +3043,10 @@ dotip()
                     nobj = cobj->nexthere;
                     if (!Is_container(cobj))
                         continue;
-                    c = ynq(safe_qbuf(qbuf, _("There is "), _(" here, tip it?"),
+                    c = wh_presel_ynq(cobj,
+                                      safe_qbuf(qbuf, _("There is "), _(" here, tip it?"),
                                       cobj,
-                                      doname, ansimpleoname, _("container")));
+                                      doname, ansimpleoname, _("container")), 'q');
                     if (c == 'q')
                         return 0;
                     if (c == 'n')

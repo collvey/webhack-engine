@@ -83,7 +83,7 @@ echo "== WebHack engine: building WebAssembly with $("$EMCC" --version | head -n
   src/rip.c src/rnd.c src/role.c src/rumors.c src/save.c src/shk.c src/shknam.c \
   src/sit.c src/sounds.c src/sp_lev.c src/spell.c src/steal.c src/steed.c \
   src/sys.c src/teleport.c src/timeout.c src/topten.c src/track.c src/trap.c \
-  src/u_init.c src/uhitm.c src/vault.c src/version.c src/vision.c src/weapon.c \
+  src/u_init.c src/uhitm.c src/vault.c src/version.c src/whinteract.c src/vision.c src/weapon.c \
   src/were.c src/wield.c src/windows.c src/wizard.c src/worm.c src/worn.c \
   src/write.c src/zap.c src/isaac64.c \
   sys/share/cppregex.cpp \

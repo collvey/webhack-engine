@@ -3,6 +3,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "whinteract.h"
 
 /* spellmenu arguments; 0 thru n-1 used as spl_book[] index when swapping */
 #define SPELLMENU_CAST (-2)
@@ -682,6 +683,8 @@ int *spell_no;
     }
     if (rejectcasting())
         return FALSE; /* no spell chosen */
+    if (wh_presel_spell(spell_no)) /* WebHack: already chosen */
+        return TRUE;
 
     if (flags.menu_style == MENU_TRADITIONAL) {
         /* we know there is at least 1 known spell */

@@ -4,6 +4,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "whinteract.h"
 
 #ifndef C /* same as cmd.c */
 #define C(c) (0x1f & (c))
@@ -1475,6 +1476,10 @@ register const char *let, *word;
     boolean oneloop = FALSE;
     long dummymask;
     Loot *sortedinvent, *srtinv;
+
+    /* WebHack (WebHack-Steam#35): the object was already chosen */
+    if ((otmp = wh_presel_invent(let)) != 0)
+        return otmp;
 
     if (*let == ALLOW_COUNT)
         let++, allowcnt = 1;

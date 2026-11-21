@@ -4,6 +4,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "whinteract.h"
 
 STATIC_PTR int NDECL(eatmdone);
 STATIC_PTR int NDECL(eatfood);
@@ -3131,7 +3132,7 @@ int corpsecheck; /* 0, no check, 1, corpses, 2, tinnable corpses */
                 || (Flying && !Breathless))))
         goto skipfloor;
 
-    if (feeding && metallivorous(youmonst.data)) {
+    if (feeding && metallivorous(youmonst.data) && !wh_presel_active()) {
         struct obj *gold;
         struct trap *ttmp = t_at(u.ux, u.uy);
 
@@ -3194,7 +3195,7 @@ int corpsecheck; /* 0, no check, 1, corpses, 2, tinnable corpses */
             Sprintf(qsfx, _(" here; %s %s?"), _(verb), one ? _("it") : _("one"));
             (void) safe_qbuf(qbuf, qbuf, qsfx, otmp, doname, ansimpleoname,
                              one ? something : (const char *) _("things"));
-            if ((c = yn_function(qbuf, ynqchars, 'n')) == 'y')
+            if ((c = wh_presel_ynq(otmp, qbuf, 'n')) == 'y')
                 return  otmp;
             else if (c == 'q')
                 return (struct obj *) 0;
