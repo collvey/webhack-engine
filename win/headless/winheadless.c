@@ -204,8 +204,12 @@ emit_map_frame_ex(int force)
     else if (In_hell(&u.uz))    branch = "gehennom";
 
     pos += snprintf(buf + pos, sizeof(buf) - pos,
-                    "{\"width\":%d,\"height\":%d,\"branch\":\"%s\",\"cursor\":{\"x\":%d,\"y\":%d},\"cells\":[",
-                    MAP_COLS, MAP_ROWS, branch, g_cursor_x, g_cursor_y);
+                    "{\"width\":%d,\"height\":%d,\"branch\":\"%s\",\"cursor\":{\"x\":%d,\"y\":%d},"
+                    "\"hero\":{\"x\":%d,\"y\":%d},\"cells\":[",
+                    MAP_COLS, MAP_ROWS, branch, g_cursor_x, g_cursor_y,
+                    /* #35: the hero's square (the cursor moves for questions;
+                       other '@' are humans) */
+                    u.ux, u.uy);
     
     /* Emit cells with mapglyph conversion */
     int first = 1;
@@ -852,6 +856,9 @@ extern int headless_wait_for_input_blocking(void);
    fetched with headless_take_action_json() */
 #define WH_ACTION_KEYCODE 65536
 extern char *headless_take_action_json(void);
+/* LOOKAT (#35): keycode 65537 announces a query; JSON via headless_take_lookat_json() */
+#define WH_LOOKAT_KEYCODE 65537
+extern char *headless_take_lookat_json(void);
 
 /* Each time the engine waits for a command: what the hero can interact
    with, for the interface (INTERACT). */
@@ -886,6 +893,20 @@ headless_getkey(void)
 
     /* Call the library function - it handles Asyncify internally */
     int keycode = headless_wait_for_input_blocking();
+
+    /* LOOKAT queries are answered in place; the wait goes on */
+    while (keycode == WH_LOOKAT_KEYCODE) {
+        char *q = headless_take_lookat_json();
+        char *a = wh_lookat_json(q);
+
+        if (a) {
+            emit_event("LOOKAT", a);
+            free(a);
+        }
+        if (q)
+            free(q);
+        keycode = headless_wait_for_input_blocking();
+    }
     return keycode;
 }
 

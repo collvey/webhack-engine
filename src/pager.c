@@ -14,7 +14,8 @@ STATIC_DCL int FDECL(append_str, (char *, const char *));
 STATIC_DCL void FDECL(look_at_object, (char *, int, int, int));
 STATIC_DCL void FDECL(look_at_monster, (char *, char *,
                                         struct monst *, int, int));
-STATIC_DCL struct permonst *FDECL(lookat, (int, int, char *, char *));
+/* WebHack-Steam#35: also used by whinteract.c (LOOKAT) */
+struct permonst *FDECL(lookat, (int, int, char *, char *));
 STATIC_DCL void FDECL(checkfile, (char *, struct permonst *,
                                   BOOLEAN_P, BOOLEAN_P, char *));
 STATIC_DCL void FDECL(look_all, (BOOLEAN_P,BOOLEAN_P));
@@ -401,7 +402,7 @@ int x, y;
  * Return the name of the glyph found at (x,y).
  * If not hallucinating and the glyph is a monster, also monster data.
  */
-STATIC_OVL struct permonst *
+struct permonst *
 lookat(x, y, buf, monbuf)
 int x, y;
 char *buf, *monbuf;

@@ -222,6 +222,23 @@ mergeInto(LibraryManager.library, {
     return stringToNewUTF8(json);
   },
 
+  // WebHack-Steam#35: the JSON of the LOOKAT query announced by keycode 65537.
+  headless_take_lookat_json__deps: ['$stringToNewUTF8'],
+  headless_take_lookat_json: function() {
+    var globalObj = (typeof self !== 'undefined') ? self
+                  : (typeof global !== 'undefined') ? global
+                  : (typeof window !== 'undefined') ? window
+                  : null;
+    if (!globalObj || typeof globalObj.wasmTakePendingLookat !== 'function') {
+      return 0;
+    }
+    var json = globalObj.wasmTakePendingLookat();
+    if (typeof json !== 'string' || !json) {
+      return 0;
+    }
+    return stringToNewUTF8(json);
+  },
+
   headless_read_line_blocking__deps: ['$Asyncify', '$stringToNewUTF8'],
   headless_read_line_blocking: function() {
     

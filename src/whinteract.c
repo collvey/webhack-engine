@@ -696,6 +696,34 @@ struct jb *b;
     jb_put(b, "]");
 }
 
+/*
+ * Map features the hero has seen on this level (#35 feedback 15): stairs,
+ * ladders, altars, fountains, thrones, sinks, as [x,y,defsym]. The map
+ * shows only the top thing on a square, so stairs under an object, a
+ * monster or the hero would be missing from the minimap.
+ */
+static void
+json_features(b)
+struct jb *b;
+{
+    int x, y, first = 1;
+    schar typ;
+
+    jb_put(b, "\"feat\":[");
+    for (x = 1; x < COLNO; x++)
+        for (y = 0; y < ROWNO; y++) {
+            typ = levl[x][y].typ;
+            if (lastseentyp[x][y] != typ
+                || (typ != STAIRS && typ != LADDER && typ != ALTAR
+                    && typ != FOUNTAIN && typ != THRONE && typ != SINK))
+                continue;
+            jb_printf(b, "%s[%d,%d,%d]", first ? "" : ",", x, y,
+                      glyph_to_cmap(back_to_glyph(x, y)));
+            first = 0;
+        }
+    jb_put(b, "]");
+}
+
 static void
 json_spells(b)
 struct jb *b;
@@ -709,7 +737,8 @@ struct jb *b;
         jb_printf(b, "{\"i\":%d,\"otyp\":%d,\"dir\":%s,\"n\":", i,
                   spellid(i),
                   (objects[spellid(i)].oc_dir != NODIR) ? "true" : "false");
-        jb_str(b, _(OBJ_NAME(objects[spellid(i)])));
+        jb_str(b, nhi18n_objname(spellid(i)) ? nhi18n_objname(spellid(i))
+                                              : OBJ_NAME(objects[spellid(i)]));
         jb_put(b, "}");
     }
     jb_put(b, "]");
@@ -788,6 +817,8 @@ wh_interact_json()
     json_adjacent(&b);
     jb_put(&b, ",");
     json_spells(&b);
+    jb_put(&b, ",");
+    json_features(&b);
     jb_put(&b, "}");
     return b.p;
 }
@@ -1235,6 +1266,75 @@ const char *a, *name;
 static int pending_key;
 static char pending_ext[32];
 
+/*
+ * LOOKAT (#35 feedback): what the hero knows is at <x,y>, in the words of
+ * the far-look command (;). Answered while the engine waits for a command;
+ * takes no time and prints nothing.
+ */
+char *
+wh_lookat_json(json)
+const char *json;
+{
+    struct jb b;
+    int x = json ? (int) json_int(json, "x", -1L) : -1;
+    int y = json ? (int) json_int(json, "y", -1L) : -1;
+    int glyph = NO_GLYPH, found = 0;
+    char out[BUFSZ], pre[BUFSZ];
+    const char *first = 0, *text = "", *kind = "other";
+    struct permonst *pm = 0;
+    coord cc;
+
+    memset(&b, 0, sizeof b);
+    out[0] = 0;
+    if (isok(x, y)) {
+        cc.x = x, cc.y = y;
+        glyph = glyph_at(x, y);
+        Sprintf(pre, "%s        ", encglyph(glyph));
+        /* the specific name (lookat), as far-look shows it in parentheses;
+           the symbol's whole explanation only when that is empty */
+        {
+            static char name[BUFSZ];
+            char monbuf[BUFSZ];
+
+            name[0] = monbuf[0] = 0;
+            if (glyph != cmap_to_glyph(S_stone))
+                (void) lookat(x, y, name, monbuf);
+            if (name[0]) {
+                text = name;
+            } else {
+                found = do_screen_description(cc, TRUE, 0, out, &first, &pm);
+                if (found)
+                    text = !strncmp(out, pre, strlen(pre)) ? out + strlen(pre)
+                                                           : out;
+            }
+        }
+        if (x == u.ux && y == u.uy)
+            kind = "self";
+        else if (glyph_is_invisible(glyph))
+            kind = "invis";
+        else if (glyph_is_monster(glyph) || glyph_is_warning(glyph))
+            kind = "mon";
+        else if (glyph_is_statue(glyph) || glyph_is_object(glyph))
+            kind = "obj";
+        else if (glyph_is_trap(glyph))
+            kind = "trap";
+        else if (glyph_is_cmap(glyph))
+            kind = (glyph == cmap_to_glyph(S_stone)) ? "unknown" : "terrain";
+    }
+    jb_printf(&b, "{\"x\":%d,\"y\":%d,\"g\":%d,\"k\":\"%s\",\"oc\":%d,"
+                  "\"cm\":%d,\"text\":",
+              x, y, glyph, kind,
+              glyph_is_statue(glyph) ? ROCK_CLASS
+              : glyph_is_object(glyph) ? (int) objects[glyph_to_obj(glyph)].oc_class
+              : -1,
+              glyph_is_cmap(glyph) ? glyph_to_cmap(glyph)
+              : glyph_is_trap(glyph) ? trap_to_defsym(glyph_to_trap(glyph))
+              : -1);
+    jb_str(&b, text);
+    jb_put(&b, "}");
+    return b.p;
+}
+
 /* the hidden command bound to WH_ACTION_KEY */
 int
 dowhaction(VOID_ARGS)
@@ -1316,6 +1416,14 @@ dowhaction(VOID_ARGS)
             pre.cc.x = u.ux + dx, pre.cc.y = u.uy + dy;
             do_mname();
         }
+        res = 0;
+    } else if (is(a, "farlook")) {
+        /* 查看(;) on a map square: the game's own far-look, no cursor */
+        coord cc;
+
+        cc.x = u.ux + dx, cc.y = u.uy + dy;
+        if (isok(cc.x, cc.y))
+            (void) do_look(2, &cc);
         res = 0;
     } else if (is(a, "ride")) {
         queue_dir(dx, dy, 0);
