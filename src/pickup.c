@@ -2038,7 +2038,8 @@ boolean *prev_loot;
         Sprintf(qbuf, _("Do you want to remove the saddle from %s?"),
                 x_monnam(mtmp, ARTICLE_THE, (char *) 0,
                          SUPPRESS_SADDLE, FALSE));
-        if ((c = yn_function(qbuf, ynqchars, 'n')) == 'y') {
+        if ((c = wh_presel_act("unsaddle") ? 'y'
+                 : yn_function(qbuf, ynqchars, 'n')) == 'y') {
             if (nolimbs(youmonst.data)) {
                 You_cant(_("do that without limbs.")); /* not body_part(HAND) */
                 return 0;

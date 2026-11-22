@@ -41,5 +41,10 @@ extern char FDECL(wh_presel_yn_terrain, (const char *));
 extern boolean NDECL(wh_presel_trap_only);
 extern boolean FDECL(wh_presel_spell, (int *));
 extern int FDECL(wh_presel_menu, (struct obj **, int));
+extern char NDECL(wh_presel_hand);
+extern boolean FDECL(wh_presel_act, (const char *));
+extern boolean FDECL(wh_presel_pos, (coord *));
+/* do_name.c: name the monster at the chosen square */
+extern void NDECL(do_mname);
 
 #endif /* WHINTERACT_H */

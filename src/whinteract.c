@@ -681,9 +681,14 @@ struct jb *b;
             jb_str(b, Hallucination ? _("monster") : x_monnam(m, ARTICLE_NONE,
                                                            (char *) 0, 0,
                                                            FALSE));
-            jb_printf(b, ",\"threat\":%s,\"still\":%s,",
+            jb_printf(b, ",\"threat\":%s,\"still\":%s,\"saddled\":%s,"
+                         "\"leashed\":%s,\"saddleable\":%s,",
                       (k == AK_HOSTILE && threatening(m)) ? "true" : "false",
-                      (!m->mcanmove || m->msleeping) ? "true" : "false");
+                      (!m->mcanmove || m->msleeping) ? "true" : "false",
+                      (k == AK_PET && which_armor(m, W_SADDLE)) ? "true" : "false",
+                      m->mleashed ? "true" : "false",
+                      (k == AK_PET && !which_armor(m, W_SADDLE)
+                       && can_saddle(m)) ? "true" : "false");
         }
         jb_acts(b, &a);
         jb_put(b, "}");
@@ -802,6 +807,9 @@ static struct {
     int spell;
     boolean terrain, trap;
     char lets[WH_MAXIDS]; /* chosen inventory letters, in order; '-' = fingers */
+    int key;              /* "cmd": the command key */
+    char ext[32];         /* "cmd": or the extended command's name */
+    char hand;            /* 'l' / 'r': which ring finger */
 } pending;
 
 static struct {
@@ -813,6 +821,10 @@ static struct {
     int spell;
     char lets[WH_MAXIDS];
     int letpos;
+    char a[32];
+    char hand;
+    boolean pos;
+    coord cc;
 } pre;
 
 static const char *
@@ -916,6 +928,23 @@ const char *json;
     pending.spell = (int) json_int(json, "sp", -1L);
     pending.terrain = json_bool(json, "terrain");
     pending.trap = json_bool(json, "trap");
+    pending.key = (int) json_int(json, "key", 0L);
+    if ((p = json_find(json, "ext")) != 0) {
+        while (*p == ' ')
+            p++;
+        if (*p == '"') {
+            p++;
+            for (i = 0; *p && *p != '"' && i < (int) sizeof pending.ext - 1;)
+                pending.ext[i++] = *p++;
+            pending.ext[i] = '\0';
+        }
+    }
+    if ((p = json_find(json, "hand")) != 0) {
+        while (*p == ' ')
+            p++;
+        if (*p == '"' && (p[1] == 'l' || p[1] == 'r'))
+            pending.hand = p[1];
+    }
     pending.valid = pending.a[0] ? TRUE : FALSE;
 }
 
@@ -934,6 +963,57 @@ presel_from_pending()
     pre.spell = pending.spell;
     Strcpy(pre.lets, pending.lets);
     pre.letpos = 0;
+    Strcpy(pre.a, pending.a);
+    pre.hand = pending.hand;
+}
+
+/* do_wear.c: the ring finger chosen with the action, or 0 to ask */
+char
+wh_presel_hand()
+{
+    return pre.active ? pre.hand : '\0';
+}
+
+/* the yes/no question that belongs to the chosen action is answered */
+boolean
+wh_presel_act(name)
+const char *name;
+{
+    return (pre.active && !strcmp(pre.a, name)) ? TRUE : FALSE;
+}
+
+/* getpos(): the square chosen with the action */
+boolean
+wh_presel_pos(ccp)
+coord *ccp;
+{
+    if (!pre.active || !pre.pos)
+        return FALSE;
+    *ccp = pre.cc;
+    pre.pos = FALSE;
+    return TRUE;
+}
+
+/* the function behind a command key or an extended command name */
+typedef int NDECL((*wh_cmdfn));
+
+static wh_cmdfn
+cmd_func(key, ext)
+int key;
+const char *ext;
+{
+    const struct ext_func_tab *e;
+
+    if (ext && *ext) {
+        for (e = extcmdlist; e->ef_txt; e++)
+            if (!strcmp(e->ef_txt, ext))
+                return e->ef_funct;
+        return 0;
+    }
+    if (key <= 0 || key > 255 || key == WH_ACTION_KEY)
+        return 0;
+    e = Cmd.commands[key & 0xff];
+    return e ? e->ef_funct : 0;
 }
 
 static void
@@ -1152,6 +1232,9 @@ const char *a, *name;
     return !strcmp(a, name) ? TRUE : FALSE;
 }
 
+static int pending_key;
+static char pending_ext[32];
+
 /* the hidden command bound to WH_ACTION_KEY */
 int
 dowhaction(VOID_ARGS)
@@ -1164,6 +1247,8 @@ dowhaction(VOID_ARGS)
         return 0;
     Strcpy(a, pending.a);
     dx = pending.dx, dy = pending.dy, dz = pending.dz;
+    pending_key = pending.key;
+    Strcpy(pending_ext, pending.ext);
     presel_from_pending();
     pending.valid = FALSE;
     wh_queue_keys("");
@@ -1210,6 +1295,39 @@ dowhaction(VOID_ARGS)
         res = doforce();
     else if (is(a, "monster"))
         res = domonability();
+    else if (is(a, "attributes"))
+    {
+        wh_cmdfn f = cmd_func(0, "attributes");
+
+        res = f ? (*f)() : 0;
+    }
+    else if (is(a, "cmd")) {
+        /* an inventory item's action: the command runs with the item chosen */
+        wh_cmdfn f = cmd_func(pending_key, pending_ext);
+
+        if (f && f != dowhaction) {
+            if (dx || dy || dz)
+                queue_dir(dx, dy, dz);
+            res = (*f)();
+        }
+    } else if (is(a, "namemon")) {
+        if (dx || dy) {
+            pre.pos = TRUE;
+            pre.cc.x = u.ux + dx, pre.cc.y = u.uy + dy;
+            do_mname();
+        }
+        res = 0;
+    } else if (is(a, "ride")) {
+        queue_dir(dx, dy, 0);
+        res = doride();
+    } else if (is(a, "unsaddle")) {
+        struct monst *mtmp = isok(u.ux + dx, u.uy + dy)
+                                 ? m_at(u.ux + dx, u.uy + dy) : 0;
+        int info = 0;
+        boolean prev = FALSE;
+
+        res = (mtmp && (dx || dy)) ? loot_mon(mtmp, &info, &prev) : 0;
+    }
     else if (is(a, "name")) {
         for (o = level.objects[u.ux][u.uy]; o; o = o->nexthere)
             if (wh_presel_is(o))
