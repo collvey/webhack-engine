@@ -28,6 +28,10 @@ extern void FDECL(wh_action_set_json, (const char *));
 extern const char *NDECL(wh_action_cmd);
 /* The hidden command that executes the pending action. */
 extern int NDECL(dowhaction);
+/* LOOKAT: the far-look text of a map square, as JSON (caller frees). */
+extern char *FDECL(wh_lookat_json, (const char *));
+/* pager.c: the name of what is shown at <x,y> */
+extern struct permonst *FDECL(lookat, (int, int, char *, char *));
 
 /* cmd.c: replace the pending key queue (directions for prompts). */
 extern void FDECL(wh_queue_keys, (const char *));
