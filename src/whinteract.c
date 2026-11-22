@@ -392,6 +392,41 @@ struct wh_default *def;
                 }
             }
     }
+    if (!impaired) {
+        /* 9: the square in front is a closed door or a peaceful;
+           10: exactly one such among the other seven.
+           A target on the map comes before one underfoot: Space acts
+           on the map first and Tab moves on to the floor panel
+           (WebHack-Steam#35, round 3 item 4). */
+        found = 0;
+        for (i = 0; i < 8; i++) {
+            d = order[i];
+            if (!diag_ok(d))
+                continue;
+            x = u.ux + xdir[d], y = u.uy + ydir[d];
+            if (!isok(x, y))
+                continue;
+            k = adj_kind(x, y, &m);
+            if (k != AK_DOOR_CLOSED && k != AK_PEACEFUL)
+                continue;
+            if (i == 0) {
+                def->lv = 9, def->at = "adj";
+                def->act = (k == AK_DOOR_CLOSED) ? "open" : "chat";
+                def->dx = xdir[d], def->dy = ydir[d];
+                return;
+            }
+            if (!found++)
+                fd = d;
+        }
+        if (found == 1) {
+            x = u.ux + xdir[fd], y = u.uy + ydir[fd];
+            k = adj_kind(x, y, &m);
+            def->lv = 10, def->at = "adj";
+            def->act = (k == AK_DOOR_CLOSED) ? "open" : "chat";
+            def->dx = xdir[fd], def->dy = ydir[fd];
+            return;
+        }
+    }
     /* 6: stairs or ladder underfoot (down needs to reach the floor) */
     if (at_upstairs(u.ux, u.uy)) {
         def->lv = 6, def->at = "here", def->slot = "terrain", def->act = "up";
@@ -422,38 +457,6 @@ struct wh_default *def;
         if (other) {
             def->lv = 8, def->at = "here", def->slot = "items";
             def->act = "pickup";
-            return;
-        }
-    }
-    if (!impaired) {
-        /* 9: the square in front is a closed door or a peaceful;
-           10: exactly one such among the other seven */
-        found = 0;
-        for (i = 0; i < 8; i++) {
-            d = order[i];
-            if (!diag_ok(d))
-                continue;
-            x = u.ux + xdir[d], y = u.uy + ydir[d];
-            if (!isok(x, y))
-                continue;
-            k = adj_kind(x, y, &m);
-            if (k != AK_DOOR_CLOSED && k != AK_PEACEFUL)
-                continue;
-            if (i == 0) {
-                def->lv = 9, def->at = "adj";
-                def->act = (k == AK_DOOR_CLOSED) ? "open" : "chat";
-                def->dx = xdir[d], def->dy = ydir[d];
-                return;
-            }
-            if (!found++)
-                fd = d;
-        }
-        if (found == 1) {
-            x = u.ux + xdir[fd], y = u.uy + ydir[fd];
-            k = adj_kind(x, y, &m);
-            def->lv = 10, def->at = "adj";
-            def->act = (k == AK_DOOR_CLOSED) ? "open" : "chat";
-            def->dx = xdir[fd], def->dy = ydir[fd];
             return;
         }
     }
