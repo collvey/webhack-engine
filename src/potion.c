@@ -4,6 +4,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "whinteract.h"
 
 boolean notonhead = FALSE;
 
@@ -498,7 +499,7 @@ dodrink()
     if (IS_FOUNTAIN(levl[u.ux][u.uy].typ)
         /* not as low as floor level but similar restrictions apply */
         && can_reach_floor(FALSE)) {
-        if (yn(_("Drink from the fountain?")) == 'y') {
+        if (wh_presel_yn_terrain(_("Drink from the fountain?")) == 'y') {
             drinkfountain();
             return 1;
         }
@@ -507,7 +508,7 @@ dodrink()
     if (IS_SINK(levl[u.ux][u.uy].typ)
         /* not as low as floor level but similar restrictions apply */
         && can_reach_floor(FALSE)) {
-        if (yn(_("Drink from the sink?")) == 'y') {
+        if (wh_presel_yn_terrain(_("Drink from the sink?")) == 'y') {
             drinksink();
             return 1;
         }
@@ -1914,7 +1915,7 @@ dodip()
         Sprintf(qbuf, _("%s%s into the fountain?"), _("Dip "),
                 flags.verbose ? obuf : _(shortestname));
         /* "Dip <the object> into the fountain?" */
-        if (yn(qbuf) == 'y') {
+        if (wh_presel_yn_terrain(qbuf) == 'y') {
             dipfountain(obj);
             return 1;
         }
@@ -1924,7 +1925,7 @@ dodip()
         Sprintf(qbuf, _("%s%s into the %s?"), _("Dip "),
                 flags.verbose ? obuf : _(shortestname), _(pooltype));
         /* "Dip <the object> into the {pool, moat, &c}?" */
-        if (yn(qbuf) == 'y') {
+        if (wh_presel_yn_terrain(qbuf) == 'y') {
             if (Levitation) {
                 floating_above(pooltype);
             } else if (u.usteed && !is_swimmer(u.usteed->data)

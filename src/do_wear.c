@@ -4,6 +4,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "whinteract.h"
 
 static NEARDATA const char see_yourself[] = "see yourself";
 static NEARDATA const char unknown_type[] = "Unknown type of %s (%d)";
@@ -1917,7 +1918,9 @@ struct obj *obj;
                     Sprintf(qbuf, _("Which %s%s, Right or Left?"),
                             humanoid(youmonst.data) ? _("ring-") : "",
                             _(body_part(FINGER)));
-                    answer = yn_function(qbuf, "rl", '\0');
+                    answer = wh_presel_hand();
+                    if (!answer)
+                        answer = yn_function(qbuf, "rl", '\0');
                     switch (answer) {
                     case '\0':
                         return 0;

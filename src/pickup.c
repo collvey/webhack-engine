@@ -8,6 +8,7 @@
  */
 
 #include "hack.h"
+#include "whinteract.h"
 
 #define CONTAINED_SYM '>' /* from invent.c */
 
@@ -1858,9 +1859,10 @@ doloot()
                 nobj = cobj->nexthere;
 
                 if (Is_container(cobj)) {
-                    c = ynq(safe_qbuf(qbuf, _("There is "), _(" here, loot it?"),
+                    c = wh_presel_ynq(cobj,
+                                      safe_qbuf(qbuf, _("There is "), _(" here, loot it?"),
                                       cobj, doname, ansimpleoname,
-                                      _("a container")));
+                                      _("a container")), 'q');
                     if (c == 'q')
                         return timepassed;
                     if (c == 'n')
@@ -2036,7 +2038,8 @@ boolean *prev_loot;
         Sprintf(qbuf, _("Do you want to remove the saddle from %s?"),
                 x_monnam(mtmp, ARTICLE_THE, (char *) 0,
                          SUPPRESS_SADDLE, FALSE));
-        if ((c = yn_function(qbuf, ynqchars, 'n')) == 'y') {
+        if ((c = wh_presel_act("unsaddle") ? 'y'
+                 : yn_function(qbuf, ynqchars, 'n')) == 'y') {
             if (nolimbs(youmonst.data)) {
                 You_cant(_("do that without limbs.")); /* not body_part(HAND) */
                 return 0;
@@ -3041,9 +3044,10 @@ dotip()
                     nobj = cobj->nexthere;
                     if (!Is_container(cobj))
                         continue;
-                    c = ynq(safe_qbuf(qbuf, _("There is "), _(" here, tip it?"),
+                    c = wh_presel_ynq(cobj,
+                                      safe_qbuf(qbuf, _("There is "), _(" here, tip it?"),
                                       cobj,
-                                      doname, ansimpleoname, _("container")));
+                                      doname, ansimpleoname, _("container")), 'q');
                     if (c == 'q')
                         return 0;
                     if (c == 'n')

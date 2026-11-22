@@ -4,6 +4,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "whinteract.h"
 
 extern const char *const destroy_strings[][3]; /* from zap.c */
 
@@ -4406,12 +4407,15 @@ boolean force;
     ttmp = t_at(x, y);
     if (ttmp && !ttmp->tseen)
         ttmp = 0;
+    /* WebHack (WebHack-Steam#35): acting on a chosen box: leave the trap alone */
+    if (wh_presel_active() && !wh_presel_trap_only())
+        ttmp = 0;
     trapdescr = ttmp ? _(defsyms[trap_to_defsym(ttmp->ttyp)].explanation) : 0;
     here = (x == u.ux && y == u.uy); /* !u.dx && !u.dy */
 
-    if (here) /* are there are one or more containers here? */
+    if (here && !wh_presel_trap_only()) /* one or more containers here? */
         for (otmp = level.objects[x][y]; otmp; otmp = otmp->nexthere)
-            if (Is_box(otmp)) {
+            if (Is_box(otmp) && (!wh_presel_active() || wh_presel_is(otmp))) {
                 if (++boxcnt > 1)
                     break;
             }
@@ -4508,7 +4512,7 @@ boolean force;
                     (void) safe_qbuf(qbuf, _("There is "),
                                      _(" here.  Check it for traps?"), otmp,
                                      doname, ansimpleoname, _("a box"));
-                    switch (ynq(qbuf)) {
+                    switch (wh_presel_ynq(otmp, qbuf, 'q')) {
                     case 'q':
                         return 0;
                     case 'n':

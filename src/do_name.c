@@ -4,6 +4,7 @@
 /* NetHack may be freely redistributed.  See license for details. */
 
 #include "hack.h"
+#include "whinteract.h"
 
 STATIC_DCL char *NDECL(nextmbuf);
 STATIC_DCL void FDECL(getpos_help, (BOOLEAN_P, const char *));
@@ -13,7 +14,6 @@ STATIC_DCL char *FDECL(name_from_player, (char *, const char *, const char *));
 STATIC_DCL void FDECL(gather_locs, (coord **, int *, int));
 STATIC_DCL int FDECL(gloc_filter_floodfill_matcharea, (int, int));
 STATIC_DCL void FDECL(auto_describe, (int, int));
-STATIC_DCL void NDECL(do_mname);
 STATIC_DCL boolean FDECL(alreadynamed, (struct monst *, char *, char *));
 STATIC_DCL void FDECL(do_oname, (struct obj *));
 STATIC_PTR char *FDECL(docall_xname, (struct obj *));
@@ -658,6 +658,9 @@ const char *goal;
     char mMoOdDxX[13];
     int result = 0;
     int cx, cy, i, c;
+
+    if (wh_presel_pos(ccp))
+        return 0;
     int sidx, tx, ty;
     boolean msg_given = TRUE; /* clear message window by default */
     boolean show_goal_msg = FALSE;
@@ -1145,7 +1148,7 @@ char *monnambuf, *usrbuf;
 }
 
 /* allow player to assign a name to some chosen monster */
-STATIC_OVL void
+void
 do_mname()
 {
     char buf[BUFSZ], monnambuf[BUFSZ], qbuf[QBUFSZ];

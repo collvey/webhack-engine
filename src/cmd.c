@@ -6,6 +6,7 @@
 #include "hack.h"
 #include "lev.h"
 #include "func_tab.h"
+#include "whinteract.h"
 
 /* Macros for meta and ctrl modifiers:
  *   M and C return the meta/ctrl code for the given character;
@@ -3543,6 +3544,8 @@ struct ext_func_tab extcmdlist[] = {
     { '/', "whatis", "show what type of thing a symbol corresponds to",
             dowhatis, IFBURIED | GENERALCMD },
     { 'w', "wield", "wield (put in use) a weapon", dowield },
+    { WH_ACTION_KEY, "whaction", "perform a WebHack interface action",
+            dowhaction, 0 },
     { M('w'), "wipe", "wipe off your face", dowipe, AUTOCOMPLETE },
 #ifdef DEBUG
     { '\0', "wizbury", "bury objs under and around you",
@@ -5604,6 +5607,10 @@ int x, y, mod;
     static char cmd[4];
     cmd[1] = 0;
 
+    /* WebHack (WebHack-Steam#35): an ACTION from the interface */
+    if (mod == WH_CLICK_ACTION)
+        return wh_action_cmd();
+
     if (iflags.clicklook && mod == CLICK_2) {
         clicklook_cc.x = x;
         clicklook_cc.y = y;
@@ -5975,6 +5982,15 @@ readchar()
         sym = *readchar_queue++;
     }
     return (char) sym;
+}
+
+/* WebHack: keys the #whaction command puts in front of a command's own
+   prompts (a direction for getdir()); "" clears them */
+void
+wh_queue_keys(s)
+const char *s;
+{
+    readchar_queue = s ? s : "";
 }
 
 /* '_' command, #travel, via keyboard rather than mouse click */

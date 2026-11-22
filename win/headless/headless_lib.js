@@ -204,6 +204,24 @@ mergeInto(LibraryManager.library, {
   // Called from C when reading JSON lines from stdin (for RESP messages)
   // Uses Asyncify to block until stdin has a complete line available
   // Returns pointer to line in WASM memory (caller must free), or 0 on EOF
+  // WebHack-Steam#35: the JSON of the ACTION announced by keycode 65536.
+  // The worker keeps it in a queue (wasmTakePendingAction); C frees it.
+  headless_take_action_json__deps: ['$stringToNewUTF8'],
+  headless_take_action_json: function() {
+    var globalObj = (typeof self !== 'undefined') ? self
+                  : (typeof global !== 'undefined') ? global
+                  : (typeof window !== 'undefined') ? window
+                  : null;
+    if (!globalObj || typeof globalObj.wasmTakePendingAction !== 'function') {
+      return 0;
+    }
+    var json = globalObj.wasmTakePendingAction();
+    if (typeof json !== 'string' || !json) {
+      return 0;
+    }
+    return stringToNewUTF8(json);
+  },
+
   headless_read_line_blocking__deps: ['$Asyncify', '$stringToNewUTF8'],
   headless_read_line_blocking: function() {
     
